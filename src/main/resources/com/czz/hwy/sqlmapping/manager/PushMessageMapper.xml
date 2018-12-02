@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.PushMessage">
+	<resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.PushMessage" >
+		<id column="id" property="id" jdbcType="INTEGER"/>
+		<result column="push_id" property="pushId" jdbcType="INTEGER"/>
+		<result column="push_name" property="pushName" jdbcType="VARCHAR"/>
+		<result column="push_content" property="pushContent" jdbcType="VARCHAR"/>
+		<result column="push_receive_id" property="pushReceiveId" jdbcType="INTEGER"/>
+	    <result column="push_receive_name" property="pushReceiveName" jdbcType="VARCHAR"/>
+		<result column="push_receive_role" property="pushReceiveRole" jdbcType="INTEGER"/>
+		<result column="push_status" property="pushStatus" jdbcType="INTEGER"/>
+		<result column="push_time" property="pushTime" jdbcType="TIMESTAMP"/>
+	</resultMap>
+	
+	<sql id="Base_Column_List" >
+        id, push_id, push_name, push_content, push_receive_id, push_receive_Name, push_receive_role, push_status, push_time
+    </sql>
+
+	<select id="getPushMessageById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from pushmessage
+		where id = #{id,jdbcType=INTEGER} 
+	</select>
+	
+    <select id="getPushMessageCount" resultType="java.lang.Integer" parameterType="com.czz.hwy.bean.manager.PushMessage">
+		select count(id) from pushmessage
+		<where>
+			<if test="inPushId != 0">
+				and push_id = #{inPushId,jdbcType=INTEGER}
+			</if>
+			<if test="inPushContent != null  and inPushContent !=''" >
+				and push_content like CONCAT('%',#{inPushContent,jdbcType=VARCHAR},'%')
+			</if>
+			<if test="inPushFromTime != null" >
+                and push_time between #{inPushFromTime,jdbcType=TIMESTAMP}
+      		</if>
+      		<if test="inPushToTime != null" >
+        		and #{inPushToTime,jdbcType=TIMESTAMP}
+      		</if>			
+		</where> 
+	</select>
+	
+	<select id="getAllPushMessage" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.PushMessage">
+		select 
+		<include refid="Base_Column_List" />
+		from pushmessage 
+		<where>
+			<if test="inPushId != 0">
+				and push_id = #{inPushId,jdbcType=INTEGER}
+			</if>
+			<if test="inPushContent != null and inPushContent !='' " >
+				and push_content like CONCAT('%',#{inPushContent,jdbcType=VARCHAR},'%')
+			</if>
+			<if test="inPushFromTime != null" >
+                and push_time between #{inPushFromTime,jdbcType=TIMESTAMP}
+      		</if>
+      		<if test="inPushToTime != null" >
+        		and #{inPushToTime,jdbcType=TIMESTAMP}
+      		</if>			
+		</where> 
+		ORDER BY push_time desc limit #{row},#{rows}
+	</select>
+	
+	<select id="getPushName" resultMap="BaseResultMap">
+		select distinct push_id, push_name from pushmessage 
+	</select>
+	
+	<select id="getPushMessageByBean" resultMap="BaseResultMap"
+		parameterType="com.czz.hwy.bean.manager.PushMessage">
+		select
+		<include refid="Base_Column_List" />
+		from pushmessage
+		<where>
+		    <if test="id != 0">
+				and id = #{id,jdbcType=INTEGER}
+			</if>
+			<if test="pushId != 0">
+				and push_id = #{pushId,jdbcType=INTEGER}
+			</if>
+			<if test="pushName != null and pushName!=''">
+				and push_name = #{pushName,jdbcType=VARCHAR}
+			</if>			
+			<if test="pushContent != null and pushContent!=''" >
+				and push_content = #{pushContent,jdbcType=VARCHAR}
+			</if>
+			<if test="pushReceiveId != 0">
+				and push_receive_id = #{pushReceiveId,jdbcType=INTEGER}
+			</if>
+			<if test="pushReceiveName != null and pushReceiveName != ''">
+				and push_receive_name = #{pushReceiveName,jdbcType=VARCHAR}
+			</if>
+			<if test="pushReceiveRole != 0">
+				and push_receive_role = #{pushReceiveRole,jdbcType=INTEGER}
+			</if>			
+			<if test="pushStatus != 0">
+				and push_status = #{pushStatus,jdbcType=INTEGER}
+			</if>
+			<if test="pushTime != null">
+				and push_time = #{pushTime,jdbcType=TIMESTAMP}
+			</if>	
+		</where>
+	</select>	
+	
+    <insert id="insertPushMessage" parameterType="com.czz.hwy.bean.manager.PushMessage" >
+        insert into pushmessage (id, push_id, push_name, push_content, push_receive_id, push_receive_Name, push_receive_role, push_status, push_time)
+        values (#{id,jdbcType=INTEGER}, #{pushId,jdbcType=INTEGER}, #{pushName,jdbcType=VARCHAR}, #{pushContent,jdbcType=VARCHAR}, 
+        #{pushReceiveId,jdbcType=INTEGER}, #{pushReceiveName,jdbcType=VARCHAR}, #{pushReceiveRole,jdbcType=INTEGER}, #{pushStatus,jdbcType=INTEGER}, #{pushTime,jdbcType=TIMESTAMP})
+    </insert>   	
+
+</mapper>

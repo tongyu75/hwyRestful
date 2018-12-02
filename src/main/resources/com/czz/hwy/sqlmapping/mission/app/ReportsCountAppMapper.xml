@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.ReportsCountApp">
+	<resultMap type="reportsCountApp" id="base_result_map">
+		<result column="eval_value" property="evalValue" jdbcType="INTEGER"/>
+		<result column="eval_name" property="evalName" jdbcType="VARCHAR"/>
+		<result column="number" property="number" jdbcType="INTEGER"/>
+		<result column="area_id" property="areaId" jdbcType="INTEGER"/>
+		<result column="area_name" property="areaName" jdbcType="VARCHAR"/>
+		<result column="days" property="days" jdbcType="INTEGER"/>
+	</resultMap>
+	
+	<!-- 查看近一周全市违规排污举报统计情况， 2017-04-17 -->
+	<select id="selectReportStatisticsByBeanApp" parameterType="reportsCountApp" resultMap="base_result_map">
+	select DISTINCT t.eval_value,t.eval_name ,count(t1.eval_value) number
+	from evaltype t
+	left join reportinfo t1 on t1.eval_value = t.eval_value 
+	and DATE_FORMAT(t1.check_time,'%Y-%m-%d') &lt;= CURDATE()
+	and DATE_FORMAT(t1.check_time,'%Y-%m-%d') &gt;= DATE_SUB(CURDATE(),INTERVAL #{days} DAY)
+	where t.type = 3
+	group by t.eval_value,t.eval_name
+	</select>
+	
+	<!-- 查看近一周全市劳动纪律督察统计情况， 2017-04-17 -->
+	<select id="selectSuperviseStatisticsByBeanApp" parameterType="reportsCountApp" resultMap="base_result_map">
+	select DISTINCT t.eval_value,t.eval_name ,count(t1.supervisor_type) number
+	from evaltype_check t
+	left join reports t1 on t1.supervisor_type = t.eval_value 
+	and DATE_FORMAT(t1.check_time,'%Y-%m-%d') &lt;= CURDATE()
+	and DATE_FORMAT(t1.check_time,'%Y-%m-%d') &gt;= DATE_SUB(CURDATE(),INTERVAL #{days} DAY)
+	where t.type = 4
+	group by t.eval_value,t.eval_name
+	</select>
+	
+	<!-- 查看近一周全市未按规定路线作业细化表，即近一周每种监察分类关于每个责任区不合格统计次数， 2017-04-17 -->
+	<select id="selectSuperviseAreaDetailsByBeanApp" parameterType="reportsCountApp" resultMap="base_result_map">
+	select DISTINCT t.id area_id,t.area_name,COUNT(t2.supervisor_type) number
+	from dutyarea t
+	left join report_duty t1 on t.id = t1.AREA_ID
+	left join reports t2 
+	on t2.supervisor_type = t1.supervisor_Type and t2.id = t1.supervisor_id
+	and DATE_FORMAT(t2.check_time,'%Y-%m-%d') &lt;= CURDATE()
+	and DATE_FORMAT(t2.check_time,'%Y-%m-%d') &gt;= DATE_SUB(CURDATE(),INTERVAL #{days} DAY)
+	and t2.supervisor_type = #{evalValue}
+	where t.status = 1
+	group by t.id
+	</select>
+	
+</mapper>

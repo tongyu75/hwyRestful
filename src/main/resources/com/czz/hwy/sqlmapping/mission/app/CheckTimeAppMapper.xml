@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.CheckTimeApp">
+    <resultMap type="com.czz.hwy.bean.mission.app.CheckTimeApp" id="base_result_map">
+        <id column="id" property="id"/>
+        <result column="eval_type" property="evalType" jdbcType="INTEGER"/>
+        <result column="evalName" property="evalName" jdbcType="VARCHAR"/>
+        <result column="employee_id" property="employeeId" jdbcType="INTEGER"/>
+        <result column="employee_name" property="employeeName" jdbcType="INTEGER"/>
+        <result column="supervisor_id" property="supervisorId" jdbcType="INTEGER"/>
+        <result column="check_address" property="checkAddress" jdbcType="VARCHAR"/>
+        <result column="check_time" property="checkTime" jdbcType="TIMESTAMP"/>
+        <result column="publish_time" property="publishTime" jdbcType="TIMESTAMP"/>
+        <result column="check_lat" property="checkLat" jdbcType="DOUBLE"/>
+        <result column="check_lng" property="checkLng" jdbcType="DOUBLE"/>
+        <result column="check_status" property="checkStatus" jdbcType="INTEGER"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+    
+    <sql id="base_column_list">
+        id,eval_type,employee_id,employee_name,supervisor_id,check_address,check_time,publish_time,
+        check_lat,check_lng,check_status,remark
+    </sql> 
+    
+    <!-- 新增五分钟考核任务，并将新增数据的主键ID返回 -->
+    <insert id="insertCheckTimeByBeanApp" parameterType="checkTimeApp">
+		<selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+			SELECT LAST_INSERT_ID() AS id
+		</selectKey>
+		insert into checktime 
+		(
+			id, 
+			eval_Type, 
+			employee_id,
+			employee_name,
+			supervisor_id,
+			check_address, 
+			check_time,
+			publish_time, 
+			check_lat, 
+			check_lng,
+			check_status,
+			remark
+		)
+		values (
+			#{id,jdbcType=INTEGER},
+			#{evalType,jdbcType=INTEGER},
+			#{employeeId,jdbcType=INTEGER},
+			#{employeeName,jdbcType=VARCHAR},
+			#{supervisorId,jdbcType=INTEGER}, 
+			#{checkAddress,jdbcType=VARCHAR},
+			#{checkTime,jdbcType=TIMESTAMP},
+			#{publishTime,jdbcType=TIMESTAMP},
+			#{checkLat,jdbcType=DOUBLE},
+			#{checkLng,jdbcType=DOUBLE},
+			#{checkStatus,jdbcType=INTEGER},
+			#{remark,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<!-- 根据主键ID和考核类型ID获取五分钟考核信息，2016-11-09 -->
+	<select id="getCheckTimeByBeanApp" parameterType="checkTimeApp" resultMap="base_result_map">
+    select * from checktime
+    <where>
+	    <if test="id != 0">
+	    and id = #{id}
+	    </if>
+	     <if test="evalType != 0">
+	    and eval_type = #{evalType}
+	    </if>
+    </where> 
+    </select>
+    
+    <!-- 根据主键ID和考核类型ID，删除五分钟考核记录，2016-11-09 -->
+    <delete id="deleteCheckTimeByBeanApp" parameterType="checkTimeApp">
+    delete from checktime
+    <where>
+	    <if test="id != 0">
+	    and id = #{id}
+	    </if>
+	     <if test="evalType != 0">
+	    and eval_type = #{evalType}
+	    </if>
+    </where> 
+    </delete>
+    
+    <!-- 查询某个责任区某个时间段内的五分钟考核总条数，2016-11-09 -->
+    <select id="getCheckTimeCountByMapApp" parameterType="java.util.Map" resultType="int">
+   	select 
+		count(1)
+	from checktime t
+	join check_duty t1 
+		on t.id = t1.check_id
+		and t.eval_type = t1.eval_type
+	join dutyarea t2 on t1.area_id  = t2.id and t2.status = 1
+	join dutypoint t3 on t1.point_id  = t3.id and t3.status = 1
+	join evaltype_check t4 on t.eval_type = t4.eval_value and t4.type = 2 
+	left join users t5 on t.employee_id = t5.employee_id and t5.status = 1
+	left join users t6 on t1.employee_id = t6.employee_id and t6.status = 1
+	left join checkimage t7 on t.id = t7.check_id and t.eval_type = t7.eval_id
+	where t1.AREA_ID = #{areaId}
+	and DATE_FORMAT(t.check_time ,'%Y-%m-%d') &gt;= #{beginDate}
+	and DATE_FORMAT(t.check_time ,'%Y-%m-%d') &lt;= #{endDate}
+    </select>
+    
+    <!-- 查询某个责任区某个时间段内的五分钟考核集合，2016-11-09，不分页 -->
+    <select id="getCheckTimeListByMapApp" parameterType="java.util.Map" resultType="com.czz.hwy.bean.mission.app.CheckTimeForSelectApp">
+    select 
+    	t1.id,
+    	t1.check_id checkId,
+		t1.area_id areaId,
+	    t2.area_name areaName,
+		t1.point_id pointId,
+	    t3.point_name pointName ,
+	    t.eval_type evalType,
+	    t4.eval_name evalName,
+	    t.employee_id submitEmployeeId,
+		IFNULL(t.employee_name, t5.showname) submitEmployeeName,
+	    t1.employee_id dutyEmployeeId,
+		IFNULL(t1.employee_name,t6.showname) dutyEmployeeName,
+		t.check_address checkAddress,
+	    t.check_lat checkLat,
+		t.check_lng checkLng,
+	    t.check_status checkStatus,
+		t.check_time checkTime,
+		t.remark,
+		count(t7.id) imageCount,
+		t1.fines
+	from checktime t
+	join check_duty t1 
+		on t.id = t1.check_id
+		and t.eval_type = t1.eval_type
+	join dutyarea t2 on t1.area_id  = t2.id and t2.status = 1
+	join dutypoint t3 on t1.point_id  = t3.id and t3.status = 1
+	join evaltype_check t4 on t.eval_type = t4.eval_value and t4.type = 2 
+	left join users t5 on t.employee_id = t5.employee_id and t5.status = 1
+	left join users t6 on t1.employee_id = t6.employee_id and t6.status = 1
+	left join checkimage t7 on t.id = t7.check_id and t.eval_type = t7.eval_id
+	where t1.AREA_ID = #{areaId}
+	and DATE_FORMAT(t.check_time ,'%Y-%m-%d') &gt;= #{beginDate}
+	and DATE_FORMAT(t.check_time ,'%Y-%m-%d') &lt;= #{endDate}
+	group by t1.id
+	order by t1.create_at desc
+    </select>
+    
+</mapper>

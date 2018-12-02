@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.syspar.FinesStandard">
+	<resultMap id="FinesStandardResultMap" type="com.czz.hwy.bean.syspar.FinesStandard">
+		<id property="id" column="id" jdbcType="INTEGER" />
+		<result property="areaid" column="area_id" jdbcType="INTEGER" />
+		<result property="pointid" column="point_id" jdbcType="INTEGER" />
+		<result property="evalid" column="eval_id" jdbcType="INTEGER" />
+		<result property="rolesid" column="roles_id" jdbcType="INTEGER" />
+		<result property="amount" column="amount" jdbcType="VARCHAR" />
+		<result property="createAt" column="create_at" jdbcType="TIMESTAMP" />
+		<result property="updateAt" column="update_at" jdbcType="TIMESTAMP" />
+		<result property="appealStatus" column="appeal_status" jdbcType="INTEGER"/>
+	</resultMap>
+
+
+	<select id="getAllFinesStandard" resultType="com.czz.hwy.bean.syspar.FinesStandard" parameterType="com.czz.hwy.bean.syspar.FinesStandard">
+
+		SELECT
+		sf.id,
+		sf.area_id,
+		a.area_name AS areaname,
+		eval_id,
+		roles_id,
+		sf.point_id,
+		p.point_name AS pointname,
+		sf.amount,
+		e.eval_name  AS evalname,
+		r.name As rolesname,
+		sf.appeal_status appealStatus
+	
+		FROM
+		standardfines sf
+		left join dutyarea a on sf.area_id = a.id
+		left join dutypoint p on sf.point_id = p.id
+		left join evaltype e on e.id = sf.eval_id
+		left join roles r on sf.roles_id = r.VALUE
+		<where>	
+			<if test="areaid!=0 ">
+			and  sf.area_id=#{areaid}
+			</if>
+			<if test="pointid!=0 ">
+			and  sf.point_id=#{pointid}
+			</if>
+			<if test="evalid!=0">
+			and sf.eval_id=#{evalid}
+			</if>
+			<if test="rolesid!=0">
+			and sf.roles_id=#{rolesid}
+			</if>
+		</where>
+		order by sf.create_at desc
+		limit #{row},#{rows}
+	</select>
+	
+	<select id="getFinesStandardCount"  resultType="java.lang.Integer"   parameterType="com.czz.hwy.bean.syspar.FinesStandard">
+	SELECT   count(sf.id)   FROM  standardfines sf  
+	<where>
+		<if test="areaid!=0 ">
+		and  sf.area_id=#{areaid}
+		</if>
+		
+		<if test="pointid!=0 ">
+		and  sf.point_id=#{pointid}
+		</if>
+		
+		<if test="evalid!=0">
+		and sf.eval_id=#{evalid}
+		</if>
+		
+		<if test="rolesid!=0">
+		and sf.roles_id=#{rolesid}
+		</if>
+		
+	</where>
+	</select>
+	
+	<update id="updateFinesStandard" parameterType="com.czz.hwy.bean.syspar.FinesStandard">
+	
+	update  standardfines   set  amount=#{amount},appeal_status=#{appealStatus}  where  id=#{id}
+	
+	</update>
+	
+	
+	<delete id="deleteFinesStandard"  parameterType="com.czz.hwy.bean.syspar.FinesStandard">
+	
+	delete   from  standardfines   where  id=#{id}
+	
+	</delete>
+	
+	<insert id="insertFinesStandard" parameterType="com.czz.hwy.bean.syspar.FinesStandard">
+	
+	insert into standardfines (id,area_id,point_id,eval_id,roles_id,amount,create_at,update_at,appeal_status) values (#{id},#{areaid},#{pointid},#{evalid},#{rolesid},#{amount},#{createAt},#{updateAt},#{appealStatus})
+	
+	</insert>
+	
+	<select id="selectFinesStandard" parameterType="com.czz.hwy.bean.syspar.FinesStandard" resultType="com.czz.hwy.bean.syspar.FinesStandard">
+		select * from standardfines where area_id = #{areaid} and point_id = #{pointid} and eval_id = #{evalid} and   roles_id = #{rolesid} 
+	</select>
+
+</mapper>

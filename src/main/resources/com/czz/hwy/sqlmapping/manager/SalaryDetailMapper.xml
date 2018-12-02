@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.czz.hwy.bean.manager.SalaryDetail">
+	<resultMap id="salaryDetailMap" type="com.czz.hwy.bean.manager.SalaryDetail">
+		<id column="id" property="id" jdbcType="INTEGER"/>
+		<result column="month" property="month" jdbcType="VARCHAR" />
+		<result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+		<result column="employeeName" property="employeeName" jdbcType="VARCHAR"/>
+		<result column="default_salary" property="defaultSalary" jdbcType="DOUBLE" />
+		<result column="fine_salary" property="fineSalary" jdbcType="DOUBLE" />
+		<result column="minus_amount" property="minusAmount" jdbcType="DOUBLE" />
+		<result column="increase_amount" property="increaseAmount" jdbcType="DOUBLE" />
+		<result column="real_salary" property="realSalary" jdbcType="DOUBLE" />
+		<result column="create_id" property="createId" jdbcType="INTEGER" />
+		<result column="createName" property="createName" jdbcType="VARCHAR"/>
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+		<result column="update_id" property="updateId" jdbcType="INTEGER" />
+		<result column="updateName" property="updateName" jdbcType="VARCHAR"/>
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+		<result column="remark" property="remark" jdbcType="VARCHAR"/>
+		<result column="status" property="status" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<resultMap id="salaryDetailSum" type="com.czz.hwy.bean.manager.SalaryDetail">
+		<result column="month" property="month" jdbcType="VARCHAR" />
+		<result column="defaultSalary" property="defaultSalary" jdbcType="DOUBLE" />
+		<result column="fineSalary" property="fineSalary" jdbcType="DOUBLE" />
+		<result column="minusAmount" property="minusAmount" jdbcType="DOUBLE" />
+		<result column="increaseAmount" property="increaseAmount" jdbcType="DOUBLE" />
+		<result column="realSalary" property="realSalary" jdbcType="DOUBLE" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="empNum" property="empNum" jdbcType="INTEGER" />
+	</resultMap>
+	
+	
+	<!-- 根据bean获取实发工资汇总信息总数 -->
+	<select id="getSalDetSumCountByBean" parameterType="com.czz.hwy.bean.manager.SalaryDetail" resultType="int">
+	select count(1) from (
+		select t.month from salarydetail t 
+	<where>
+		<if test="month != null and month !=''">
+			t.month = #{month, jdbcType=VARCHAR}
+		</if>
+	</where>
+	group by t.month)tt
+	</select>
+	
+	<!--根据bean获取实发工资汇总信息列表  -->
+	<select id="getSalDetSumByBean" parameterType="com.czz.hwy.bean.manager.SalaryDetail" resultMap="salaryDetailSum">
+	select t.month, IF(t2.month is null, 2, 1) status,count(1) empNum, sum(t.default_salary) defaultSalary, SUM(t.fine_salary) fineSalary, SUM(t.minus_amount) minusAmount, SUM(t.increase_amount) increaseAmount, SUM(t.real_salary) realSalary
+	from salarydetail t left join(select t1.month from  salarydetail t1 where t1.status = 1 group by t1.month) t2 on t.month = t2.month
+	<where>
+		<if test="month != null and month !=''">
+			t.month = #{month, jdbcType=VARCHAR}
+		</if>
+	</where>
+	group by t.month
+	<if test="row != 0 || rows != 0" >
+      limit #{row},#{rows}
+    </if>
+	</select>
+	
+	<!--判断这个年月的实发工资是否已经发布 -->
+	<select id="selectStatusByMonth" parameterType="com.czz.hwy.bean.manager.SalaryDetail" resultType="String">
+	select t.status  from salarydetail t 
+	<where>
+		<if test="month != null and month !=''">
+			and t.month = #{month, jdbcType=VARCHAR}
+		</if>
+	</where>
+	group by t.status
+	</select>
+	
+	<!--删除该月工资 -->
+	<delete id="deleteSalaryDetailByMonth" parameterType="com.czz.hwy.bean.manager.SalaryDetail">
+	delete from salarydetail 
+	<where>
+		<if test="month != null and month !=''">
+			and month = #{month, jdbcType=VARCHAR}
+		</if>
+	</where>
+	</delete>
+	
+	<!--插入实发工资条  -->
+	<insert id="insertSalaryDetailByMonth" parameterType="com.czz.hwy.bean.manager.SalaryDetail">
+	insert into salarydetail (month,employee_id,default_salary,fine_salary,real_salary,create_id,create_at,status,update_id,update_at) 
+	select #{month, jdbcType=VARCHAR},t.employee_id,t.default_salary,a.amount,t.default_salary - IFNULL(a.amount,0), #{createId,jdbcType=VARCHAR},#{createAt,jdbcType=VARCHAR},1,null,null
+	from defaultsalary t left join finescount a on t.employee_id = a.employee_id and DATE_FORMAT(a.month,'%Y-%m') = #{month, jdbcType=VARCHAR}
+	where t.status = 1
+	</insert>
+	
+	<!-- 根据月份发布所有员工实发工资条 -->
+	<update id="submitSalaryDetail" parameterType="com.czz.hwy.bean.manager.SalaryDetail">
+	update salarydetail t 
+	set t.status = 2
+	, t.update_id = #{updateId,jdbcType=VARCHAR}
+	, t.update_at = #{updateAt,jdbcType=VARCHAR}
+	where t.status = 1 and t.month = #{month,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 根据bean获取每月工资条的总数 -->
+	<select id="getSalDetCountByBean" resultType="int" parameterType="com.czz.hwy.bean.manager.SalaryDetail">
+	select count(1) from salarydetail 
+	<where>
+		<if test="month != null and month != ''">
+			and month = #{month,jdbcType=VARCHAR}
+		</if>
+	</where>
+	</select>
+	
+	<!-- 根据bean获取每月工资条的详细信息 -->
+	<select id="getSalDetByBean" resultMap="salaryDetailMap" parameterType="com.czz.hwy.bean.manager.SalaryDetail">
+	select t.id,t.month,t.employee_id, a.showname employeeName,t.default_salary,t.fine_salary,t.minus_amount,t.increase_amount ,t.real_salary,t.create_id,b.showname createName,t.create_at,t.update_id,c.showname updateName,t.update_at,t.status,t.remark
+	from salarydetail t
+	left join users a on t.employee_id = a.employee_id
+	left join users b on t.create_id = b.employee_id
+	left join users c on t.update_id = c.employee_id
+	<where>
+		<if test="month != null and month != ''">
+			and t.month = #{month,jdbcType=VARCHAR}
+		</if>
+		<if test="employeeId != null and employeeId != ''">
+			and t.employee_id = #{employeeId,jdbcType=VARCHAR}
+		</if>
+		<if test="employeeName != null and employeeName != ''">
+			and a.showname like concat('%',concat(#{employeeName,jdbcType=VARCHAR},'%'))
+		</if>
+	</where>
+	order by t.employee_id
+	<if test="row != 0 || rows != 0" >
+      limit #{row},#{rows}
+    </if>
+	</select>
+	
+	<!-- 修改员工其他扣款额或其他增加额 -->
+	<update id="setSalaryDetail" parameterType="com.czz.hwy.bean.manager.SalaryDetail">
+	update salarydetail t 
+	set t.minus_amount = #{minusAmount,jdbcType=VARCHAR},
+	 	t.increase_amount = #{increaseAmount,jdbcType=VARCHAR},
+	  	t.remark = #{remark,jdbcType=VARCHAR},
+	   	t.update_id = #{updateId,jdbcType=VARCHAR},
+	    t.update_at = #{updateAt,jdbcType=VARCHAR},
+	    t.real_salary = t.default_salary - IFNULL(t.fine_salary,0) + IFNULL(t.increase_amount,0) - IFNULL(t.minus_amount,0)
+	    where t.status = 1
+	    and t.id = #{id,jdbcType=VARCHAR}
+	</update>
+	
+</mapper>

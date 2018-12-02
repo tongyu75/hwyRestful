@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.Relay">
+	<resultMap type="relay" id="base_result_map">
+		<id column="id" property="id"/>
+		<result column="area_id" property="areaId" jdbcType="INTEGER"/>
+		<result column="employee_id" property="employeeId" jdbcType="INTEGER"/>
+		<result column="create_id" property="createId" jdbcType="INTEGER"/>
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+		<result column="update_id" property="updateId" jdbcType="INTEGER"/>
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+		<result column="areaName" property="areaName" jdbcType="VARCHAR"/>
+		<result column="employeeName" property="employeeName" jdbcType="VARCHAR"/>
+		<result column="roleId" property="roleId" jdbcType="INTEGER"/>
+		<result column="roleName" property="roleName" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<!-- 表字段 -->
+	<sql id="base_column_list">
+		id,area_id,employee_id,create_id,create_at,update_id,update_at
+	</sql> 
+	<!-- 表字段 和试图字段-->
+	<sql id="map_column_list">
+		id,area_id,employee_id,create_id,create_at,update_id,update_at,areaName,employeeName,roleId,roleName
+	</sql>
+	
+	<!-- 根据员工ID和责任区ID，获取替班人员信息。2016-09-29 -->
+	<select id="getRelayByBean" parameterType="relay" resultMap="base_result_map">
+	select * from relay
+	<where>
+        <if test="employeeId != 0">
+          and employee_id =#{employeeId}
+        </if>      
+        <if test="areaId != 0">
+          and area_id =#{areaId}
+        </if>
+     </where>
+	</select>
+	<!-- 新增一条替班人员记录,2016-09-29 -->
+	<insert id="insertRelayByBean" parameterType="relay">
+	insert into relay(area_id,employee_id,create_id,create_at)
+	values(#{areaId},#{employeeId},#{createId},#{createAt})
+	</insert>
+	
+	<!--根据ID获取替班人员信息，2016-09-29  -->
+	<select id="getRelayById" parameterType="String" resultMap="base_result_map">
+	select * from relay where id = #{id}
+	</select>
+	
+	<!-- 物理删除一条替班人员记录，2016-09-29 -->
+	<select id="deleteRelayById" parameterType="String" >
+	delete from relay where id = #{id}
+	</select>
+	
+	<!-- 查询替班人员记录总条数，2016-09-29 -->
+	<select id="getRelayCountByBean" parameterType="relay" resultType="int">
+	select count(1) 
+	from relay t
+	join  users t1 on t.employee_id = t1.employee_id and t1.status = 1
+	join  dutyarea t2 on t.area_id = t2.id and t2.status = 1
+	join  roles t3 on t1.role_id = t3.value and t3.status = 1
+	<where>
+		<if test="areaId != 0 ">
+			and t.area_id = #{areaId}
+		</if>
+		<if test="roleId != 0 ">
+			and t1.role_id = #{roleId}
+		</if>
+		<if test="employeeId != 0 ">
+			and t.employee_id = #{employeeId}
+		</if>
+		<if test="employeeName != null and  employeeName != ''">
+			and t1.showname like concat('%',#{employeeName},'%')
+		</if>
+	</where>
+	</select>
+	
+	
+	<!-- 查询替班人员记录集合，2016-09-29，分页 -->
+	<select id="getRelayListByBean" parameterType="relay" resultMap="base_result_map">
+	select t.id,t.area_id,t2.area_name areaName,
+	t.employee_id,t1.showname employeeName,
+	t1.role_id roleId, t3.name roleName,
+	t.create_id,t.create_at
+	from relay t 
+	join  users t1 on t.employee_id = t1.employee_id and t1.status = 1
+	join  dutyarea t2 on t.area_id = t2.id and t2.status = 1
+	join  roles t3 on t1.role_id = t3.value and t3.status = 1
+	<where>
+		<if test="areaId != 0 ">
+			and t.area_id = #{areaId}
+		</if>
+		<if test="roleId != 0 ">
+			and t1.role_id = #{roleId}
+		</if>
+		<if test="employeeId != 0 ">
+			and t.employee_id = #{employeeId}
+		</if>
+		<if test="employeeName != null and  employeeName != ''">
+			and t1.showname like concat('%',#{employeeName},'%')
+		</if>
+	</where>
+	limit #{row},#{rows}
+	</select>
+	
+	<!-- 查询替班人员记录集合，2016-09-29，不分页 -->
+	<select id="getAllRelayListByBean" parameterType="relay" resultMap="base_result_map">
+	select t.id,t.area_id,t2.area_name areaName,
+	t.employee_id,t1.showname employeeName,
+	t1.role_id roleId, t3.name roleName,
+	t.create_id,t.create_at
+	from relay t 
+	join  users t1 on t.employee_id = t1.employee_id and t1.status = 1
+	join  dutyarea t2 on t.area_id = t2.id and t2.status = 1
+	join  roles t3 on t1.role_id = t3.value and t3.status = 1
+	<where>
+		<if test="areaId != 0 ">
+			and t.area_id = #{areaId}
+		</if>
+		<if test="roleId != 0 ">
+			and t1.role_id = #{roleId}
+		</if>
+		<if test="employeeId != 0 ">
+			and t.employee_id = #{employeeId}
+		</if>
+		<if test="employeeName != null and  employeeName != ''">
+			and t1.showname like concat('%',#{employeeName},'%')
+		</if>
+	</where>
+	</select>
+	
+	<!-- 查询所有没有排班计划，且又不再替班表中的员工总条数，2016-09-30 -->
+	<select id="getNotRelayCountByBean" parameterType="relay" resultType="int">
+	select count(1)
+	from user_area t
+	join  users t3 on t3.employee_id = t.employee_id and t3.status = 1
+	left join roles t4 on t3.role_id = t4.value and t4.status = 1
+	left join dutyarea t5 on t.area_id = t5.id and t5.status = 1
+	<where>
+		not EXISTS(select 1 from relay a where a.employee_id = t.employee_id and a.area_id = t.area_id) 
+		and not EXISTS(select 1 from workplans a where a.employee_id = t.employee_id and a.area_id = t.area_id) 
+		<if test="areaId != 0 ">
+			and t.area_id = #{areaId}
+		</if>
+		<if test="roleId != 0 ">
+			and t3.role_id = #{roleId}
+		</if>
+		<if test="employeeId != 0 ">
+			and t.employee_id = #{employeeId}
+		</if>
+		<if test="employeeName != null and  employeeName != ''">
+			and t3.showname like concat('%',#{employeeName},'%')
+		</if>
+	</where>
+	</select>
+	
+	
+	<!-- 查询所有没有排班计划，且又不再替班表中的员工信息集合，2016-09-30，不分页 -->
+	<select id="getAllNotRelayListByBean" parameterType="relay" resultMap="base_result_map">
+	select t.id,t.area_id,t5.area_name areaName, 
+	       t.employee_id,t3.showname employeeName,
+		   t3.role_id roleId, t4.name roleName
+	from user_area t
+	join  users t3 on t3.employee_id = t.employee_id and t3.status = 1
+	left join roles t4 on t3.role_id = t4.value and t4.status = 1
+	left join dutyarea t5 on t.area_id = t5.id and t5.status = 1
+	<where>
+		not EXISTS(select 1 from relay a where a.employee_id = t.employee_id and a.area_id = t.area_id) 
+		and not EXISTS(select 1 from workplans a where a.employee_id = t.employee_id and a.area_id = t.area_id) 
+		<if test="areaId != 0 ">
+			and t.area_id = #{areaId}
+		</if>
+		<if test="employeeId != 0 ">
+			and t.employee_id = #{employeeId}
+		</if>
+		<if test="roleId != 0 ">
+			and t3.role_id = #{roleId}
+		</if>
+		<if test="employeeName != null and  employeeName != ''">
+			and t3.showname like concat('%',#{employeeName},'%')
+		</if>
+	</where>
+	</select>
+	
+</mapper>

@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.RelayApp">
+	<resultMap type="relayApp" id="base_result_map">
+		<id column="id" property="id"/>
+		<result column="area_id" property="areaId" jdbcType="INTEGER"/>
+		<result column="employee_id" property="employeeId" jdbcType="TIMESTAMP"/>
+		<result column="create_id" property="createId" jdbcType="INTEGER"/>
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+		<result column="update_id" property="updateId" jdbcType="INTEGER"/>
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+		<result column="areaName" property="areaName" jdbcType="VARCHAR"/>
+		<result column="employeeName" property="employeeName" jdbcType="VARCHAR"/>
+		<result column="roleId" property="roleId" jdbcType="INTEGER"/>
+		<result column="roleName" property="roleName" jdbcType="VARCHAR"/>
+		<result column="workTime" property="workTime" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<!-- 表字段 -->
+	<sql id="base_column_list">
+		id,area_id,employee_id,create_id,create_at,update_id,update_at
+	</sql> 
+	<!-- 表字段 和试图字段-->
+	<sql id="map_column_list">
+		id,area_id,employee_id,create_id,create_at,update_id,update_at,areaName,employeeName,roleId,roleName
+	</sql>
+	
+	<!-- 查询替班人员记录总条数，2016-10-20 
+		2016-11-21修改为：（1）环卫工请假代班人员查询其所属责任区所有的环卫工（应该不包含自己）
+	  		                                    （2）检测员请假代班人员可查询出自己所属部门的所有检测员（应该不包含自己）
+	-->
+	<select id="getRelayCountByBeanApp" parameterType="relayApp" resultType="int">
+	
+		<!-- 获取环卫工的替班人员 -->
+		<if test="roleId == 1">
+		select count(1) 
+		from user_area t
+		join users t1 on t.employee_id = t1.employee_id and t1.status = 1
+		join  dutyarea t2 on t.area_id = t2.id and t2.status = 1
+		join  roles t3 on t1.role_id = t3.value and t3.status = 1
+		<where>
+				<if test="areaId != 0 ">
+					and t.area_id = #{areaId}
+				</if>
+				<if test="roleId != 0 ">
+					and t1.role_id = #{roleId}
+				</if>
+				<if test="employeeId != 0 ">
+					and t.employee_id = #{employeeId}
+				</if>
+				<if test="employeeName != null and  employeeName != ''">
+					and t1.showname like concat('%',#{employeeName},'%')
+				</if>
+				<if test="leaveId != 0 ">
+					and t.employee_id != #{leaveId}
+				</if>
+		</where>
+		</if>
+		
+		<!-- 获取检测员的替班人员 -->
+		<if test="roleId == 2 or roleId == 3">
+		select count(1)
+		from users t
+		<where>
+				t.status = 1 
+				<if test="roleId != 0 ">
+					and t.role_id = #{roleId}
+				</if>		
+				<if test="leaveId != 0 ">
+					and t.employee_id != #{leaveId}
+					and exists (select a.dept_id from users a where a.dept_id = t.dept_id and a.status = 1 and a.employee_id = #{leaveId})		
+				</if>
+				<if test="employeeId != 0 ">
+					and t.employee_id = #{employeeId}
+				</if>
+				<if test="employeeName != null and  employeeName != ''">
+					and t.showname like concat('%',#{employeeName},'%')
+				</if>
+		</where>
+		</if>
+		
+		<!-- 获取其他角色的替班人员 -->
+		<if test="roleId != 1 and roleId != 2 and roleId != 3">
+		select count(1) 
+		from relay t
+		join  users t1 on t.employee_id = t1.employee_id and t1.status = 1
+		join  dutyarea t2 on t.area_id = t2.id and t2.status = 1
+		join  roles t3 on t1.role_id = t3.value and t3.status = 1
+		<where>
+			<if test="areaId != 0 ">
+				and t.area_id = #{areaId}
+			</if>
+			<if test="roleId != 0 ">
+				and t1.role_id = #{roleId}
+			</if>
+			<if test="employeeId != 0 ">
+				and t.employee_id = #{employeeId}
+			</if>
+			<if test="employeeName != null and  employeeName != ''">
+				and t1.showname like concat('%',#{employeeName},'%')
+			</if>
+		</where>
+		</if>
+	</select>
+	
+	<!-- 查询替班人员记录集合，2016-10-20，不分页
+		2016-11-21修改为：（1）环卫工请假代班人员查询其所属责任区所有的环卫工（不包含自己）
+	  		                                    （2）检测员请假代班人员可查询出自己所属部门的所有检测员（不包含自己）
+	 -->
+	<select id="getAllRelayListByBeanApp" parameterType="relayApp" resultMap="base_result_map">
+	<!-- 获取环卫工的替班人员 -->
+		<if test="roleId == 1">
+		select t.employee_id,t1.showname employeeName,t5.workTime
+		from user_area t
+		join users t1 on t.employee_id = t1.employee_id and t1.status = 1
+		join  dutyarea t2 on t.area_id = t2.id and t2.status = 1
+		join  roles t3 on t1.role_id = t3.value and t3.status = 1
+		left join relay t4 on t.employee_id = t4.employee_id and t.area_id = t4.area_id
+		left join (
+			select a.employeeId,GROUP_CONCAT(DISTINCT CONCAT(a.duty_on_time,'-', a.duty_off_time)) workTime from attendanceforplans a 
+			where a.recorddate = CURDATE()
+			group by a.employeeId
+		) t5 on t5.employeeId = t.employee_id
+		<where>
+				<if test="areaId != 0 ">
+					and t.area_id = #{areaId}
+				</if>
+				<if test="roleId != 0 ">
+					and t1.role_id = #{roleId}
+				</if>
+				<if test="employeeId != 0 ">
+					and t.employee_id = #{employeeId}
+				</if>
+				<if test="employeeName != null and  employeeName != ''">
+					and t1.showname like concat('%',#{employeeName},'%')
+				</if>
+				<if test="leaveId != 0 ">
+					and t.employee_id != #{leaveId}
+				</if>
+		</where>
+		order by IF(t4.employee_id is null,2,1)
+		</if>
+		
+		<!-- 获取检测员的替班人员 -->
+		<if test="roleId == 2 or roleId == 3">
+		select t.employee_id,t.showname employeeName, t5.workTime
+		from users t
+		left join (
+			select a.employeeId,GROUP_CONCAT(DISTINCT CONCAT(a.duty_on_time,'-', a.duty_off_time)) workTime from attendanceforplans a 
+			where a.recorddate = CURDATE()
+			group by a.employeeId
+		) t5 on t5.employeeId = t.employee_id
+		<where>
+				t.status = 1 
+				<if test="roleId != 0 ">
+					and t.role_id = #{roleId}
+				</if>		
+				<if test="leaveId != 0 ">
+					and t.employee_id != #{leaveId}
+					and exists (select a.dept_id from users a where a.dept_id = t.dept_id and a.status = 1 and a.employee_id = #{leaveId})		
+				</if>
+				<if test="employeeId != 0 ">
+					and t.employee_id = #{employeeId}
+				</if>
+				<if test="employeeName != null and  employeeName != ''">
+					and t.showname like concat('%',#{employeeName},'%')
+				</if>
+		</where>
+		</if>
+		
+		<!-- 获取其他角色的替班人员 -->
+		<if test="roleId != 1 and roleId != 2 and roleId != 3">
+			select t.id,t.area_id,t2.area_name areaName,
+			t.employee_id,t1.showname employeeName,
+			t1.role_id roleId, t3.name roleName,
+			t.create_id,t.create_at, t5.workTime
+			from relay t 
+			join  users t1 on t.employee_id = t1.employee_id and t1.status = 1
+			join  dutyarea t2 on t.area_id = t2.id and t2.status = 1
+			join  roles t3 on t1.role_id = t3.value and t3.status = 1
+			left join (
+				select a.employeeId,GROUP_CONCAT(DISTINCT CONCAT(a.duty_on_time,'-', a.duty_off_time)) workTime from attendanceforplans a 
+				where a.recorddate = CURDATE()
+				group by a.employeeId
+			) t5 on t5.employeeId = t.employee_id
+			<where>
+				<if test="areaId != 0 ">
+					and t.area_id = #{areaId}
+				</if>
+				<if test="roleId != 0 ">
+					and t1.role_id = #{roleId}
+				</if>
+				<if test="employeeId != 0 ">
+					and t.employee_id = #{employeeId}
+				</if>
+				<if test="employeeName != null and  employeeName != ''">
+					and t1.showname like concat('%',#{employeeName},'%')
+				</if>
+			</where>
+		</if>
+	</select>
+	
+	
+	
+	
+	<!-- 查询替班人员记录总条数，2016-10-20 -->
+	<!-- <select id="getRelayCountByBeanApp" parameterType="relay" resultType="int">
+	select count(1) 
+	from relay t
+	join  users t1 on t.employee_id = t1.employee_id and t1.status = 1
+	join  dutyarea t2 on t.area_id = t2.id and t2.status = 1
+	join  roles t3 on t1.role_id = t3.value and t3.status = 1
+	<where>
+		<if test="areaId != 0 ">
+			and t.area_id = #{areaId}
+		</if>
+		<if test="roleId != 0 ">
+			and t1.role_id = #{roleId}
+		</if>
+		<if test="employeeId != 0 ">
+			and t.employee_id = #{employeeId}
+		</if>
+		<if test="employeeName != null and  employeeName != ''">
+			and t1.showname like concat('%',#{employeeName},'%')
+		</if>
+	</where>
+	</select> -->
+	
+	<!-- 查询替班人员记录集合，2016-10-20，不分页 -->
+	<!-- <select id="getAllRelayListByBeanApp" parameterType="relay" resultMap="base_result_map">
+	select t.id,t.area_id,t2.area_name areaName,
+	t.employee_id,t1.showname employeeName,
+	t1.role_id roleId, t3.name roleName,
+	t.create_id,t.create_at
+	from relay t 
+	join  users t1 on t.employee_id = t1.employee_id and t1.status = 1
+	join  dutyarea t2 on t.area_id = t2.id and t2.status = 1
+	join  roles t3 on t1.role_id = t3.value and t3.status = 1
+	<where>
+		<if test="areaId != 0 ">
+			and t.area_id = #{areaId}
+		</if>
+		<if test="roleId != 0 ">
+			and t1.role_id = #{roleId}
+		</if>
+		<if test="employeeId != 0 ">
+			and t.employee_id = #{employeeId}
+		</if>
+		<if test="employeeName != null and  employeeName != ''">
+			and t1.showname like concat('%',#{employeeName},'%')
+		</if>
+	</where>
+	</select> -->
+</mapper>

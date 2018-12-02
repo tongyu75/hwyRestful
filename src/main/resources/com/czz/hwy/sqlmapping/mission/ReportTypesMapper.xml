@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.ReportTypes" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.mission.ReportTypes" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="supervisor_id" property="supervisorId" jdbcType="INTEGER" />
+    <result column="supervisor_name" property="supervisorName" jdbcType="VARCHAR" />
+    <result column="supervisor_desc" property="supervisorDesc" jdbcType="VARCHAR" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, supervisor_id, supervisor_name, supervisor_desc, create_at, update_at
+  </sql>
+  <select id="getReportTypesById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from reporttypes
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteReportTypes" parameterType="java.lang.Integer" >
+    delete from reporttypes
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertReportTypes" parameterType="com.czz.hwy.bean.mission.ReportTypes" >
+    insert into reporttypes (id, supervisor_id, supervisor_name, 
+      supervisor_desc, create_at, update_at
+      )
+    values (#{id,jdbcType=INTEGER}, #{supervisorId,jdbcType=INTEGER}, #{supervisorName,jdbcType=VARCHAR}, 
+      #{supervisorDesc,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, #{updateAt,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.czz.hwy.bean.mission.ReportTypes" >
+    insert into reporttypes
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="supervisorId != null" >
+        supervisor_id,
+      </if>
+      <if test="supervisorName != null" >
+        supervisor_name,
+      </if>
+      <if test="supervisorDesc != null" >
+        supervisor_desc,
+      </if>
+      <if test="createAt != null" >
+        create_at,
+      </if>
+      <if test="updateAt != null" >
+        update_at,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="supervisorId != null" >
+        #{supervisorId,jdbcType=INTEGER},
+      </if>
+      <if test="supervisorName != null" >
+        #{supervisorName,jdbcType=VARCHAR},
+      </if>
+      <if test="supervisorDesc != null" >
+        #{supervisorDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="createAt != null" >
+        #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateReportTypes" parameterType="com.czz.hwy.bean.mission.ReportTypes" >
+    update reporttypes
+    <set >
+      <if test="supervisorId != null" >
+        supervisor_id = #{supervisorId,jdbcType=INTEGER},
+      </if>
+      <if test="supervisorName != null" >
+        supervisor_name = #{supervisorName,jdbcType=VARCHAR},
+      </if>
+      <if test="supervisorDesc != null" >
+        supervisor_desc = #{supervisorDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.mission.ReportTypes" >
+    update reporttypes
+    set supervisor_id = #{supervisorId,jdbcType=INTEGER},
+      supervisor_name = #{supervisorName,jdbcType=VARCHAR},
+      supervisor_desc = #{supervisorDesc,jdbcType=VARCHAR},
+      create_at = #{createAt,jdbcType=TIMESTAMP},
+      update_at = #{updateAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

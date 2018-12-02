@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.CheckParameter" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.CheckParameter" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="pass_count" property="passCount" jdbcType="INTEGER" />
+    <result column="access_rate" property="accessRate" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, pass_count, access_rate, create_at
+  </sql>
+  <select id="getCheckParameterById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from check_parameter
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteCheckParameter" parameterType="java.lang.Integer" >
+    delete from check_parameter
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertCheckParameter" parameterType="com.czz.hwy.bean.manager.CheckParameter" >
+    insert into check_parameter (id, pass_count, access_rate, 
+      create_at)
+    values (#{id,jdbcType=INTEGER}, #{passCount,jdbcType=INTEGER}, #{accessRate,jdbcType=INTEGER}, 
+      #{createAt,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.czz.hwy.bean.manager.CheckParameter" >
+    insert into check_parameter
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="passCount != null" >
+        pass_count,
+      </if>
+      <if test="accessRate != null" >
+        access_rate,
+      </if>
+      <if test="createAt != null" >
+        create_at,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="passCount != null" >
+        #{passCount,jdbcType=INTEGER},
+      </if>
+      <if test="accessRate != null" >
+        #{accessRate,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        #{createAt,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateCheckParameter" parameterType="com.czz.hwy.bean.manager.CheckParameter" >
+    update check_parameter
+    <set >
+      <if test="passCount != null" >
+        pass_count = #{passCount,jdbcType=INTEGER},
+      </if>
+      <if test="accessRate != null" >
+        access_rate = #{accessRate,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.manager.CheckParameter" >
+    update check_parameter
+    set pass_count = #{passCount,jdbcType=INTEGER},
+      access_rate = #{accessRate,jdbcType=INTEGER},
+      create_at = #{createAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

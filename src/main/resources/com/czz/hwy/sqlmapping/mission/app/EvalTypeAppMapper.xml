@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.EvalTypeApp">
+	<resultMap type="evalTypeApp" id="evalTypeAppMap">
+		<result column="id" property="id" jdbcType="INTEGER" />
+		<result column="eval_value" property="evalValue" jdbcType="INTEGER" />
+	    <result column="eval_name" property="evalName" jdbcType="VARCHAR" />
+	    <result column="remark" property="remark" jdbcType="VARCHAR" />
+	    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+	    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+	    <result column="role1" property="role1" jdbcType="INTEGER" />
+	    <result column="role2" property="role2" jdbcType="INTEGER" />
+	    <result column="role3" property="role3" jdbcType="INTEGER" />
+	    <result column="role4" property="role4" jdbcType="INTEGER" />
+	    <result column="ishwg" property="isHwg" jdbcType="INTEGER" />
+	    <result column="isjcy" property="isJcy" jdbcType="INTEGER" />
+	    <result column="iskhy" property="isKhy" jdbcType="INTEGER" />
+		<result column="type" property="type" jdbcType="INTEGER"/>
+	</resultMap>
+
+	<sql id="Base_Column_List" >
+	    id, eval_value, eval_name, remark, create_at, update_at,role1, role2, role3, role4, ishwg, isjcy, iskhy, type
+	</sql>
+	
+	<!-- 根据考核类型ID获取考核类型详细信息，2016-11-09 -->
+	<select id="getEvalTypeByBeanApp" parameterType="evalTypeApp" resultMap="evalTypeAppMap">
+	select * from evaltype where eval_value = #{evalValue}
+	</select>	
+	
+	<!-- 根据type值，获取五克，五分钟，举报，监督对应的考核分类集合总条数，2016-11-09 -->
+	<select id="getEvalTypeCountByBeanApp" parameterType="evalTypeApp" resultType="int">
+	select count(1) from evaltype
+	<where>
+		<if test="type != 0">
+		and type = #{type}
+		</if>
+	</where>
+	</select>
+	
+	<!-- 根据type值，获取五克，五分钟，举报，监督对应的考核分类集合,不分页，2016-11-09 -->
+	<select id="getEvalTypeListByBeanApp" parameterType="evalTypeApp" resultMap="evalTypeAppMap">
+	select * from evaltype
+	<where>
+		<if test="type != 0">
+		and type = #{type}
+		</if>
+	</where>
+	</select>
+	
+</mapper>

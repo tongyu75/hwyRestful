@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.user.app.AttendanceForPlans">
+    <resultMap type="com.czz.hwy.bean.user.app.AttendanceForPlansApp" id="BaseResultMap">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="employeeId" property="employeeId" jdbcType="INTEGER"/>
+        <result column="duty_area" property="dutyAreaId" jdbcType="INTEGER"/>
+        <result column="duty_point" property="dutyPointId" jdbcType="INTEGER"/>
+        <result column="lastrecordtime" property="lastRecordTime" jdbcType="TIMESTAMP"/>
+        <result column="duty_on_time" property="dutyOnTime" jdbcType="TIMESTAMP"/>
+        <result column="duty_off_time" property="dutyOffTime" jdbcType="TIMESTAMP"/>
+        <result column="get_on_status" property="dutyOnStatus" jdbcType="VARCHAR"/>
+        <result column="get_off_status" property="dutyOffStatus" jdbcType="VARCHAR"/>
+        <result column="create_at" property="createDate" jdbcType="TIMESTAMP"/>
+        <result column="update_at" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="recorddate" property="recordDate" jdbcType="TIMESTAMP"/>
+        <result column="lat"  property="lat" jdbcType="DOUBLE"/>
+        <result column="lng"  property="lng" jdbcType="DOUBLE"/>
+        <result column="slow_down_num" property="slowDownNum" jdbcType="INTEGER"/>
+        <result column="reason" property="reason" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id,employeeId,duty_area,duty_point,lastrecordtime,duty_on_time,duty_off_time,
+        get_on_status,get_off_status,create_at,update_at,recorddate,lat,lng,slow_down_num,reason
+    </sql>
+    
+    <!-- 考勤查岗（当前时间） 考核员或督察员（APP端） -->
+    <select id="getAllCityWorkAttForApp" resultType="Map" parameterType="Map">
+        select A.duty_area areaId, B.area_name areaName, A.get_on_status curStatus, count(A.id) num 
+          from dutyarea B 
+          join attendanceforplans A on A.duty_area = B.id
+          join users C on A.employeeId = C.employee_id and C.status = 1
+         where A.recorddate = DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+           and DATE_FORMAT(A.duty_on_time, '%H:%i:%s') &lt;= DATE_FORMAT(SYSDATE(), '%H:%i:%s')
+           and DATE_FORMAT(A.duty_off_time, '%H:%i:%s') &gt;=  DATE_FORMAT(SYSDATE(), '%H:%i:%s')  
+           and B.status = 1  
+           <!-- 如果是考核员查岗，只统计考核员负责责任区的环卫工和检测员，如果是督察员查岗，则统计所有区的环卫工、检测员和考核员 -->
+           <if test="roleId == 3">
+               and (EXISTS (select area_id
+                              from workplans
+                             where employee_id = #{employeeId}
+                               and B.id = area_id))
+               and (C.role_id = 1 or C.role_id = 2)
+            </if>
+         group by A.duty_area, A.get_on_status
+         order by A.duty_area
+    </select>
+    
+   <!-- 考勤查岗（最晚下班时间之前的考勤状态） 考核员或督察员（APP端） -->
+    <select id="getAllCityWorkAttLastForApp" resultType="Map" parameterType="Map">
+         select E.duty_area areaId, F.area_name areaName, E.get_off_status curStatus, count(E.id) num 
+           from dutyarea F 
+           join (select D.duty_area, D.id , D.get_off_status, D.employeeId
+                   from attendanceforplans D
+                   JOIN (select distinct A.employee_id, A.area_id, A.duty_on_time, A.duty_off_time
+                           from attendanceforpoint A
+                           join (select area_id, point_id, max(duty_off_time) dutyOffTime
+                                   from attendanceforpoint
+                                  where recorddate = curdate()
+                                  group by area_id, point_id) B ON A.area_id = B.area_id and A.point_id = B.point_id and A.duty_off_time = B.dutyOffTime
+                          where A.recorddate = curdate()
+                            and duty_off_time != '23:59:00'
+                            <!-- 如果是考核员查岗，只统计考核员负责责任区，如果是督察员查岗，则统计所有区 -->
+                            <if test="roleId == 3">
+                            and EXISTS (select area_id
+                                          from workplans
+                                         where employee_id = #{employeeId}
+                                           and A.area_id = area_id)
+                            </if>
+                            and A.duty_off_time &lt;= (select max(A.duty_off_time) dutyOffTime
+                                                      from attendanceforpoint A
+                                                     where recorddate = curdate()
+                                                       and duty_off_time != '23:59:00'
+                                                       <if test="roleId == 3">
+                                                       and EXISTS (select area_id
+                                                                     from workplans
+                                                                    where employee_id = #{employeeId}
+                                                                      and A.area_id = area_id)
+                                                       </if>
+                                                     having dutyOffTime &lt; CURTIME())) C ON D.duty_area = C.area_id and D.employeeId = C.employee_id and D.duty_on_time = C.duty_on_time and D.duty_off_time = C.duty_off_time
+                  where D.recorddate = curdate()) E on E.duty_area = F.id
+            join users G on E.employeeId = G.employee_id and G.status = 1                  
+          where F.status = 1 
+           <!-- 如果是考核员查岗，只统计环卫工和检测员，如果是督察员查岗，则统计环卫工、检测员和考核员 -->
+           <if test="roleId == 3">
+               and (G.role_id = 1 or G.role_id = 2)
+            </if>
+          group by E.duty_area, E.get_off_status
+          order by E.duty_area
+    </select>
+    
+    <!-- 考勤查岗(针对考核员和督察员当前负责的所有责任区，当前时间是否是一天中最晚下班之后的时间) 考核员或督察员（APP端） -->
+    <select id="getAllCityWorkAttLastTimeForApp" resultType="com.czz.hwy.bean.user.app.AttendanceForPlansApp" parameterType="java.lang.Integer">
+        select max(A.duty_off_time) dutyOffTime
+          from attendanceforpoint A
+         where recorddate = curdate()
+           and duty_off_time != '23:59:00'
+           <if test="_parameter != null">
+           and EXISTS (select area_id
+                         from workplans
+                        where employee_id = #{_parameter}
+                          and A.area_id = area_id)
+           </if>
+        having dutyOffTime &lt; CURTIME()
+    </select>
+    
+    <!-- 根据员工ID查询昨天或今天考勤记录，用于手机端的考勤记录 2016-12-08 -->
+    <select id="getYesAndTodAttendanceForApp" parameterType="java.util.Map" resultType="java.util.Map">
+        select DISTINCT date_format(duty_on_time, '%H:%i:%s') planOnTime, date_format(duty_off_time, '%H:%i:%s') planOffTime, 
+               IFNULL(date_format(update_at,'%H:%i:%s'),'') onTime, IFNULL(date_format(lastrecordtime,'%H:%i:%s'),'') offTime, 
+               IFNULL(get_on_status,'') onStatus , IFNULL(get_off_status,'') offStatus 
+          from attendanceforplans t
+         where employeeId = #{employeeId}
+           and recorddate = #{attendanceDate}
+         order by planOnTime, planOffTime
+    </select>      
+    
+    <!-- 自动生成考勤记录 2016-12-09 -->
+   <insert id="batchAddAttendanceForPlansForApp" >    
+      insert into attendanceforplans (
+                employeeId,
+                duty_area,
+                duty_on_time,
+                duty_off_time,
+                create_at,
+                recorddate,
+                lat,
+                lng,
+                slow_down_num,
+                is_coverwork
+            ) 
+        select 
+            DISTINCT t.employee_id,
+            t.area_id,
+            t0.duty_on_time,
+            t0.duty_off_time,
+            now(),
+            DATE_FORMAT(now(),'%Y-%m-%d'),
+            0,
+            0,
+            0,
+            2
+        from workplans t
+        join banci t0 on t.banzu_id = t0.banzu_id and t0.status = 1
+        join dutyarea t2 on t.area_id = t2.id and t2.status = 1
+        join users t3 on t.employee_id = t3.employee_id and t3.status = 1 and t3.role_id in (1,2,3)
+        where 
+        not EXISTS(
+            select 1 from attendanceforplans a
+            where a.recorddate = DATE_FORMAT(now(),'%Y-%m-%d')
+            and a.duty_on_time = t0.duty_on_time
+            and a.duty_off_time = t0.duty_off_time
+          and a.employeeId = t.employee_id
+            and a.duty_area = t.area_id
+        )
+    </insert>    
+    <!-- 根据员工ID，查询员工的上下班时间用于定时生成考勤状态,2016-11-28 -->
+    <select id="getAttendanceForPlansByEmployeeIdForApp" parameterType="Integer" resultType="com.czz.hwy.bean.user.app.AttendanceForPlansApp">
+        select t.id,
+        t.employeeId,
+        t.duty_on_time dutyOnTime,
+        t.duty_off_time dutyOffTime,
+        t.duty_area dutyAreaId,
+        t.duty_point dutyPointId,
+        t.get_on_status dutyOnStatus,
+        t.get_off_status dutyOffStatus,
+        t.update_at updateTime,
+        t.lastrecordtime lastRecordTime,
+        t.recorddate recordDate,
+        t.reason reason,
+        u.role_id roleId
+        from attendanceforplans t
+        join users u on t.employeeId = u.employee_id
+        where employeeId = #{employeeId}
+          and recorddate = DATE_FORMAT(CURRENT_TIMESTAMP(),'%Y-%m-%d')        
+    </select>    
+    
+    <!-- 针对代代班人不再上与所代替的请假人的班次重叠的班次，删除代班人的考勤记录 2016-12-06 -->   
+    <delete id="deleteAttendanceForCoverWorkForApp" parameterType="attendanceForPlansApp">
+        delete from attendanceforplans 
+            <where>
+                <if test="employeeId != 0">
+                    and employeeId = #{employeeId,jdbcType=INTEGER}
+                </if>
+                <if test="recordDate != null ">
+                    and recorddate = DATE_FORMAT(#{recordDate},'%Y-%m-%d')
+                </if>
+                <if test="dutyAreaId != 0">
+                    and duty_area = #{dutyAreaId,jdbcType=INTEGER}
+                </if>
+                and (
+                        (
+                            DATE_FORMAT(duty_on_time,'%H:%i') &lt;= DATE_FORMAT(#{dutyOnTime},'%H:%i')
+                            and DATE_FORMAT(#{dutyOnTime},'%H:%i') &lt;= DATE_FORMAT(duty_off_time,'%H:%i')
+                        )
+                        or 
+                        (
+                            DATE_FORMAT(duty_on_time,'%H:%i') &lt;= DATE_FORMAT(#{dutyOffTime},'%H:%i')
+                            and DATE_FORMAT(#{dutyOffTime},'%H:%i') &lt;= DATE_FORMAT(duty_off_time,'%H:%i')
+                        )
+                        or 
+                        (
+                            DATE_FORMAT(duty_on_time,'%H:%i') &lt;= DATE_FORMAT(#{dutyOnTime},'%H:%i')
+                            and DATE_FORMAT(#{dutyOffTime},'%H:%i') &lt;= DATE_FORMAT(duty_off_time,'%H:%i')
+                        )
+                        or 
+                        (
+                            DATE_FORMAT(#{dutyOnTime},'%H:%i') &lt;= DATE_FORMAT(duty_on_time,'%H:%i') 
+                            and DATE_FORMAT(duty_off_time,'%H:%i') &lt;=  DATE_FORMAT(#{dutyOffTime},'%H:%i') 
+                        )
+                )
+            </where>
+    </delete>        
+    
+    <!-- 代班人是检测员的时候,查询代班人的实际上下班时间，并且根据此上下班时间生成代班的时间,2016-12-09 -->
+    <select id="getAttendanceForPlansForCreateCoverWorkForApp" parameterType="Integer" resultType="com.czz.hwy.bean.user.app.AttendanceForPlansApp">
+        select distinct t.duty_on_time dutyOnTime, t.duty_off_time dutyOffTime
+          from attendanceforplans t
+          join users u on t.employeeId = u.employee_id
+         where employeeId = #{employeeId}
+           and recorddate = DATE_FORMAT(CURRENT_TIMESTAMP(),'%Y-%m-%d')        
+    </select>        
+    
+    <!--当存在请假和任务的时候，更新考勤表的上下班状态为请假和任务 2016-11-28 -->
+    <update id="updateAttendancePlansForLeaveAndTaskForApp" parameterType="attendanceForPlansApp">
+        update attendanceforplans 
+        <set>
+            <if test="dutyOffStatus !=null and dutyOffStatus != ''">
+                get_off_status = #{dutyOffStatus},
+            </if>
+            <if test="dutyOnStatus != null and dutyOnStatus != '' ">
+                get_on_status = #{dutyOnStatus},
+            </if>
+            <if test="lat != null">
+                lat = #{lat,jdbcType=DOUBLE},
+            </if>
+            <if test="lng != null">
+                lng = #{lng,jdbcType=DOUBLE},
+            </if>
+            <if test="slowDownNum != 0">
+                slow_down_num = #{slowDownNum,jdbcType=INTEGER},
+            </if>
+            <if test="isCoverwork != 0">
+                is_coverwork = #{isCoverwork,jdbcType=INTEGER},
+            </if>
+             lastrecordtime = null,
+             update_at = null
+        </set>
+        where id = #{id}
+    </update>         
+    <!-- 更新当天的没有手机的环卫工的上下班状态为正常，2016-10-11 -->
+    <update id="updateNoMobileStatusApp" parameterType="java.lang.String">
+        update attendanceforplans t 
+           set t.get_on_status = #{status}, 
+               t.update_at = null, 
+               t.get_off_status = #{status},
+               t.lastrecordtime = null
+         where  t.recorddate = CURDATE()
+           and EXISTS(select 1 from users a where a.status = 1 and a.has_mobile = 2 and a.has_watch = 2 and a.employee_id = t.employeeId)
+           and t.get_on_status is NULL
+    </update>    
+    
+    <!-- 根据上下班时间段，查询当前在考勤表中代班人的记录是否存在,如果存在则将is_coverwork状态置为1，否则需要重新插入一条代班的考勤记录 2016-11-28 -->
+    <select id="getExsitsCoverWorkAttApp" parameterType="com.czz.hwy.bean.user.app.AttendanceForPlansApp" resultType="java.lang.Integer">
+        select count(t.id)
+          from attendanceforplans t
+       <where>
+           <if test="employeeId != 0">
+               employeeId = #{employeeId}
+           </if>
+           <if test="dutyOnTime != null">
+               and duty_on_time = DATE_FORMAT(#{dutyOnTime},'%H:%i:%s')
+           </if>
+           <if test="dutyOffTime != null">
+               and duty_off_time = DATE_FORMAT(#{dutyOffTime},'%H:%i:%s')          
+           </if>
+           <if test="dutyAreaId != 0">
+               and duty_area = #{dutyAreaId}       
+           </if>                      
+           and recorddate = DATE_FORMAT(CURRENT_TIMESTAMP(),'%Y-%m-%d')  
+      </where> 
+    </select>       
+    
+    <!-- 考勤表中指定上下班时间段的代班人记录存在，更新is_coverwork状态置为1 2016-11-28 -->
+    <update id="updateAttendancePlansForCoverWorkApp" parameterType="attendanceForPlansApp">
+        update attendanceforplans 
+        <set>
+            <if test="dutyOffStatus !=null and dutyOffStatus != ''">
+                get_off_status = #{dutyOffStatus},
+            </if>
+            <if test="dutyOnStatus != null and dutyOnStatus != '' ">
+                get_on_status = #{dutyOnStatus},
+            </if>
+            <if test="lastRecordTime != null">
+                lastrecordtime = #{lastRecordTime},
+            </if>
+            <if test="updateTime != null">
+                update_at = #{updateTime},
+            </if>
+            <if test="lat != null">
+                lat = #{lat,jdbcType=DOUBLE},
+            </if>
+            <if test="lng != null">
+                lng = #{lng,jdbcType=DOUBLE},
+            </if>
+            <if test="slowDownNum != 0">
+                slow_down_num = #{slowDownNum,jdbcType=INTEGER},
+            </if>
+            <if test="isCoverwork != 0">
+                is_coverwork = #{isCoverwork,jdbcType=INTEGER}
+            </if>
+            
+        </set>
+       <where>
+           <if test="employeeId != 0">
+               employeeId = #{employeeId}
+           </if>
+           <if test="dutyOnTime != null">
+               and duty_on_time = DATE_FORMAT(#{dutyOnTime},'%H:%i:%s')
+           </if>
+           <if test="dutyOffTime != null">
+               and duty_off_time = DATE_FORMAT(#{dutyOffTime},'%H:%i:%s')          
+           </if>
+           <if test="dutyAreaId != 0">
+               and duty_area = #{dutyAreaId}       
+           </if>                      
+           and recorddate = DATE_FORMAT(CURRENT_TIMESTAMP(),'%Y-%m-%d')  
+      </where>         
+    </update>    
+    
+    <!-- 考勤表中指定上下班时间段的代班人记录不存在，重新插入一条代班的考勤记录 2016-11-28 -->
+    <insert id="insertAttendancePlansForCoverWorkApp" parameterType="attendanceForPlansApp">    
+      insert into attendanceforplans (
+                employeeId,
+                duty_area,
+                duty_on_time,
+                duty_off_time,
+                create_at,
+                recorddate,
+                lat,
+                lng,
+                slow_down_num,
+                is_coverwork
+            ) 
+      values (#{employeeId},#{dutyAreaId},DATE_FORMAT(#{dutyOnTime},'%H:%i:%s'),DATE_FORMAT(#{dutyOffTime},'%H:%i:%s'),now(),
+              DATE_FORMAT(now(),'%Y-%m-%d'),
+              #{lat},#{lng},#{slowDownNum},#{isCoverwork})
+    </insert>        
+    
+    <!-- 根据员工ID，查询昨日或今日员工出勤的责任点,2017-01-16 -->
+    <select id="getTodayAttendancePointNameForApp" parameterType="java.util.Map" resultType="java.util.Map">
+        <!-- 环卫工出勤责任点 -->
+        <if test="roleId == 1">
+            select A.employee_id employeeId, A.duty_on_time dutyOnTime, A.duty_off_time dutyOffTime, CAST(GROUP_CONCAT(A.point_id order by A.point_id) as char) pointId,
+                   CAST(GROUP_CONCAT(A.point_name order by A.point_id) as char) pointName
+              from attendanceforpoint A
+             where A.recorddate = DATE_FORMAT(#{attendanceDateStr},'%Y-%m-%d')
+               and A.employee_id = #{employeeId}
+             group by A.employee_id, A.duty_on_time, A.duty_off_time
+        </if>
+        <!-- 检测员出勤责任点 -->
+        <if test="roleId == 2 || roleId == 3">
+            select A.employee_id employeeId, A.duty_on_time dutyOnTime, A.duty_off_time dutyOffTime, CAST(GROUP_CONCAT(A.area_id order by A.area_id) as char) pointId,
+                   CAST(GROUP_CONCAT(A.area_name order by A.area_id) as char) pointName
+              from attendanceforpoint A
+             where A.recorddate = DATE_FORMAT(#{attendanceDateStr},'%Y-%m-%d')
+               and A.employee_id = #{employeeId}
+             group by A.employee_id, A.duty_on_time, A.duty_off_time
+        </if>        
+    </select>    
+   
+    <!-- 根据获取的上一班次的员工以及其上下班时间获取其考勤记录集合，2016-12-29 
+		2017-01-13:是根据考勤记录对应的责任点记录，获取某个员工某个时间段的上班责任点集合    
+    -->
+    <select id="getLastBanciAttendanceForPlansByListApp" parameterType="java.util.List" resultType="com.czz.hwy.bean.user.app.DutyRecodeApp">
+   	select * from (
+	    <foreach collection="list" item="att" index="index" separator="union all" open="" close="">
+	      select 
+	        	DISTINCT t.duty_area areaId,
+						t.employeeId,
+						t1.showname username,
+						t1.role_id roleId, 
+						t2.name roleName,
+						GROUP_CONCAT(DISTINCT if(t1.role_id = 2, t3.area_id, t3.point_id)) pointIds,
+						GROUP_CONCAT(DISTINCT if(t1.role_id = 2, t3.area_name, t3.point_name)) pointName,
+						IFNULL(t.get_off_status, '') status, 
+						IFNULL(t.off_status_reason, '') reason,
+						DATE_FORMAT(#{att.dutyOnTime}, '%Y-%m-%d %H:%i:%s') dutyOnTime,
+						DATE_FORMAT(#{att.dutyOffTime}, '%Y-%m-%d %H:%i:%s') dutyOffTime 
+					from attendanceforplans t
+					join users t1 on t.employeeId = t1.employee_id and t1.status = 1
+					join roles t2 on t1.role_id = t2.value and t2.status = 1
+					join attendanceforpoint t3 
+							 on t3.recorddate = t.recorddate 
+					     and t3.employee_id = t.employeeId 
+               and t3.area_id = t.duty_area
+               and t3.duty_on_time = t.duty_on_time
+							 and t3.duty_off_time = t.duty_off_time
+					<where>
+						t.recorddate = CURDATE()
+						<if test="att.dutyAreaId != 0">
+						and t.duty_area = #{att.dutyAreaId }
+						</if>
+						<if test="att.employeeId != 0">
+						and t.employeeId = #{att.employeeId }
+						</if>
+						<if test="att.dutyOnTime != null">
+						and t.duty_on_time = DATE_FORMAT(#{att.dutyOnTime},'%H:%i:%s')
+						</if>
+						<if test="att.dutyOffTime != null">
+						and t.duty_off_time =  DATE_FORMAT(#{att.dutyOffTime},'%H:%i:%s')
+						</if>
+					</where>
+	    </foreach>
+    ) t5
+    ORDER by t5.roleId desc, t5.employeeId asc
+    </select>
+    
+    <!-- 根据获取的上一班次的员工以及其上下班时间获取其考勤记录集合，2016-12-29,不再使用这个 -->
+    <select id="getLastBanciAttendanceForPlansByListApp1" parameterType="java.util.List" resultType="com.czz.hwy.bean.user.app.DutyRecodeApp">
+   	select * from (
+	    <foreach collection="list" item="att" index="index" separator="union all" open="" close="">
+	        select 
+	        	DISTINCT t.duty_area areaId,
+				t.employeeId,
+				t1.showname username,
+				t1.role_id roleId, 
+				t2.name roleName,
+				GROUP_CONCAT(t3.pointId) pointIds,
+				GROUP_CONCAT(t3.pointName) pointName,
+				IFNULL(t.get_off_status, '') status, 
+				IFNULL(t.off_status_reason, '') reason,
+				DATE_FORMAT(#{att.dutyOnTime}, '%Y-%m-%d %H:%i:%s') dutyOnTime,
+				DATE_FORMAT(#{att.dutyOffTime}, '%Y-%m-%d %H:%i:%s') dutyOffTime 
+			from attendanceforplans t
+			join users t1 on t.employeeId = t1.employee_id and t1.status = 1
+			join roles t2 on t1.role_id = t2.value and t2.status = 1
+			left join (
+					select DISTINCT tt.employeeId, tt.pointId, if(tt.roleId = 2, tt2.area_name, tt1.point_name) pointName from  (
+						select DISTINCT a.employee_id employeeId,if(a.role_id = 2, a.area_id, a.point_id) pointId, a.role_id roleId
+						from workplans a
+						join banci b on a.banzu_id = b.banzu_id and b.status = 1 
+						<where>
+							<if test="att.employeeId != 0">
+								and a.employee_id = #{att.employeeId }
+							</if>
+							<if test="att.dutyOnTime != null">
+								and b.duty_on_time = DATE_FORMAT(#{att.dutyOnTime},'%H:%i:%s')
+							</if>
+							<if test="att.dutyOffTime != null">
+								and b.duty_off_time = DATE_FORMAT(#{att.dutyOffTime},'%H:%i:%s')
+							</if>
+							<if test="att.dutyAreaId != 0">
+								and a.area_id = #{att.dutyAreaId }
+							</if>
+						</where>
+						
+						union ALL
+						
+						select DISTINCT a.cover_id employeeId, if(b.role_id = 2, b.area_id, b.point_id) pointId,b.role_id roleId
+						from coverwork a
+						join workplans b on a.leave_id = b.employee_id
+						join banci c on b.banzu_id = c.banzu_id and c.status = 1 
+						<where>
+							<if test="att.employeeId != 0">
+								and a.cover_id = #{att.employeeId }
+							</if>
+							<if test="att.dutyOnTime != null">
+								and DATE_FORMAT(a.cover_from_time, '%Y-%m-%d %H:%i:%s') &lt;= CONCAT(CURDATE(), ' ' ,DATE_FORMAT(#{att.dutyOnTime},'%H:%i:%s'))  
+							</if>
+							<if test="att.dutyOffTime != null">
+								and DATE_FORMAT(a.cover_to_time, '%Y-%m-%d %H:%i:%s') &gt;= CONCAT(CURDATE(), ' ' ,DATE_FORMAT(#{att.dutyOffTime},'%H:%i:%s'))  
+							</if>
+							<if test="att.dutyAreaId != 0">
+								and b.area_id = #{att.dutyAreaId }
+							</if>
+							<if test="att.dutyOnTime != null">
+								and c.duty_on_time = DATE_FORMAT(#{att.dutyOnTime},'%H:%i:%s')
+							</if>
+							<if test="att.dutyOffTime != null">
+								and c.duty_off_time = DATE_FORMAT(#{att.dutyOffTime},'%H:%i:%s')
+							</if>
+						</where>
+					) tt 
+					left join dutypoint tt1 on tt.pointId = tt1.id and tt1.status = 1
+					left join dutyarea tt2 on tt.pointId = tt2.id and tt2.status = 1
+			) t3 on t3.employeeId = t.employeeId
+			<where>
+				t.recorddate = CURDATE()
+				<if test="att.dutyAreaId != 0">
+				and t.duty_area = #{att.dutyAreaId }
+				</if>
+				<if test="att.employeeId != 0">
+				and t.employeeId = #{att.employeeId }
+				</if>
+				<if test="att.dutyOnTime != null">
+				and t.duty_on_time = DATE_FORMAT(#{att.dutyOnTime},'%H:%i:%s')
+				</if>
+				<if test="att.dutyOffTime != null">
+				and t.duty_off_time =  DATE_FORMAT(#{att.dutyOffTime},'%H:%i:%s')
+				</if>
+			</where>
+	    </foreach>
+    ) t5
+    ORDER by t5.roleId desc, t5.employeeId asc
+    </select>
+	
+	<!-- 根据对下班状态的不同出来，对下班状态和下班时间进行相应处理。2016-12-30 -->    
+	 <update id="updateAttendancePlansForXBApp" parameterType="com.czz.hwy.bean.user.app.AttendanceForPlansApp" >
+	    update attendanceforplans
+	    <set>
+	        <if test="offStatusReason != null">
+	            off_status_reason = #{offStatusReason},
+	        </if>
+	        <if test="dutyOnStatus != null and dutyOnStatus != ''">
+	            get_on_status = #{dutyOnStatus},
+	        </if>  
+	        <if test="dutyOffStatus != null and dutyOffStatus != ''">
+	            get_off_status = #{dutyOffStatus},
+	        </if> 
+	        <if test="updateTime != null ">
+	            update_at = #{updateTime},
+	        </if> 
+	         <if test="lastRecordTime != null ">
+	            lastrecordtime = #{lastRecordTime},
+	        </if> 
+	    </set>
+	    where employeeId = #{employeeId}
+	      and duty_on_time = DATE_FORMAT(#{dutyOnTime},'%H:%i:%s') 
+	      and duty_off_time = DATE_FORMAT(#{dutyOffTime},'%H:%i:%s')  
+	      and recorddate = DATE_FORMAT( #{recordDate},'%Y-%m-%d') 
+	    </update>   
+	    
+	 <!-- 注册或注销的时候改变下一个班次的当天考勤状态，2017-03-16 -->
+    <update id="updateRegisterOrLogoutStatusApp" parameterType="com.czz.hwy.bean.user.app.AttendanceForPlansApp">
+        update attendanceforplans t 
+           set t.get_on_status = #{dutyOnStatus}, 
+               t.update_at = null, 
+               t.get_off_status = #{dutyOffStatus},
+               t.lastrecordtime = null
+         where  t.recorddate = CURDATE()
+           and t.employeeId = #{employeeId}
+           and t.duty_on_time > date_format(now(),'%H:%i:%s')
+    </update>  
+    
+    <!-- 根据获取的上一班次的员工以及其上下班时间获取其考勤记录集合，2016-12-29 
+		2017-01-13:是根据考勤记录对应的责任点记录，获取某个员工某个时间段的上班责任点集合    
+		2017-04-21:获取的考勤记录含移动距离，
+    -->
+    <select id="getLastBanciAttendanceForPlansByListAppForMOV" parameterType="java.util.List" resultType="com.czz.hwy.bean.user.app.DutyRecodeApp">
+   	select * from (
+	    <foreach collection="list" item="att" index="index" separator="union all" open="" close="">
+	      select 
+	        	DISTINCT t.duty_area areaId,
+						t.employeeId,
+						t1.showname username,
+						t1.role_id roleId, 
+						t2.name roleName,
+						GROUP_CONCAT(DISTINCT if(t1.role_id = 2 or t1.role_id = 3, t3.area_id, t3.point_id)) pointIds,
+						GROUP_CONCAT(DISTINCT if(t1.role_id = 2 or t1.role_id = 3, t3.area_name, t3.point_name)) pointName,
+						IFNULL(t.get_off_status, '') status, 
+						IFNULL(t.off_status_reason, '') reason,
+						DATE_FORMAT(#{att.dutyOnTime}, '%Y-%m-%d %H:%i:%s') dutyOnTime,
+						DATE_FORMAT(#{att.dutyOffTime}, '%Y-%m-%d %H:%i:%s') dutyOffTime,
+						mobile_distance mobileDistance 
+					from attendanceforplans t
+					join users t1 on t.employeeId = t1.employee_id and t1.status = 1
+					join roles t2 on t1.role_id = t2.value and t2.status = 1
+					join attendanceforpoint t3 
+							 on t3.recorddate = t.recorddate 
+					     and t3.employee_id = t.employeeId 
+               and t3.area_id = t.duty_area
+               and t3.duty_on_time = t.duty_on_time
+							 and t3.duty_off_time = t.duty_off_time
+					<where>
+						t.recorddate = CURDATE()
+						<if test="att.dutyAreaId != 0">
+						and t.duty_area = #{att.dutyAreaId }
+						</if>
+						<if test="att.employeeId != 0">
+						and t.employeeId = #{att.employeeId }
+						</if>
+						<if test="att.dutyOnTime != null">
+						and t.duty_on_time = DATE_FORMAT(#{att.dutyOnTime},'%H:%i:%s')
+						</if>
+						<if test="att.dutyOffTime != null">
+						and t.duty_off_time =  DATE_FORMAT(#{att.dutyOffTime},'%H:%i:%s')
+						</if>
+					</where>
+	    </foreach>
+    ) t5
+    ORDER by t5.roleId desc,t5.mobileDistance desc, t5.employeeId asc
+    </select>
+	     
+</mapper>

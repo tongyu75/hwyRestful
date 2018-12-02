@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.area.PointParameter" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.area.PointParameter" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="point_id" property="pointId" jdbcType="INTEGER" />
+    <result column="col_rate" property="colRate" jdbcType="INTEGER" />
+    <result column="report_rate" property="reportRate" jdbcType="INTEGER" />
+    <result column="stay_time" property="stayTime" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, point_id, col_rate, report_rate, stay_time, create_at
+  </sql>
+  <select id="getPointParameterById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from point_parameter
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="getPointParameterByBean" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from point_parameter
+    <where>
+    <if test="pointId != 0" >
+       and point_id = #{pointId,jdbcType=INTEGER}
+      </if>
+      <if test="colRate != 0" >
+       and col_rate = #{colRate,jdbcType=INTEGER}
+      </if>
+      <if test="reportRate != 0" >
+       and report_rate = #{reportRate,jdbcType=INTEGER}
+      </if>
+      <if test="stayTime != 0" >
+       and stay_time = #{stayTime,jdbcType=INTEGER}
+      </if>
+      <if test="createAt != null" >
+       and create_at = #{createAt,jdbcType=TIMESTAMP}
+      </if>
+    </where>
+  </select>
+  <delete id="deletePointParameter" parameterType="java.lang.Integer" >
+    delete from point_parameter
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertPointParameter" parameterType="com.czz.hwy.bean.area.PointParameter" >
+    insert into point_parameter (id, point_id, col_rate, 
+      report_rate, stay_time, create_at
+      )
+    values (#{id,jdbcType=INTEGER}, #{pointId,jdbcType=INTEGER}, #{colRate,jdbcType=INTEGER}, 
+      #{reportRate,jdbcType=INTEGER}, #{stayTime,jdbcType=INTEGER}, #{createAt,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.czz.hwy.bean.area.PointParameter" >
+    insert into point_parameter
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="pointId != null" >
+        point_id,
+      </if>
+      <if test="colRate != null" >
+        col_rate,
+      </if>
+      <if test="reportRate != null" >
+        report_rate,
+      </if>
+      <if test="stayTime != null" >
+        stay_time,
+      </if>
+      <if test="createAt != null" >
+        create_at,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="pointId != null" >
+        #{pointId,jdbcType=INTEGER},
+      </if>
+      <if test="colRate != null" >
+        #{colRate,jdbcType=INTEGER},
+      </if>
+      <if test="reportRate != null" >
+        #{reportRate,jdbcType=INTEGER},
+      </if>
+      <if test="stayTime != null" >
+        #{stayTime,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        #{createAt,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updatePointParameter" parameterType="com.czz.hwy.bean.area.PointParameter" >
+    update point_parameter
+    <set >
+      <if test="pointId != null" >
+        point_id = #{pointId,jdbcType=INTEGER},
+      </if>
+      <if test="colRate != null" >
+        col_rate = #{colRate,jdbcType=INTEGER},
+      </if>
+      <if test="reportRate != null" >
+        report_rate = #{reportRate,jdbcType=INTEGER},
+      </if>
+      <if test="stayTime != null" >
+        stay_time = #{stayTime,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.area.PointParameter" >
+    update point_parameter
+    set point_id = #{pointId,jdbcType=INTEGER},
+      col_rate = #{colRate,jdbcType=INTEGER},
+      report_rate = #{reportRate,jdbcType=INTEGER},
+      stay_time = #{stayTime,jdbcType=INTEGER},
+      create_at = #{createAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.QualifiedNumberApp" >
+  <resultMap id="BaseResultMap" type="qualifiedNumberApp" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="rank" property="rank" jdbcType="VARCHAR" />
+    <result column="create_id" property="createId" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_id" property="updateId" jdbcType="INTEGER" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, employee_id, num, type, create_id, create_at, update_id, update_at
+  </sql>
+  
+  <!-- 根据bean获取五克，五分钟统计次数记录，2016-11-09 -->
+  <select id="getQualifiedNumberByBeanApp" parameterType="qualifiedNumberApp" resultType="qualifiedNumberApp">
+  select * from noqualifiednumber
+  where employee_id = #{employeeId}
+  and type = #{type}
+  and date_format(create_at,'%Y-%m-%d') = date_format(#{createAt},'%Y-%m-%d')
+  </select>
+  
+  <!--  新增五克,五分钟统计次数，2016-11-09 -->
+  <insert id="insertQulifiedNumberByBeanApp" parameterType="qualifiedNumberApp">
+  insert into noqualifiednumber ( 
+  	  employee_id, num, 
+      type, create_id, 
+      create_at, update_id, update_at
+      )
+    values ( 
+      #{employeeId,jdbcType=INTEGER}, #{num,jdbcType=INTEGER}, 
+      #{type,jdbcType=INTEGER}, #{createId,jdbcType=INTEGER}, 
+      #{createAt,jdbcType=TIMESTAMP}, #{updateId,jdbcType=INTEGER}, #{updateAt,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  
+  <!-- 更新五克，五分钟统计次数，2016-11-09 -->
+  <update id="updateQulifiedNumberByBeanApp" parameterType="qualifiedNumberApp">
+  update noqualifiednumber
+    set num = #{num,jdbcType=INTEGER},
+        update_id = #{updateId,jdbcType=INTEGER},
+        update_at = #{updateAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <!-- 批量生成当天五克统计记录，只有检测员生成五克统计记录，2016-10-14 -->
+<!--   <insert id="batchGenCheckGramStatRec">
+  insert into noqualifiednumber
+	(
+	  employee_id,num,type,create_id,create_at,update_id,update_at
+	)
+	select 
+		t.employee_id, 0 num, 1 type, t.employee_id create_id, now() create_at,null update_id,null update_at
+	from users t 
+	where t.status = 1 
+		and t.role_id = 2
+		and not EXISTS(
+			select 1 from noqualifiednumber a 
+			where a.employee_id = t.employee_id 
+				and DATE_FORMAT(a.create_at,'%Y-%m-%d') = CURDATE()
+				and a.type = 1)
+  </insert> -->
+  
+  <!-- 批量生成当天五分钟统计记录，检测员，考核员都生成五分钟统计，2016-10-14 -->
+ <!--  <insert id="batchGenCheckTimeStatRec">
+  insert into noqualifiednumber
+	(
+	  employee_id,num,type,create_id,create_at,update_id,update_at
+	)
+	select 
+		t.employee_id, 0 num, 2 type, t.employee_id create_id, now() create_at,null update_id,null update_at
+	from users t 
+	where t.status = 1 
+		and t.role_id in (2,3)
+		and not EXISTS(
+			select 1 from noqualifiednumber a 
+			where a.employee_id = t.employee_id 
+				and DATE_FORMAT(a.create_at,'%Y-%m-%d') = CURDATE()
+				and a.type = 2)
+  </insert> -->
+  
+</mapper>

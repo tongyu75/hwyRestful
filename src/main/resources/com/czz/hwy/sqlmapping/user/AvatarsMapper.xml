@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.user.Avatars">
+	<resultMap id="BaseResultMap" type="com.czz.hwy.bean.user.Avatars">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+		<result column="icon_file_name" property="iconFileName"
+			jdbcType="VARCHAR" />
+		<result column="icon_content_type" property="iconContentType"
+			jdbcType="VARCHAR" />
+		<result column="icon_file_size" property="iconFileSize"
+			jdbcType="INTEGER" />
+		<result column="icon_content" property="iconContent" jdbcType="VARCHAR" />
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, employee_id, icon_file_name, icon_content_type, icon_file_size,
+		icon_content,
+		create_at, update_at
+	</sql>
+	<select id="getAvatarsById" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from avatars
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteAvatars" parameterType="java.lang.Integer">
+		delete from avatars
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insertAvatars" parameterType="com.czz.hwy.bean.user.Avatars">
+		insert into avatars (id, employee_id, icon_file_name,
+		icon_content_type, icon_file_size, icon_content,
+		create_at, update_at)
+		values (#{id,jdbcType=INTEGER}, #{employeeId,jdbcType=INTEGER},
+		#{iconFileName,jdbcType=VARCHAR},
+		#{iconContentType,jdbcType=VARCHAR}, #{iconFileSize,jdbcType=INTEGER}, #{iconContent,jdbcType=VARCHAR},
+		#{createAt,jdbcType=TIMESTAMP}, #{updateAt,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="com.czz.hwy.bean.user.Avatars">
+		insert into avatars
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="employeeId != null">
+				employee_id,
+			</if>
+			<if test="iconFileName != null">
+				icon_file_name,
+			</if>
+			<if test="iconContentType != null">
+				icon_content_type,
+			</if>
+			<if test="iconFileSize != null">
+				icon_file_size,
+			</if>
+			<if test="iconContent != null">
+				icon_content,
+			</if>
+			<if test="createAt != null">
+				create_at,
+			</if>
+			<if test="updateAt != null">
+				update_at,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=INTEGER},
+			</if>
+			<if test="employeeId != null">
+				#{employeeId,jdbcType=INTEGER},
+			</if>
+			<if test="iconFileName != null">
+				#{iconFileName,jdbcType=VARCHAR},
+			</if>
+			<if test="iconContentType != null">
+				#{iconContentType,jdbcType=VARCHAR},
+			</if>
+			<if test="iconFileSize != null">
+				#{iconFileSize,jdbcType=INTEGER},
+			</if>
+			<if test="iconContent != null">
+				#{iconContent,jdbcType=VARCHAR},
+			</if>
+			<if test="createAt != null">
+				#{createAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateAt != null">
+				#{updateAt,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateAvatars" parameterType="com.czz.hwy.bean.user.Avatars">
+		update avatars
+		<set>
+			<if test="employeeId != null">
+				employee_id = #{employeeId,jdbcType=INTEGER},
+			</if>
+			<if test="iconFileName != null">
+				icon_file_name = #{iconFileName,jdbcType=VARCHAR},
+			</if>
+			<if test="iconContentType != null">
+				icon_content_type = #{iconContentType,jdbcType=VARCHAR},
+			</if>
+			<if test="iconFileSize != null">
+				icon_file_size = #{iconFileSize,jdbcType=INTEGER},
+			</if>
+			<if test="iconContent != null">
+				icon_content = #{iconContent,jdbcType=VARCHAR},
+			</if>
+			<if test="createAt != null">
+				create_at = #{createAt,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateAt != null">
+				update_at = #{updateAt,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.user.Avatars">
+		update avatars
+		set employee_id = #{employeeId,jdbcType=INTEGER},
+		icon_file_name = #{iconFileName,jdbcType=VARCHAR},
+		icon_content_type = #{iconContentType,jdbcType=VARCHAR},
+		icon_file_size = #{iconFileSize,jdbcType=INTEGER},
+		icon_content = #{iconContent,jdbcType=VARCHAR},
+		create_at = #{createAt,jdbcType=TIMESTAMP},
+		update_at = #{updateAt,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+</mapper>

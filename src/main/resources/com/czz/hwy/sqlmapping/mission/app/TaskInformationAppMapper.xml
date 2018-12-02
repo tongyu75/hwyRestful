@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.TaskInformationApp">
+	<resultMap type="com.czz.hwy.bean.mission.app.TaskInformationApp" id="BaseResultMap">
+		<id column="id" property="id"/>
+		<result column="taskname" property="taskName"/>
+		<result column="taskstart" property="taskStart"/>
+		<result column="taskend" property="taskEnd"/>
+		<result column="taskaddress" property="taskAddress"/>
+		<result column="taskdutypeople" property="taskDutyPeople"/>
+		<result column="taskcreatepeople" property="taskCreatePeople"/>
+		<result column="taskcomment" property="taskComment"/>
+		<result column="isarrived" property="isArrived"/>
+		<result column="taskresult" property="taskResult"/>
+		<result column="taskstatus" property="taskStatus"/>
+		<result column="create_at" property="createAt"/>
+		<result column="update_at" property="updateAt"/>
+		<result column="people_number" property="peopleNumber"/>
+		<result column="taskCreatePeopleName" property="taskCreatePeopleName"/>
+        <result column="taskdutypeopleId" property="taskdutypeopleId"/>		
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		id,taskname,taskstart,taskend,taskaddress,taskdutypeople,taskcreatepeople,
+			taskcomment,isarrived,taskresult,taskstatus,create_at,update_at
+	</sql>
+	
+	<!-- 获取某个人在某个时间正在出任务的列表，2016-11-09 -->
+	<select id="getTaskInformationListByBeanApp" parameterType="taskInformationApp" resultMap="BaseResultMap">
+		select * from taskinformation
+		<where>
+			taskstatus = 1
+			<if test="taskDutyPeople != null and taskDutyPeople != ''">
+			and taskdutypeople like concat('%',#{taskDutyPeople},'%') 
+			</if>
+			<if test="timeForSelect != null">
+			and DATE_SUB(taskstart,INTERVAL #{taskStartBufferTime} MINUTE) &lt;= #{timeForSelect}
+			and DATE_ADD(taskend,INTERVAL #{taskEndBufferTime} MINUTE) &gt;= #{timeForSelect}
+			</if>
+		</where>
+	</select>
+	
+    <!-- 根据当日时间，查询任务人信息用于定时生成考勤状态,2016-11-28 -->
+    <select id="getTaskForAttendanceApp" resultMap="BaseResultMap">
+        select taskstart,
+               taskend,
+               taskdutypeopleId
+          from taskinformation
+         where DATE_FORMAT(NOW(), '%Y-%m-%d') &gt;= DATE_FORMAT(taskstart, '%Y-%m-%d')
+           and DATE_FORMAT(NOW(), '%Y-%m-%d') &lt;= DATE_FORMAT(taskend, '%Y-%m-%d')
+           and taskstatus = 1     
+  </select>   
+  
+  	<!-- 依据员工ID以及明日日期，查询出明日出任务记录。2016-12-09-->
+    <select id="getTaskInformationListByMapApp" parameterType="java.util.Map" resultMap="BaseResultMap">
+    	select * from taskinformation t
+		<where>
+			 t.taskstatus = 1
+			 <if test="employeeId != 0">
+			and t.taskdutypeople like concat('%',concat('工号:', #{employeeId}, ','),'%') 
+			</if>
+			<if test="tomorrowDate != null">
+			and DATE_FORMAT(t.taskstart,'%Y-%m-%d') &lt;= DATE_FORMAT(#{tomorrowDate},'%Y-%m-%d')
+		  	and DATE_FORMAT(t.taskend,'%Y-%m-%d') &gt;= DATE_FORMAT(#{tomorrowDate},'%Y-%m-%d')
+			</if>
+		</where>
+ 	 </select>      	
+</mapper>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+</style>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=MXDf0gIa6ce8G7anDfMCkyWxb21Tkj4Q"></script>
+<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+<title>测试接口</title>
+</head>
+<body>
+	<div id="allmap"></div>
+</body>
+<script type="text/javascript">
+	$(function() {
+		
+		//获取班组下拉框，get请求
+		$.ajax({
+			url : 'http://192.168.1.7:8080/hwyRestfulInterface/banZuController/banZuForBanci',
+			async : true,
+			type : 'get' ,
+			/*xhrFields:{withCredentials: true},
+       		crossDomain: true,*/
+			/*data : {
+					acceptContent : 
+						JSON.stringify(
+							{
+								banzuName : '班'
+							}
+						)
+			}, */
+			dataType : "json",
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		});
+
+
+
+	});
+</script>
+
+

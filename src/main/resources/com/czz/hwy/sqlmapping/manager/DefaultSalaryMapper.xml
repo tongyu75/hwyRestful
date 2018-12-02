@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.czz.hwy.bean.manager.DefaultSalary">
+	<resultMap id="defaultSalaryMap" type="com.czz.hwy.bean.manager.DefaultSalary">
+		<id column="id" property="id" jdbcType="INTEGER"/>
+		<result column="initStatus" property="initStatus" jdbcType="INTEGER" />
+		<result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+		<result column="employeeName" property="employeeName" jdbcType="VARCHAR" />
+		<result column="role_id" property="roleId" jdbcType="INTEGER" />
+		<result column="roleName" property="roleName" jdbcType="VARCHAR" />
+		<result column="default_salary" property="defaultSalary" jdbcType="DOUBLE" />
+		<result column="update_id" property="updateId" jdbcType="INTEGER" />
+		<result column="updateName" property="updateName" jdbcType="VARCHAR" />
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		id, employee_id, default_salary, update_id, update_at
+	</sql>
+	
+	<!-- 根据bean获取默认工资记录总数 -->
+	<select id="getDefaultSalaryCountByBean" resultType="int" parameterType="com.czz.hwy.bean.manager.DefaultSalary">
+		select count(1)
+		from users a  
+		left join defaultsalary b on a.employee_id = b.employee_id  
+		where not EXISTS (select 1 from defaultsalary c where a.employee_id = c.employee_id and c.status = 2)
+		<if test="employeeId != null and employeeId !=''">
+			and a.employee_id = #{employeeId, jdbcType=VARCHAR}
+		</if>
+		<if test="roleId != null and roleId !=''">
+			and a.role_id = #{roleId, jdbcType=VARCHAR}
+		</if>
+		<if test="employeeName != null and employeeName !=''">
+			and a.showname like concat('%',concat(#{employeeName, jdbcType=VARCHAR},'%'))
+		</if>
+		<if test="initStatus != null and initStatus != ''">
+    		and IF(b.id is NULL, 1, 2) = #{initStatus, jdbcType=VARCHAR}
+    	</if>
+	</select>
+	
+	<!--根据bean获取默认工资列表   -->
+	<select id="getDefaultSalaryInfoByBean" resultMap="defaultSalaryMap" parameterType="com.czz.hwy.bean.manager.DefaultSalary">
+		select b.id, IF(b.id is NULL, 1, 2) initStatus, a.employee_id,a.showname employeeName,a.role_id,d.name roleName,b.default_salary,b.update_at,b.update_id,e.showname updateName
+		from users a  
+		left join defaultsalary b on a.employee_id = b.employee_id  
+		join roles d on a.role_id = d.value
+		left join users e on b.update_id = e.employee_id 
+		where not EXISTS (select 1 from defaultsalary c where a.employee_id = c.employee_id and c.status = 2)
+		<if test="employeeId != null and employeeId !=''">
+			and a.employee_id = #{employeeId, jdbcType=VARCHAR}
+		</if>
+		<if test="roleId != null and roleId !=''">
+			and a.role_id = #{roleId, jdbcType=VARCHAR}
+		</if>
+		<if test="employeeName != null and employeeName !=''">
+			and a.showname like concat('%',concat(#{employeeName, jdbcType=VARCHAR},'%'))
+		</if>
+		<if test="initStatus != null and initStatus != ''">
+	   		and IF(b.id is NULL, 1, 2) = #{initStatus, jdbcType=VARCHAR}
+	   	</if>
+		ORDER BY a.employee_id
+	    <if test="row != 0 || rows != 0" >
+	      limit #{row},#{rows}
+	    </if>
+	</select>
+	
+	<!-- 获得角色列表 -->
+	<select id="getRoles4Combobox" resultType="java.util.Map">
+	select value id, name roleName from roles where status = 1
+	</select>
+	
+	<!-- 根据bean修改已初始化的员工默认工资 -->
+	<update id="updateDefaultSalaryByBean" parameterType="com.czz.hwy.bean.manager.DefaultSalary">
+	update defaultsalary t join users a on t.employee_id = a.employee_id  
+		set t.update_at = #{updateAt,jdbcType=VARCHAR}, 
+		t.update_id = #{updateId,jdbcType=VARCHAR}, 
+		t.default_salary = #{defaultSalary,jdbcType=VARCHAR}
+	where t.status = 1 
+	<if test="roleId != null and roleId != ''">
+		and a.role_id = #{roleId,jdbcType=VARCHAR}
+	</if>
+	</update>
+	
+	<!-- 根据bean新增未初始化的员工默认工资 -->
+	<insert id="insertDefaultSalaryByBean" parameterType="com.czz.hwy.bean.manager.DefaultSalary">
+	insert into defaultsalary (employee_id,default_salary,update_id,update_at,status)
+	select a.employee_id,#{defaultSalary,jdbcType=VARCHAR},#{updateId,jdbcType=VARCHAR},#{updateAt,jdbcType=VARCHAR}, 1 from users a
+	where not EXISTS(select 1 from defaultsalary c where c.employee_id = a.employee_id) 
+	<if test="roleId != null and roleId != ''">
+		and a.role_id = #{roleId,jdbcType=VARCHAR}
+	</if>
+	</insert>
+	
+	<!--根据员工ID新增默认工资 -->
+	<insert id="insertEmpDefSalByEmployeeId" parameterType="com.czz.hwy.bean.manager.DefaultSalary">
+		INSERT INTO defaultsalary (employee_id,default_salary,update_id,update_at,STATUS) 
+		SELECT a.employee_id,#{defaultSalary,jdbcType=VARCHAR},#{updateId,jdbcType=VARCHAR},#{updateAt,jdbcType=VARCHAR}, 1 from users a
+		WHERE NOT EXISTS (SELECT 1 FROM defaultsalary c WHERE c.employee_id = a.employee_id)
+		<if test="employeeId != null and employeeId != ''">
+		and a.employee_id = #{employeeId,jdbcType=VARCHAR}
+		</if>
+	</insert>
+	
+	<!--根据ID修改默认工资 -->
+	<update id="updateEmpDefSalById" parameterType="com.czz.hwy.bean.manager.DefaultSalary">
+		update defaultsalary t
+		set t.update_at = #{updateAt,jdbcType=VARCHAR}, 
+		t.update_id = #{updateId,jdbcType=VARCHAR}, 
+		t.default_salary = #{defaultSalary,jdbcType=VARCHAR}
+		where t.status = 1 
+		<if test="id != 0">
+			and t.id = #{id,jdbcType=INTEGER}
+		</if>
+	</update>
+	
+	<!-- 删除用户默认工资 -->
+	<update id="updateDefSalById" parameterType="com.czz.hwy.bean.manager.DefaultSalary">
+		update defaultsalary t
+		set t.update_at = #{updateAt,jdbcType=VARCHAR}, 
+		t.update_id = #{updateId,jdbcType=VARCHAR}, 
+		t.status = 2
+		where t.status = 1 
+		<if test="id != 0">
+			and t.id = #{id,jdbcType=INTEGER}
+		</if>
+		<if test="employeeId != null and employeeId != ''">
+			and t.employee_id = #{employeeId,jdbcType=VARCHAR}
+		</if>
+	</update>
+</mapper>

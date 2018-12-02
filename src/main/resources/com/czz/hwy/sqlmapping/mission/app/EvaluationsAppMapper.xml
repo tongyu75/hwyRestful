@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.EvaluationsApp" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.mission.app.EvaluationsApp" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="area_id" property="areaId" jdbcType="INTEGER" />
+    <result column="point_id" property="pointId" jdbcType="INTEGER" />
+    <result column="work_type" property="workType" jdbcType="INTEGER" />
+    <result column="eval_type" property="evalType" jdbcType="INTEGER" />
+    <result column="eval_name" property="evalName" jdbcType="VARCHAR" />
+    <result column="eval_desc" property="evalDesc" jdbcType="VARCHAR" />
+    <result column="standard_value" property="standardValue" jdbcType="DOUBLE" />
+    <result column="standard_unit" property="standardUnit" jdbcType="VARCHAR" />
+    <result column="limit_value" property="limitValue" jdbcType="VARCHAR" />
+    <result column="limit_unit" property="limitUnit" jdbcType="VARCHAR" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="fine" property="fine" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, area_id, point_id, work_type, eval_type, eval_name, eval_desc, standard_value, 
+    standard_unit, limit_value, limit_unit, create_at, update_at, fine
+  </sql>
+  <select id="getEvaluationsByListAndAreaId" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.mission.app.EvaluationsApp" >
+    select 
+    <include refid="Base_Column_List" />
+    from evaluations
+    where eval_type in 
+    <foreach item="item" index="index" collection="integerList" open="(" separator="," close=")">  
+  		#{item}
+ 	</foreach> and area_id = #{areaId}
+  </select>
+  
+   <select id="getCountByListAndAreaId" resultType="java.lang.Integer" parameterType="com.czz.hwy.bean.mission.app.EvaluationsApp" >
+    select 
+    count(1)
+    from evaluations
+    where eval_type in 
+    <foreach item="item" index="index" collection="integerList" open="(" separator="," close=")">  
+  		#{item}
+ 	</foreach> and area_id = #{areaId}
+  </select>
+  
+  <!-- 根据责任区Id，责任点ID和考核类型值，获取考核标准信息。2016-12-20 -->
+  <select id="getEvaluationsByBeanApp" parameterType="com.czz.hwy.bean.mission.app.EvaluationsApp" resultMap="BaseResultMap">
+  select * from evaluations
+  <where>
+  	<if test="areaId != null and areaId != 0">
+  	and area_id = #{areaId}
+  	</if>
+  	<if test="pointId != null and pointId != 0">
+  	and point_id = #{pointId}
+  	</if>
+  	<if test="evalType != null and evalType != 0">
+  	and eval_type = #{evalType}
+  	</if>
+  </where>
+  </select>
+</mapper>

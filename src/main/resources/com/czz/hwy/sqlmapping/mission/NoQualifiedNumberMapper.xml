@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.NoQualifiedNumberMapper" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.mission.NoQualifiedNumber" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="create_id" property="createId" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_id" property="updateId" jdbcType="INTEGER" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="showDay" property="showDay" jdbcType="VARCHAR" />    
+    <result column="showname" property="showName" jdbcType="VARCHAR" />        
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, employee_id, num, type, create_id, create_at, update_id, update_at
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from noqualifiednumber
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from noqualifiednumber
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.czz.hwy.bean.mission.NoQualifiedNumber" >
+    insert into noqualifiednumber (id, employee_id, num, 
+      type, create_id, 
+      create_at, update_id, update_at
+      )
+    values (#{id,jdbcType=INTEGER}, #{employeeId,jdbcType=INTEGER}, #{num,jdbcType=INTEGER}, 
+      #{type,jdbcType=INTEGER}, #{createId,jdbcType=INTEGER}, 
+      #{createAt,jdbcType=TIMESTAMP}, #{updateId,jdbcType=INTEGER}, #{updateAt,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.mission.NoQualifiedNumber" >
+    update noqualifiednumber
+    set employee_id = #{employeeId,jdbcType=INTEGER},
+      num = #{num,jdbcType=INTEGER},
+      type = #{type,jdbcType=INTEGER},
+      create_id = #{createId,jdbcType=INTEGER},
+      create_at = #{createAt,jdbcType=TIMESTAMP},
+      update_id = #{updateId,jdbcType=INTEGER},
+      update_at = #{updateAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <!-- 管理人员尽职监督 获取七天内每人每天合格次数用于排名（领导APP端） -->  
+  <select id="getNoFiveGramMinNumForApp" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.mission.NoQualifiedNumber" >
+    select A.employee_id, B.showname, A.num, date_format(A.create_at,'%d') showDay
+      from noqualifiednumber A
+      join users B on A.employee_id = B.employee_id
+     where date_format(A.create_at,'%Y-%m-%d') &lt;= date_format(now(),'%Y-%m-%d') 
+       and date_format(A.create_at,'%Y-%m-%d') &gt;= date_format(date_sub(now(),interval 7 day),'%Y-%m-%d')
+       and A.type = #{type,jdbcType=INTEGER}
+       and A.employee_id in (1001, 2001, 3001, 4001, 5001, 6001, 7001)
+     order by showDay, A.num desc
+  </select>  
+  
+  <!-- 五克检测合格情况（"以克论净"之检测力度）2016-11-16 -->  
+  <select id="getFiveGramNum" resultType="Map">
+      select D.area_name areaName , sum(A.num) num, C.area_id areaId
+        from noqualifiednumber A
+        join users B on A.employee_id = B.employee_id
+        join (select distinct area_id, employee_id
+                from workplans) C on A.employee_id = C.employee_id
+        join dutyarea D on C.area_id = D.id
+       where date_format(A.create_at,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d') 
+         and A.type = 1
+         and B.role_id = 2
+         and B.status = 1
+         and (C.area_id = 1 or C.area_id = 2 or C.area_id = 3 or C.area_id = 4 or C.area_id = 5 or C.area_id = 6 or C.area_id = 7) 
+       group by C.area_id      
+       order by A.employee_id asc
+  </select>    
+
+    <!-- 道路清洁程度（"以克论净"之平均克数）2016-11-16 -->
+    <select id="getFiveGramEvg" resultType="Map">
+        select t.id, t.area_name areaName, if (t1.avergeGrames is null, 0, t1.avergeGrames) avergeGrames
+           from dutyarea t
+           left join (
+                select b.area_id, ROUND(avg(a.check_value),1) avergeGrames
+                  from checkgram a 
+                  join check_duty b on a.id = b.check_id
+                 where a.eval_type = 1 
+                   and DATE_FORMAT(a.check_time ,'%Y-%m-%d') = DATE_FORMAT(now(),'%Y-%m-%d')
+                 group by b.AREA_ID order by b.AREA_ID
+           ) t1 on t1.area_id = t.id
+           where t.id = 1 or t.id = 2 or t.id = 3 or t.id = 4 or t.id = 5 or t.id = 6 or t.id = 7            
+    </select>                 
+</mapper>

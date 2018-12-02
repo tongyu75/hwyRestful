@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.FinesDetail" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.FinesDetail" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="dept_id" property="deptId" jdbcType="INTEGER" />
+    <result column="amount" property="amount" jdbcType="DOUBLE" />
+    <result column="stand_id" property="standId" jdbcType="INTEGER" />
+    <result column="eval_id" property="evalId" jdbcType="INTEGER" />
+    <result column="work_id" property="workId" jdbcType="INTEGER" />
+    <result column="check_id" property="checkId" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="check_user" property="checkUser" jdbcType="INTEGER" />
+    <result column="check_time" property="checkTime" jdbcType="TIMESTAMP" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="employeeUser" property="employeeUser" jdbcType="VARCHAR" />
+    <result column="checkedUser" property="checkedUser" jdbcType="VARCHAR" />
+    <result column="eval_name" property="evalName" jdbcType="VARCHAR" />
+    <result column="dept_name" property="deptName" jdbcType="VARCHAR" />
+    <result column="appealStatus" property="appealStatus" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, employee_id, dept_id, amount, stand_id, eval_id, work_id, check_id, create_at, 
+    update_at, check_user, check_time, remark
+  </sql>
+  <select id="getFinesDetailById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from finesdetail
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="getFinesDetailPeoNum" resultType="java.util.Map" parameterType="com.czz.hwy.bean.manager.FinesDetail">
+    select DATE_FORMAT(check_time,'%Y-%m-%d') as 'date',count(DISTINCT employee_id) as 'peoNum' from finesdetail where dept_id=#{deptId,jdbcType=INTEGER} 
+    and DATE_FORMAT(check_time,'%Y-%m')=DATE_FORMAT(#{checkTime,jdbcType=TIMESTAMP},'%Y-%m') GROUP BY DATE_FORMAT(check_time,'%Y-%m-%d')
+  </select>
+  <select id="getFinesDetailCouNum" resultType="java.util.Map" parameterType="com.czz.hwy.bean.manager.FinesDetail">
+    select DATE_FORMAT(check_time,'%Y-%m-%d') as 'date',count(id) as 'couNum' from
+     finesdetail where dept_id=#{deptId,jdbcType=INTEGER} and DATE_FORMAT(check_time,'%Y-%m')=DATE_FORMAT(#{checkTime,jdbcType=TIMESTAMP},'%Y-%m')
+      GROUP BY DATE_FORMAT(check_time,'%Y-%m-%d')
+  </select>
+  <delete id="deleteFinesDetail" parameterType="java.lang.Integer" >
+    delete from finesdetail
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertFinesDetail" parameterType="com.czz.hwy.bean.manager.FinesDetail" >
+    insert into finesdetail (id, employee_id, dept_id, 
+      amount, stand_id, eval_id, 
+      work_id, check_id, create_at, 
+      update_at, check_user, check_time, 
+      remark)
+    values (#{id,jdbcType=INTEGER}, #{employeeId,jdbcType=INTEGER}, #{deptId,jdbcType=INTEGER}, 
+      #{amount,jdbcType=DOUBLE}, #{standId,jdbcType=INTEGER}, #{evalId,jdbcType=INTEGER}, 
+      #{workId,jdbcType=INTEGER}, #{checkId,jdbcType=INTEGER}, #{createAt,jdbcType=TIMESTAMP}, 
+      #{updateAt,jdbcType=TIMESTAMP}, #{checkUser,jdbcType=INTEGER}, #{checkTime,jdbcType=TIMESTAMP}, 
+      #{remark,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.czz.hwy.bean.manager.FinesDetail" >
+    insert into finesdetail
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="employeeId != null" >
+        employee_id,
+      </if>
+      <if test="deptId != null" >
+        dept_id,
+      </if>
+      <if test="amount != null" >
+        amount,
+      </if>
+      <if test="standId != null" >
+        stand_id,
+      </if>
+      <if test="evalId != null" >
+        eval_id,
+      </if>
+      <if test="workId != null" >
+        work_id,
+      </if>
+      <if test="checkId != null" >
+        check_id,
+      </if>
+      <if test="createAt != null" >
+        create_at,
+      </if>
+      <if test="updateAt != null" >
+        update_at,
+      </if>
+      <if test="checkUser != null" >
+        check_user,
+      </if>
+      <if test="checkTime != null" >
+        check_time,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="deptId != null" >
+        #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=DOUBLE},
+      </if>
+      <if test="standId != null" >
+        #{standId,jdbcType=INTEGER},
+      </if>
+      <if test="evalId != null" >
+        #{evalId,jdbcType=INTEGER},
+      </if>
+      <if test="workId != null" >
+        #{workId,jdbcType=INTEGER},
+      </if>
+      <if test="checkId != null" >
+        #{checkId,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="checkUser != null" >
+        #{checkUser,jdbcType=INTEGER},
+      </if>
+      <if test="checkTime != null" >
+        #{checkTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateFinesDetail" parameterType="com.czz.hwy.bean.manager.FinesDetail" >
+    update finesdetail
+    <set >
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="deptId != null" >
+        dept_id = #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=DOUBLE},
+      </if>
+      <if test="standId != null" >
+        stand_id = #{standId,jdbcType=INTEGER},
+      </if>
+      <if test="evalId != null" >
+        eval_id = #{evalId,jdbcType=INTEGER},
+      </if>
+      <if test="workId != null" >
+        work_id = #{workId,jdbcType=INTEGER},
+      </if>
+      <if test="checkId != null" >
+        check_id = #{checkId,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="checkUser != null" >
+        check_user = #{checkUser,jdbcType=INTEGER},
+      </if>
+      <if test="checkTime != null" >
+        check_time = #{checkTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.manager.FinesDetail" >
+    update finesdetail
+    set employee_id = #{employeeId,jdbcType=INTEGER},
+      dept_id = #{deptId,jdbcType=INTEGER},
+      amount = #{amount,jdbcType=DOUBLE},
+      stand_id = #{standId,jdbcType=INTEGER},
+      eval_id = #{evalId,jdbcType=INTEGER},
+      work_id = #{workId,jdbcType=INTEGER},
+      check_id = #{checkId,jdbcType=INTEGER},
+      create_at = #{createAt,jdbcType=TIMESTAMP},
+      update_at = #{updateAt,jdbcType=TIMESTAMP},
+      check_user = #{checkUser,jdbcType=INTEGER},
+      check_time = #{checkTime,jdbcType=TIMESTAMP},
+      remark = #{remark,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="getFinesDetailByBean" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.FinesDetail" >
+    select A.id,A.amount,A.employee_id,A.check_time,A.remark,B.showname as employeeUser,C.showname as checkedUser,D.eval_name,E.dept_name,(CASE WHEN T.id is NULL THEN 4 ELSE T.status END) appealStatus from finesdetail A 
+    LEFT JOIN users B ON A.employee_id = B.employee_id
+	LEFT JOIN users C ON A.check_user = C.employee_id
+	LEFT JOIN evaltype D ON A.eval_id = D.eval_value
+	LEFT JOIN departments E ON A.dept_id = E.dept_id
+	LEFT OUTER JOIN appealfines T ON A.id = T.fines_id
+    <where>
+    <if test="employeeId != 0" >
+        and A.employee_id = #{employeeId,jdbcType=INTEGER}
+      </if>
+      <if test="deptId != 0" >
+        and A.dept_id = #{deptId,jdbcType=INTEGER}
+      </if>
+      <if test="amount != 0.0" >
+        and A.amount = #{amount,jdbcType=DOUBLE}
+      </if>
+      <if test="standId != 0" >
+        and A.stand_id = #{standId,jdbcType=INTEGER}
+      </if>
+      <if test="evalId != 0" >
+        and A.eval_id = #{evalId,jdbcType=INTEGER}
+      </if>
+      <if test="workId != 0" >
+        and A.work_id = #{workId,jdbcType=INTEGER}
+      </if>
+      <if test="checkId != 0" >
+        and A.check_id = #{checkId,jdbcType=INTEGER}
+      </if>
+      <if test="createAt != null" >
+        and A.create_at = #{createAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="updateAt != null" >
+        and A.update_at = #{updateAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="checkUser != 0" >
+        and A.check_user = #{checkUser,jdbcType=INTEGER}
+      </if>
+      <if test="remark != null" >
+        and A.remark = #{remark,jdbcType=VARCHAR}
+      </if>
+		and DATE_FORMAT(check_time,'%Y-%m') = DATE_FORMAT(#{checkTime},'%Y-%m')
+    </where>
+    ORDER BY check_time desc
+    <if test="row != 0 || rows != 0" >
+      limit #{row},#{rows}
+      </if>
+  </select>
+  
+   <select id="getFinesDetailCountByBean" resultType="java.lang.Integer" parameterType="com.czz.hwy.bean.manager.FinesDetail" >
+    select count(id) from finesdetail
+    <where>
+    <if test="employeeId != 0" >
+        and employee_id = #{employeeId,jdbcType=INTEGER}
+      </if>
+      <if test="deptId != 0" >
+        and dept_id = #{deptId,jdbcType=INTEGER}
+      </if>
+      <if test="amount != 0.0" >
+        and amount = #{amount,jdbcType=DOUBLE}
+      </if>
+      <if test="standId != 0" >
+        and stand_id = #{standId,jdbcType=INTEGER}
+      </if>
+      <if test="evalId != 0" >
+        and eval_id = #{evalId,jdbcType=INTEGER}
+      </if>
+      <if test="workId != 0" >
+        and work_id = #{workId,jdbcType=INTEGER}
+      </if>
+      <if test="checkId != 0" >
+        and check_id = #{checkId,jdbcType=INTEGER}
+      </if>
+      <if test="createAt != null" >
+        and create_at = #{createAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="updateAt != null" >
+        and update_at = #{updateAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="checkUser != 0" >
+        and check_user = #{checkUser,jdbcType=INTEGER}
+      </if>
+      <if test="remark != null" >
+        and remark = #{remark,jdbcType=VARCHAR}
+      </if>
+        and DATE_FORMAT(check_time,'%Y-%m') = DATE_FORMAT(#{checkTime},'%Y-%m')
+    </where>
+  </select>
+</mapper>

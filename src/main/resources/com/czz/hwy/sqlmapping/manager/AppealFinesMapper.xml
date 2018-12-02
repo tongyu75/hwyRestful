@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.AppealFines">
+	<resultMap type="com.czz.hwy.bean.manager.AppealFines" id="resultMap">
+		<id column="id" property="id" jdbcType="INTEGER"/>
+		<result column="fines_id" property="finesId" jdbcType="INTEGER"/>
+		<result column="employee_id" property="employeeId" jdbcType="INTEGER"/>
+		<result column="appealReason" property="appealReason" jdbcType="VARCHAR"/>
+		<result column="status" property="status" jdbcType="INTEGER"/>
+		<result column="dropUser" property="dropUser" jdbcType="INTEGER"/>
+		<result column="dropReason" property="dropReason" jdbcType="VARCHAR"/>
+		<result column="creat_at" property="createat" jdbcType="TIMESTAMP"/>
+		<result column="update_at" property="updateat" jdbcType="TIMESTAMP"/>
+		<result column="employeeUser" property="employeeUser" jdbcType="VARCHAR"/>
+		<result column="dropUserName" property="dropUserName" jdbcType="VARCHAR"/>
+		<result column="remark" property="remark" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<insert id="insertInfo" parameterType="appealFines" >
+		insert into appealfines (id,fines_id,employee_id,appealReason,status,creat_at) 
+		values (null,#{finesId},#{employeeId},#{appealReason},#{status},#{createat})
+	</insert>
+	
+	<!-- 获得申诉信息 -->
+	<select id="getInfoByBean" parameterType="com.czz.hwy.bean.manager.AppealFines" resultType="com.czz.hwy.bean.manager.AppealFines">
+		select * from appealfines 
+		<where>
+			<if test="id != 0">
+				and id = #{id, jdbcType=INTEGER}
+			</if>
+			<if test="finesId != 0">
+				and fines_id = #{finesId,jdbcType=INTEGER}
+			</if>
+			<if test="employeeId != 0">
+				and employee_id = #{employeeId,jdbcType=INTEGER}
+			</if>
+			<if test="appealReason != null">
+				and appealReason like concat('%',#{appealReason},'%')
+			</if>
+			<if test="dropUser != 0">
+				and  dropUser = #{dropUser, employeeId,jdbcType=INTEGER}
+			</if>
+			<if test="dropReason != null">
+				and dropReason like concat('%',#{dropReason},'%')
+			</if>
+			<if test="createat != null">
+				and creat_at &gt;= createat
+			</if>
+		</where>
+	</select>
+
+	<!-- 驳回申诉 -->
+	<update id="rejectAppealfinesByBean" parameterType="com.czz.hwy.bean.manager.AppealFines">
+	update appealfines set status = 1,update_at = now(), dropUser = #{dropUser},dropReason = #{dropReason}
+	where id = #{id} and status = 0
+	</update>
+	
+	<!-- 根据处罚信息ID查询申诉信息 -->
+	<select id="getAppealFinesByFinesId" resultMap="resultMap">
+	select a.*,b.showname as employeeUser,c.showname as dropUserName, d.remark from appealfines a 
+	join users b on a.employee_id = b.employee_id
+	left join users c on a.dropUser = c.employee_id
+	join finesdetail d on a.fines_id = d.id
+	where fines_id = #{finesId,jdbcType=INTEGER}
+	</select>
+	
+	<!-- 撤销处罚:更新申诉表中处理申诉人，申诉状态等信息-->
+	<update id="avoidAppealfinesByBean" parameterType="com.czz.hwy.bean.manager.AppealFines">
+	update appealfines set status = 2, update_at = now(), dropUser = #{dropUser,jdbcType=INTEGER}
+	where id = #{id,jdbcType=INTEGER} and status = 0
+	</update>
+	
+	<!-- 撤销处罚:更新处罚统计中的处罚金额和处罚次数 -->
+	<update id="updateAmountAndCountOfFinesCount" parameterType="map">
+	update finescount t1 set t1.amount = #{newAcountAmount,jdbcType=DOUBLE},t1.count = #{newCount,jdbcType=INTEGER} where t1.id = #{finesCountId,jdbcType=INTEGER} 
+	</update>
+	
+	<!-- 根据处罚详细信息ID查询该条处罚信息的处罚金额 -->
+	<select id="getAmountByFinesDetailId" resultType="string">
+	select amount from finesdetail where id = #{finesDetailId,jdbcType=INTEGER}
+	</select>
+	
+	<!-- 根据处罚统计ID查询该条处罚统计的处罚金额以及处罚次数 -->
+	<select id="getAmountAndCountByFinesCountId" resultType="map">
+	select amount,count from finescount where id = #{finesCountId,jdbcType=INTEGER}
+	</select>
+	
+</mapper>

@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.ArticleInfo" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.ArticleInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="employee_name" property="employeeName" jdbcType="VARCHAR" />
+    <result column="apply_time" property="applyTime" jdbcType="TIMESTAMP" />
+    <result column="apply_number" property="applyNumber" jdbcType="INTEGER" />
+    <result column="article_name" property="articleName" jdbcType="VARCHAR" />
+    <result column="approval_time" property="approvalTime" jdbcType="TIMESTAMP" />
+    <result column="approval_status" property="approvalStatus" jdbcType="INTEGER" />
+    <result column="apply_content" property="applyContent" jdbcType="VARCHAR" />
+    <result column="scrap_time" property="scrapTime" jdbcType="TIMESTAMP" />
+    <result column="scrap_content" property="scrapContent" jdbcType="VARCHAR" />
+    <result column="scrap_name" property="scrapName" jdbcType="VARCHAR" />
+    <result column="scrap_number" property="scrapNumber" jdbcType="INTEGER" />
+    <result column="scrap_status" property="scrapStatus" jdbcType="INTEGER" />
+    <result column="article_status" property="articleStatus" jdbcType="INTEGER" />
+  </resultMap>
+<!--   <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, employee_id, employee_name, apply_time, apply_number, article_name, approval_time, 
+    approval_status, apply_content, scrap_time, scrap_content, scrap_name, scrap_number, 
+    scrap_status, article_status
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="tsr.or.model.ArticleInfoExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from articleInfo
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from articleInfo
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from articleInfo
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="tsr.or.model.ArticleInfoExample" >
+    delete from articleInfo
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="tsr.or.model.ArticleInfo" >
+    insert into articleInfo (id, employee_id, employee_name, 
+      apply_time, apply_number, article_name, 
+      approval_time, approval_status, apply_content, 
+      scrap_time, scrap_content, scrap_name, 
+      scrap_number, scrap_status, article_status
+      )
+    values (#{id,jdbcType=INTEGER}, #{employeeId,jdbcType=INTEGER}, #{employeeName,jdbcType=VARCHAR}, 
+      #{applyTime,jdbcType=TIMESTAMP}, #{applyNumber,jdbcType=INTEGER}, #{articleName,jdbcType=VARCHAR}, 
+      #{approvalTime,jdbcType=TIMESTAMP}, #{approvalStatus,jdbcType=INTEGER}, #{applyContent,jdbcType=VARCHAR}, 
+      #{scrapTime,jdbcType=TIMESTAMP}, #{scrapContent,jdbcType=VARCHAR}, #{scrapName,jdbcType=VARCHAR}, 
+      #{scrapNumber,jdbcType=INTEGER}, #{scrapStatus,jdbcType=INTEGER}, #{articleStatus,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="tsr.or.model.ArticleInfo" >
+    insert into articleInfo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="employeeId != null" >
+        employee_id,
+      </if>
+      <if test="employeeName != null" >
+        employee_name,
+      </if>
+      <if test="applyTime != null" >
+        apply_time,
+      </if>
+      <if test="applyNumber != null" >
+        apply_number,
+      </if>
+      <if test="articleName != null" >
+        article_name,
+      </if>
+      <if test="approvalTime != null" >
+        approval_time,
+      </if>
+      <if test="approvalStatus != null" >
+        approval_status,
+      </if>
+      <if test="applyContent != null" >
+        apply_content,
+      </if>
+      <if test="scrapTime != null" >
+        scrap_time,
+      </if>
+      <if test="scrapContent != null" >
+        scrap_content,
+      </if>
+      <if test="scrapName != null" >
+        scrap_name,
+      </if>
+      <if test="scrapNumber != null" >
+        scrap_number,
+      </if>
+      <if test="scrapStatus != null" >
+        scrap_status,
+      </if>
+      <if test="articleStatus != null" >
+        article_status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="employeeName != null" >
+        #{employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="applyTime != null" >
+        #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="applyNumber != null" >
+        #{applyNumber,jdbcType=INTEGER},
+      </if>
+      <if test="articleName != null" >
+        #{articleName,jdbcType=VARCHAR},
+      </if>
+      <if test="approvalTime != null" >
+        #{approvalTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="approvalStatus != null" >
+        #{approvalStatus,jdbcType=INTEGER},
+      </if>
+      <if test="applyContent != null" >
+        #{applyContent,jdbcType=VARCHAR},
+      </if>
+      <if test="scrapTime != null" >
+        #{scrapTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="scrapContent != null" >
+        #{scrapContent,jdbcType=VARCHAR},
+      </if>
+      <if test="scrapName != null" >
+        #{scrapName,jdbcType=VARCHAR},
+      </if>
+      <if test="scrapNumber != null" >
+        #{scrapNumber,jdbcType=INTEGER},
+      </if>
+      <if test="scrapStatus != null" >
+        #{scrapStatus,jdbcType=INTEGER},
+      </if>
+      <if test="articleStatus != null" >
+        #{articleStatus,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="tsr.or.model.ArticleInfoExample" resultType="java.lang.Integer" >
+    select count(*) from articleInfo
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update articleInfo
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.employeeId != null" >
+        employee_id = #{record.employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="record.employeeName != null" >
+        employee_name = #{record.employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.applyTime != null" >
+        apply_time = #{record.applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.applyNumber != null" >
+        apply_number = #{record.applyNumber,jdbcType=INTEGER},
+      </if>
+      <if test="record.articleName != null" >
+        article_name = #{record.articleName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.approvalTime != null" >
+        approval_time = #{record.approvalTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.approvalStatus != null" >
+        approval_status = #{record.approvalStatus,jdbcType=INTEGER},
+      </if>
+      <if test="record.applyContent != null" >
+        apply_content = #{record.applyContent,jdbcType=VARCHAR},
+      </if>
+      <if test="record.scrapTime != null" >
+        scrap_time = #{record.scrapTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.scrapContent != null" >
+        scrap_content = #{record.scrapContent,jdbcType=VARCHAR},
+      </if>
+      <if test="record.scrapName != null" >
+        scrap_name = #{record.scrapName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.scrapNumber != null" >
+        scrap_number = #{record.scrapNumber,jdbcType=INTEGER},
+      </if>
+      <if test="record.scrapStatus != null" >
+        scrap_status = #{record.scrapStatus,jdbcType=INTEGER},
+      </if>
+      <if test="record.articleStatus != null" >
+        article_status = #{record.articleStatus,jdbcType=INTEGER},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update articleInfo
+    set id = #{record.id,jdbcType=INTEGER},
+      employee_id = #{record.employeeId,jdbcType=INTEGER},
+      employee_name = #{record.employeeName,jdbcType=VARCHAR},
+      apply_time = #{record.applyTime,jdbcType=TIMESTAMP},
+      apply_number = #{record.applyNumber,jdbcType=INTEGER},
+      article_name = #{record.articleName,jdbcType=VARCHAR},
+      approval_time = #{record.approvalTime,jdbcType=TIMESTAMP},
+      approval_status = #{record.approvalStatus,jdbcType=INTEGER},
+      apply_content = #{record.applyContent,jdbcType=VARCHAR},
+      scrap_time = #{record.scrapTime,jdbcType=TIMESTAMP},
+      scrap_content = #{record.scrapContent,jdbcType=VARCHAR},
+      scrap_name = #{record.scrapName,jdbcType=VARCHAR},
+      scrap_number = #{record.scrapNumber,jdbcType=INTEGER},
+      scrap_status = #{record.scrapStatus,jdbcType=INTEGER},
+      article_status = #{record.articleStatus,jdbcType=INTEGER}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="tsr.or.model.ArticleInfo" >
+    update articleInfo
+    <set >
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="employeeName != null" >
+        employee_name = #{employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="applyTime != null" >
+        apply_time = #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="applyNumber != null" >
+        apply_number = #{applyNumber,jdbcType=INTEGER},
+      </if>
+      <if test="articleName != null" >
+        article_name = #{articleName,jdbcType=VARCHAR},
+      </if>
+      <if test="approvalTime != null" >
+        approval_time = #{approvalTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="approvalStatus != null" >
+        approval_status = #{approvalStatus,jdbcType=INTEGER},
+      </if>
+      <if test="applyContent != null" >
+        apply_content = #{applyContent,jdbcType=VARCHAR},
+      </if>
+      <if test="scrapTime != null" >
+        scrap_time = #{scrapTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="scrapContent != null" >
+        scrap_content = #{scrapContent,jdbcType=VARCHAR},
+      </if>
+      <if test="scrapName != null" >
+        scrap_name = #{scrapName,jdbcType=VARCHAR},
+      </if>
+      <if test="scrapNumber != null" >
+        scrap_number = #{scrapNumber,jdbcType=INTEGER},
+      </if>
+      <if test="scrapStatus != null" >
+        scrap_status = #{scrapStatus,jdbcType=INTEGER},
+      </if>
+      <if test="articleStatus != null" >
+        article_status = #{articleStatus,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="tsr.or.model.ArticleInfo" >
+    update articleInfo
+    set employee_id = #{employeeId,jdbcType=INTEGER},
+      employee_name = #{employeeName,jdbcType=VARCHAR},
+      apply_time = #{applyTime,jdbcType=TIMESTAMP},
+      apply_number = #{applyNumber,jdbcType=INTEGER},
+      article_name = #{articleName,jdbcType=VARCHAR},
+      approval_time = #{approvalTime,jdbcType=TIMESTAMP},
+      approval_status = #{approvalStatus,jdbcType=INTEGER},
+      apply_content = #{applyContent,jdbcType=VARCHAR},
+      scrap_time = #{scrapTime,jdbcType=TIMESTAMP},
+      scrap_content = #{scrapContent,jdbcType=VARCHAR},
+      scrap_name = #{scrapName,jdbcType=VARCHAR},
+      scrap_number = #{scrapNumber,jdbcType=INTEGER},
+      scrap_status = #{scrapStatus,jdbcType=INTEGER},
+      article_status = #{articleStatus,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+   -->
+   
+  <sql id="Base_Column_List" >
+    id, employee_id, employee_name, apply_time, apply_number, article_name, approval_time, 
+    approval_status, apply_content, scrap_time, scrap_content, scrap_name, scrap_number, 
+    scrap_status, article_status
+  </sql>   
+  <select id="selectArticleInfo" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.ArticleInfo" >
+   	select article_name, 
+           apply_number, 
+           apply_time
+      from articleInfo
+  	 where employee_id = #{employeeId,jdbcType=INTEGER} 
+  	   and article_status = #{articleStatus,jdbcType=INTEGER}
+       and approval_status = #{approvalStatus,jdbcType=INTEGER}
+     order by apply_time desc
+  </select>
+  
+  <select id="selectApplyInfo" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.ArticleInfo" >
+   	select 
+   	    <include refid="Base_Column_List" />
+    from articleInfo
+    <where>
+        <if test="articleName != null and articleName !=''">
+            and article_name = #{articleName,jdbcType=VARCHAR}
+        </if>
+        <if test="employeeName != null and employeeName !=''">
+            and employee_name = #{employeeName,jdbcType=VARCHAR}
+        </if>
+        <if test="employeeId != 0">
+            and employee_id = #{employeeId,jdbcType=INTEGER}
+        </if>
+        <if test="articleStatus != 0">
+            and article_status = #{articleStatus,jdbcType=INTEGER}
+        </if>        
+        <if test="approvalStatus != 0">
+            and approval_status = #{approvalStatus,jdbcType=INTEGER}
+        </if>                
+    </where>
+  	 order by apply_time desc
+  	 limit #{row},#{rows}
+  </select>  
+  <select id="getApplyInfoCount" resultType="java.lang.Integer" parameterType="com.czz.hwy.bean.manager.ArticleInfo">
+    select count(id) 
+    from articleInfo 
+    <where>
+        <if test="articleName != null and articleName !=''">
+            and article_name = #{articleName,jdbcType=VARCHAR}
+        </if>
+        <if test="employeeName != null and employeeName !=''">
+            and article_name like concat('%',#{employeeName,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="employeeId != 0">
+            and employee_id like concat('%',#{employeeId,jdbcType=INTEGER},'%')
+        </if>
+        <if test="articleStatus != 0">
+            and article_status = #{articleStatus,jdbcType=INTEGER}
+        </if>                
+        <if test="approvalStatus != 0">
+            and approval_status = #{approvalStatus,jdbcType=INTEGER}
+        </if>              
+    </where> 
+  </select>   
+  <insert id="insertApplyInfo" parameterType="com.czz.hwy.bean.manager.ArticleInfo" >
+   	insert into
+   	    employee_id, article_name, apply_number, apply_content, apply_time, article_status
+    values 
+        (#{employeeId,jdbcType=INTEGER}, #{articleName,jdbcType=VARCHAR}, #{applyNumber,jdbcType=INTEGER},
+         #{applyContent,jdbcType=VARCHAR}, #{applyTime,jdbcType=TIMESTAMP}, #{articleStatus,jdbcType=INTEGER})
+  </insert>    
+
+  <select id="selectScrapInfo" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.ArticleInfo" >
+   	select scrap_name, 
+           scrap_number, 
+           apply_time,
+           scrap_time,
+           scrap_status	
+      from articleInfo
+  	 where employee_id = #{employeeId,jdbcType=INTEGER} 
+  	   and article_status = #{articleStatus,jdbcType=INTEGER}
+	  order by scrap_time desc  	   
+  </select>  
+  <update id="updateApprovalStatus" parameterType="com.czz.hwy.bean.manager.ArticleInfo">
+    update articleInfo
+    <set>
+      <if test="approvalStatus != 0" >
+        approval_status = #{approvalStatus,jdbcType=INTEGER},
+      </if>
+      <if test="approvalTime != null" >
+        approval_time = #{approvalTime,jdbcType=TIMESTAMP}
+      </if>      
+    </set>
+    <where>
+      <if test="employeeId != 0" >
+        and employee_id = #{employeeId,jdbcType=INTEGER}
+      </if>
+      <if test="applyTime != null" >
+        and apply_time = #{applyTime,jdbcType=TIMESTAMP}
+      </if>
+    </where>
+  </update>    
+  <insert id="insertScrapInfo" parameterType="com.czz.hwy.bean.manager.ArticleInfo" >
+   	insert into
+   	    employee_id, scrap_name, scrap_number, scrap_content, scrap_time, article_status
+    values 
+        (#{employeeId,jdbcType=INTEGER}, #{scrapName,jdbcType=VARCHAR}, #{scrapNumber,jdbcType=INTEGER},
+         #{scrapContent,jdbcType=VARCHAR}, #{scrapTime,jdbcType=TIMESTAMP}, #{articleStatus,jdbcType=INTEGER})
+  </insert>  
+  
+  <insert id="borrowArticleInfo" parameterType="com.czz.hwy.bean.manager.ArticleInfo" >
+  </insert>  
+  
+</mapper>

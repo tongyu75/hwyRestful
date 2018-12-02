@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.czz.hwy.bean.manager.AppErrLogs">
+	<resultMap id="appErrLogsBean" type="com.czz.hwy.bean.manager.AppErrLogs">
+		<result property="id" column="id" />
+		<result property="content" column="content" />
+		<result property="deviceId" column="device_id" />
+		<result property="remark" column="remark" />
+		<result property="employeeId" column="employee_id" />
+		<result property="status" column="status" />
+		<result property="createAt" column="create_at" />
+		<result property="updateAt" column="update_at" />
+	</resultMap>
+	<insert id="insertAppErrLogs" parameterType="com.czz.hwy.bean.manager.AppErrLogs">
+		insert into	apperrlogs
+		values(#{content},#{employee_id},#{deviceId},#{remark},#{status},#{createAt},#{updateAt})
+	</insert>
+
+	<select id="getAppErrLogsInfo" parameterType="com.czz.hwy.bean.manager.AppErrLogs"
+		resultType="appErrLogs">
+		select * from apperrlogs
+		<where>
+			<if test="id !=0">
+				and id=#{id}
+			</if>
+			<if test="content !=null">
+				and content=#{content}
+			</if>
+			<if test="employeeId !=0">
+				and employee_id=#{employeeId}
+			</if>
+			<if test="status !=null">
+				and status=#{status}
+			</if>
+			<if test="createAt !=''">
+				and create_at=#{createAt}
+			</if>
+			<if test="updateAt !=''">
+				and update_at=#{updateAt}
+			</if>
+			<if test="deviceId !=''">
+				and device_id=#{deviceId}
+			</if>
+			<if test="remark !=''">
+				and remark=#{remark}
+			</if>
+		</where>
+	</select>
+
+	<select id="getAllAppErrLogsInfo" resultMap="appErrLogsBean">
+		select * from apperrlogs
+	</select>
+
+	<select id="getAppErrLogsById" parameterType="java.lang.Integer"
+		resultType="appErrLogs">
+		select * from apperrlogs where id=#{id}
+	</select>
+
+	<select id="getCountById" parameterType="java.lang.Integer"
+		resultType="java.lang.Integer">
+		select count(*) from apperrlogs where id=#{id}
+	</select>
+
+	<delete id="deleteAppErr" parameterType="com.czz.hwy.bean.manager.AppErrLogs">
+		delete from apperrlogs
+		where id=#{id}
+	</delete>
+
+	<update id="updateAppErr" parameterType="com.czz.hwy.bean.manager.AppErrLogs">
+		UPDATE apperrlogs
+		<set>
+			<if test="content !=null">
+				content=#{content},
+			</if>
+			<if test="employeeId !=0">
+				employee_id=#{employeeId},
+			</if>
+			<if test="status !=null">
+				status=#{status},
+			</if>
+			<if test="createAt !=''">
+				create_at=#{createAt},
+			</if>
+			<if test="updateAt !=''">
+				update_at=#{updateAt},
+			</if>
+			<if test="deviceId !=''">
+				device_id=#{deviceId},
+			</if>
+			<if test="remark !=''">
+				remark=#{remark},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+</mapper>

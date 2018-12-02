@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.area.app.DutyAreaApp" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.area.app.DutyAreaApp" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="area_name" property="areaName" jdbcType="VARCHAR" />
+    <result column="area_address" property="areaAddress" jdbcType="VARCHAR" />
+    <result column="area_desc" property="areaDesc" jdbcType="VARCHAR" />
+    <result column="create_id" property="createId" jdbcType="INTEGER" />
+    <result column="update_id" property="updateId" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, area_name, area_address, area_desc, create_id, update_id, create_at, update_at, 
+    status
+  </sql>
+  
+  <!-- 查询检测员或考核员或督察员所管辖的责任区总数，2016-11-02 -->
+  <select id="selectAreaListCount" resultType="int" parameterType="java.util.Map">
+    select count(1)       
+      from dutyarea t
+     where t.status = 1
+       <if test="roleId == 2">
+       and EXISTS(
+               select 1
+                 from attendanceforplans t1
+                where employeeId = #{employeeId} 
+                  and recorddate = date_format(now(), '%Y-%m-%d')
+                  and t.id = t1.duty_area)
+       </if>
+       <if test="roleId == 3">  
+       and (EXISTS (select area_id
+                      from workplans
+                     where employee_id = #{employeeId}
+                       and t.id = area_id) 
+        OR EXISTS (select B.area_id
+                     from coverwork A
+                     join workplans B on A.leave_id = B.employee_id
+                    where A.cover_from_time &lt;= now()
+                      and A.cover_to_time &gt;= now()
+                      and A.cover_id = #{employeeId}
+                      and A.cover_status = 1
+                      and t.id = area_id))
+       </if>
+  </select>
+  
+  <!-- 查询检测员或考核员或督察员所管辖的责任区总数，2016-11-02 -->
+  <select id="selectAreaList" resultMap="BaseResultMap" parameterType="java.util.Map">
+    select * 
+      from dutyarea t
+	 where t.status = 1
+	   <if test="roleId == 2">
+	   and EXISTS(
+	           select 1
+                 from attendanceforplans t1
+                where employeeId = #{employeeId} 
+                  and recorddate = date_format(now(), '%Y-%m-%d')
+		          and t.id = t1.duty_area)
+	   </if>
+       <if test="roleId == 3">	
+       and (EXISTS (select area_id
+                      from workplans
+                     where employee_id = #{employeeId}
+                       and t.id = area_id) 
+        OR EXISTS (select B.area_id
+                     from coverwork A
+                     join workplans B on A.leave_id = B.employee_id
+                    where A.cover_from_time &lt;= now()
+                      and A.cover_to_time &gt;= now()
+                      and A.cover_id = #{employeeId}
+                      and A.cover_status = 1
+                      and t.id = area_id))
+	   </if>
+	 order by t.id 
+  </select>
+  
+  <!-- 查询考核员或督察员的考勤查岗的责任区，2016-11-07 -->
+  <select id="selectAttendanceInspectAreaApp" resultType="java.util.Map" parameterType="java.lang.Integer">
+    select da.id areaId, da.area_name areaName
+      from dutyarea da
+      where da.status = 1
+    <!-- 如果是考核员查询所属的责任区，如果是督察员查询所有责任区 -->
+    <if test="_parameter != null">
+        and (EXISTS (select area_id
+                      from workplans
+                     where employee_id = #{_parameter}
+                       and da.id = area_id) 
+         OR EXISTS (select B.area_id
+                      from coverwork A
+                      join workplans B on A.leave_id = B.employee_id
+                     where A.cover_from_time &lt;= now()
+                       and A.cover_to_time &gt;= now()
+                       and A.cover_id = #{_parameter}
+                       and A.cover_status = 1
+                       and da.id = area_id))
+    </if>
+    order by da.id
+  </select>  
+</mapper>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=MXDf0gIa6ce8G7anDfMCkyWxb21Tkj4Q"></script>
+<script type="text/javascript" src="../jquery-1.7.2.min.js"></script>
+<title>测试接口</title>
+</head>
+<body>
+	<div id="allmap"></div>
+</body>
+<script type="text/javascript">
+	//banzhuId ,banzhuName,createUserId,createAt,updateUserid,updateAt
+	$(function() {
+		//获取替班下拉框
+		$.ajax({
+			url :'http://192.168.1.17:8080/hwyRestful/relayAppController/allRelay',
+			async : true,
+			type : 'post' ,
+			data : {
+					acceptContent : 
+						JSON.stringify(
+							{
+								areaId : 1,
+                                roleId : 1,
+								employeeId : '',
+								employeeName : '',
+								leaveId: 22
+							}
+						)
+			}, 
+			dataType : "json",
+			// contentType : "application/x-www-form-urlencoded",
+			//contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		});
+
+
+	/* $.ajax({
+			url :'http://192.168.1.7:8080/hwyRestful/coverWorkAppController/coverWork',
+			async : true,
+			type : 'get' ,
+			data : {
+					acceptContent : 
+						JSON.stringify(
+							{
+								coverId : 1002,
+                                beginDateStr : '2016-09-21',
+								endDateStr : '2016-10-21'
+							}
+						)
+			}, 
+			dataType : "json",
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		});
+ */
+
+
+	/*$.ajax({
+		url :'http://192.168.1.7:8080/hwyRestful/coverWorkAppController/allCoverWork',
+		async : true,
+		type : 'get' ,
+		data : {
+				acceptContent : 
+					JSON.stringify(
+						{
+							dutyAreaId : '',
+							selectByRoleId : 2,
+                            beginDateStr : '2016-10-21',
+							endDateStr : '2016-10-21'
+						}
+					)
+		}, 
+		dataType : "json",
+		// contentType : "application/x-www-form-urlencoded",
+		contentType : "application/json;charset=UTF-8",
+		success : function(data) {
+			console.log(data);
+		}
+	});*/
+
+		
+		
+		
+		
+
+	
+
+	});
+</script>
+
+

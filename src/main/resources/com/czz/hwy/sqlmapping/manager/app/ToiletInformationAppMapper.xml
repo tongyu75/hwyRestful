@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.app.ToiletInformationApp" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.app.ToiletInformationApp" >
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="toilet_place_name" property="toiletPlaceName" jdbcType="VARCHAR" />
+    <result column="lat" property="lat" jdbcType="DOUBLE" />
+    <result column="lng" property="lng" jdbcType="DOUBLE" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="create_id" property="createId" jdbcType="INTEGER" />
+    <result column="update_id" property="updateId" jdbcType="INTEGER" />
+  </resultMap>
+  <select id="getToiletInformationApp" resultMap="BaseResultMap" >
+    select toilet_place_name, lat, lng
+      from toilet_information
+  </select>  
+</mapper>

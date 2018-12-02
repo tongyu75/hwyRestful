@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=MXDf0gIa6ce8G7anDfMCkyWxb21Tkj4Q"></script>
+<script type="text/javascript" src="../jquery-1.7.2.min.js"></script>
+<title>测试接口</title>
+</head>
+<body>
+	<div id="allmap"></div>
+</body>
+<script type="text/javascript">
+	$(function() {
+	/**根据员工ID和角色ID查询出该员工所管辖的责任区列表，用于责任区下拉框，2016-11-02
+	 * 检测员和考核员只能查看自己管辖的责任区，督察员查看所有的责任区*/
+	/*$(function() {
+		$.ajax({
+           url :'http://192.168.1.7:8080/hwyRestful/dictionarAppyController/areaList',
+			async : true,
+			type : 'get' ,
+			data : {
+					acceptContent : 
+						JSON.stringify(
+							{
+								roleId : 4,
+								employeeId : 9001
+							}
+						)
+			}, 
+			dataType : "json",
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		});*/
+
+
+
+		//获取责任点列表
+		/* $.ajax({
+           url :'http://192.168.1.7:8080/hwyRestful/dictionarAppyController/pointByAreadId/1',
+			async : true,
+			type : 'get' ,
+			dataType : "json",
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		}); */
+		
+		
+		//获取责任人列表
+		$.ajax({
+           url :'http://192.168.1.5:8080/hwyRestful/dictionarAppyController/dutyPeopleList',
+			async : true,
+			type : 'get' ,
+			data : {
+				acceptContent : 
+					JSON.stringify(
+						{
+							areaId : 7,
+							pointId : 178,
+							curDate : "2017-01-16 17:39:00"
+						}
+					)
+			}, 
+			dataType : "json",
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		}); 
+		
+		
+		/* $.ajax({
+           url :'http://192.168.1.5:8080/hwyRestful/dictionarAppyController/getFinesForCheck',
+			async : true,
+			type : 'get' ,
+			data : {
+				acceptContent : 
+					JSON.stringify(
+						{
+							areaId : 7,
+							pointId : 178,
+							evalType : 1
+						}
+					)
+			}, 
+			dataType : "json",
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			
+			success : function(data) {
+				console.log(data);
+			}
+		}); */
+		
+		
+
+	});
+</script>
+
+

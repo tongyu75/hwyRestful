@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.app.CoverWorkApp">
+    <resultMap type="com.czz.hwy.bean.manager.app.CoverWorkApp" id="base_result_map">
+        <id column="id" property="id"/>
+        <result column="leaveInfo_id" property="leaveInfoId" jdbcType="INTEGER"/>
+        <result column="leave_id" property="leaveId" jdbcType="INTEGER"/>
+        <result column="leave_name" property="leaveName" jdbcType="VARCHAR"/>
+        <result column="leave_role" property="leaveRole" jdbcType="INTEGER"/>
+        <result column="cover_from_time" property="coverFromTime" jdbcType="TIMESTAMP"/>
+        <result column="cover_to_time" property="coverToTime" jdbcType="TIMESTAMP"/>
+        <result column="duty_area_id" property="dutyAreaId" jdbcType="INTEGER"/>
+        <result column="duty_point_id" property="dutyPointId" jdbcType="INTEGER"/>
+        <result column="cover_id" property="coverId" jdbcType="INTEGER"/>
+        <result column="cover_role" property="coverRole" jdbcType="INTEGER"/>
+        <result column="cover_name" property="coverName" jdbcType="VARCHAR"/>
+        <result column="cover_status" property="coverStatus" jdbcType="INTEGER"/>
+        <result column="toTime" property="toTime" jdbcType="VARCHAR"/>
+        <result column="fromTime" property="fromTime" jdbcType="VARCHAR"/>
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+        <result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+        <result column="areaName" property="areaName" jdbcType="VARCHAR"/>
+        <result column="pointName" property="pointName" jdbcType="VARCHAR"/>
+        <result column="beginDateStr" property="beginDateStr" jdbcType="VARCHAR"/>
+        <result column="endDateStr" property="endDateStr" jdbcType="VARCHAR"/>
+        <result column="selectByEmployeeId" property="selectByEmployeeId" jdbcType="INTEGER"/>
+        <result column="is_oldplans" property="isOldPlans" jdbcType="INTEGER" />   
+    </resultMap>
+    
+    <sql id="base_column_list">
+        id,leaveInfo_id,leave_id,leave_name,leave_role,cover_from_time,cover_to_time,duty_area_id,
+        duty_point_id,cover_id,cover_role,cover_status,create_at,update_at
+    </sql> 
+    
+    <!--查看自己某一段时间内的代班记录总条数，2016-10-21-->
+    <select id="getCoverWorkCountByBeanApp" resultType="int" parameterType="com.czz.hwy.bean.manager.app.CoverWorkApp">
+    select count(1) from coverwork t 
+    <where>
+    	cover_status = 1
+        <if test="coverId != 0">
+        and t.cover_id = #{coverId}
+        </if>
+        <if test="beginDateStr != null and beginDateStr != ''">
+        and DATE_FORMAT(t.create_at,'%Y-%m-%d') &gt;= #{beginDateStr}
+        </if>
+        <if test="endDateStr != null and endDateStr != ''">
+        and DATE_FORMAT(t.create_at,'%Y-%m-%d') &lt;= #{endDateStr}
+        </if>
+    </where>
+    </select>
+    
+    <!--查看自己某一段时间内的代班记录集合，2016-10-21，不分页 -->
+    <select id="getCoverWorkListByBeanApp" resultMap="base_result_map" parameterType="com.czz.hwy.bean.manager.app.CoverWorkApp">
+    select * from coverwork t 
+    <where>
+    	cover_status = 1
+        <if test="coverId != 0">
+        and t.cover_id = #{coverId}
+        </if>
+        <if test="beginDateStr != null and beginDateStr != ''">
+        and DATE_FORMAT(t.create_at,'%Y-%m-%d') &gt;= #{beginDateStr}
+        </if>
+        <if test="endDateStr != null and endDateStr != ''">
+        and DATE_FORMAT(t.create_at,'%Y-%m-%d') &lt;= #{endDateStr}
+        </if>
+    </where>
+    order by t.create_at desc
+    </select>
+    
+    <!-- 查询某个责任区某个时间段内的请假记录对应的代班详情总条数，2016-10-21-->
+    <select id="getAllCoverWorkCountByBeanApp" resultType="int" parameterType="com.czz.hwy.bean.manager.app.CoverWorkApp">
+    select count(1) from coverwork t 
+    <where>
+    	cover_status = 1
+        <if test="dutyAreaId != 0">
+        and t.duty_area_id = #{dutyAreaId}
+        </if>
+        <if test="beginDateStr != null and beginDateStr != ''">
+        and DATE_FORMAT(t.create_at,'%Y-%m-%d') &gt;= #{beginDateStr}
+        </if>
+        <if test="endDateStr != null and endDateStr != ''">
+        and DATE_FORMAT(t.create_at,'%Y-%m-%d') &lt;= #{endDateStr}
+        </if>
+    </where>
+    </select>
+    
+    <!--  查询某个责任区某个时间段内的请假记录对应的代班详情集合，2016-10-21，不分页 -->
+    <select id="getAllCoverWorkListByBeanApp" resultMap="base_result_map" parameterType="com.czz.hwy.bean.manager.app.CoverWorkApp">
+    select * from coverwork t 
+    <where>
+    	cover_status = 1
+        <if test="dutyAreaId != 0">
+        and t.duty_area_id = #{dutyAreaId}
+        </if>
+        <if test="beginDateStr != null and beginDateStr != ''">
+        and DATE_FORMAT(t.create_at,'%Y-%m-%d') &gt;= #{beginDateStr}
+        </if>
+        <if test="endDateStr != null and endDateStr != ''">
+        and DATE_FORMAT(t.create_at,'%Y-%m-%d') &lt;= #{endDateStr}
+        </if>
+    </where>
+    order by t.create_at desc
+    </select>
+    
+    <!-- 查询出检测员负责的责任区,2016-10-21 -->
+    <select id="getAreaIdByBeanApp"  parameterType="com.czz.hwy.bean.manager.app.CoverWorkApp" resultType="int" >
+    select distinct duty_area_id from dutyplans
+    where roles_value = #{selectByRoleId,jdbcType=INTEGER}
+      AND employee_id = #{selectByEmployeeId,jdbcType=INTEGER} 
+      and status = 1
+    </select>
+    
+    <!-- 根据当日时间，查询代班人信息用于定时生成考勤状态,2016-11-28 -->
+    <select id="getCoverWorkForAttendanceApp" resultMap="base_result_map">
+        select cover_from_time,
+               cover_to_time,
+               cover_id,
+               duty_area_id,
+               leave_id,
+               is_oldplans
+          from coverwork
+         where DATE_FORMAT(NOW(), '%Y-%m-%d') &gt;= DATE_FORMAT(cover_from_time, '%Y-%m-%d')
+           and DATE_FORMAT(NOW(), '%Y-%m-%d') &lt;= DATE_FORMAT(cover_to_time, '%Y-%m-%d')
+           and cover_status = 1     
+  </select>              
+    
+    <!-- 根据日期和代班人Id获取代班记录，2016-12-08 -->
+    <select id="getCoverWorkListByMapApp" parameterType="java.util.Map" resultMap="base_result_map">
+    select * from coverwork t
+    <where>
+    cover_status = 1
+    <if test="tomorrowDate != null">
+        and DATE_FORMAT(t.cover_from_time,'%Y-%m-%d') &lt;= DATE_FORMAT(#{tomorrowDate},'%Y-%m-%d')
+        and DATE_FORMAT(t.cover_to_time,'%Y-%m-%d') &gt;= DATE_FORMAT(#{tomorrowDate},'%Y-%m-%d')
+    </if>
+     <if test="employeeId != 0">
+        and cover_id = #{employeeId}
+    </if>
+    </where>
+    </select>
+    
+</mapper>

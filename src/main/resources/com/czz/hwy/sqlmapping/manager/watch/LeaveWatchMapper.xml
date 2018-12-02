@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.watch.Leave" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.watch.Leave" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="apply_id" property="applyId" jdbcType="INTEGER" />
+    <result column="apply_name" property="applyName" jdbcType="VARCHAR" />
+    <result column="leave_content" property="leaveContent" jdbcType="VARCHAR" />
+    <result column="leave_number" property="leaveNumber" jdbcType="INTEGER" />
+    <result column="leave_from_time" property="leaveFromTime" jdbcType="TIMESTAMP" />
+    <result column="leave_to_time" property="leaveToTime" jdbcType="TIMESTAMP" />
+    <result column="leave_appl_time" property="leaveApplTime" jdbcType="TIMESTAMP" />
+    <result column="leave_appr_id" property="leaveApprId" jdbcType="INTEGER" />
+    <result column="leave_appr_name" property="leaveApprName" jdbcType="VARCHAR" />
+    <result column="leave_appr_content" property="leaveApprContent" jdbcType="VARCHAR" />
+    <result column="apply_role" property="applyRole" jdbcType="INTEGER" />
+    <result column="appr_role" property="apprRole" jdbcType="INTEGER" />
+    <result column="appr_content" property="apprContent" jdbcType="VARCHAR" />
+    <result column="appr_time" property="apprTime" jdbcType="TIMESTAMP" />
+    <result column="appr_status" property="apprStatus" jdbcType="INTEGER" />
+    <result column="from_Time" property="fromTime" jdbcType="VARCHAR" />
+    <result column="to_Time" property="toTime" jdbcType="VARCHAR" />    
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />    
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, apply_id, apply_name, leave_content, leave_number, leave_from_time, leave_to_time, leave_appl_time,
+    leave_appr_id, leave_appr_name, leave_appr_content, apply_role, appr_role, appr_content, appr_time, appr_status,
+    create_at, update_at
+  </sql>
+
+  <insert id="insertLeaveByBeanWatch" parameterType="com.czz.hwy.bean.manager.watch.Leave">
+    insert into leaveinfo (id, apply_id, apply_name, leave_content, leave_number, leave_from_time, leave_to_time, leave_appl_time,
+    leave_appr_id, leave_appr_name, leave_appr_content, apply_role, appr_role, appr_content, appr_time, appr_status, create_at, update_at,
+    duty_area_id, duty_point_id, appr_two_status, appr_three_status, appr_four_status,appr_number,leave_time_number,first_appr_roleId)
+    values 
+        (#{id,jdbcType=INTEGER}, #{applyId,jdbcType=INTEGER}, #{applyName,jdbcType=VARCHAR}, #{leaveContent,jdbcType=VARCHAR},
+         #{leaveNumber,jdbcType=INTEGER}, #{leaveFromTime,jdbcType=TIMESTAMP}, #{leaveToTime,jdbcType=TIMESTAMP},
+         #{leaveApplTime,jdbcType=TIMESTAMP},#{leaveApprId,jdbcType=INTEGER}, #{leaveApprName,jdbcType=VARCHAR}, 
+         #{leaveApprContent,jdbcType=VARCHAR}, #{applyRole,jdbcType=INTEGER}, #{apprRole,jdbcType=INTEGER}, 
+         #{apprContent,jdbcType=VARCHAR}, #{apprTime,jdbcType=TIMESTAMP}, #{apprStatus,jdbcType=INTEGER},
+         #{createAt,jdbcType=TIMESTAMP}, #{updateAt,jdbcType=TIMESTAMP}, #{dutyAreaId,jdbcType=INTEGER}, #{dutyPointId,jdbcType=INTEGER},
+         #{apprTwoStatus,jdbcType=INTEGER},#{apprThreeStatus,jdbcType=INTEGER},#{apprFourStatus,jdbcType=INTEGER},#{apprNumber,jdbcType=INTEGER},
+         #{leaveTimeNumber,jdbcType=INTEGER},#{firstApprRoleId,jdbcType=INTEGER}
+         )    
+  </insert>
+</mapper>

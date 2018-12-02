@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.user.app.UsersApp" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.user.app.UsersApp" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="showname" property="showname" jdbcType="VARCHAR" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="tel" property="tel" jdbcType="VARCHAR" />
+    <result column="gener" property="gener" jdbcType="INTEGER" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="id_card" property="idCard" jdbcType="VARCHAR" />
+    <result column="dept_id" property="deptId" jdbcType="INTEGER" />
+    <result column="role_id" property="roleId" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="flag" property="flag" jdbcType="INTEGER" />
+    <result column="position" property="position" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="dept_name" property="deptName" jdbcType="VARCHAR" />
+    <result column="role_name" property="roleName" jdbcType="VARCHAR" />   
+    <result column="gener_name" property="generName" jdbcType="VARCHAR" />
+    <result column="has_mobile" property="hasMobile" jdbcType="INTEGER" />    
+    <result column="has_watch" property="hasWatch" jdbcType="INTEGER" />        
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, showname, employee_id, password, email, tel, gener, address, id_card, dept_id, 
+    role_id, status, flag, position, remark, create_at, update_at, has_mobile, has_watch
+  </sql>
+
+  <select id="getUserInfoByEmployeeIdApp"  resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select <include refid="Base_Column_List" />
+      from users
+     where employee_id = #{employeeId} and status = 1
+  </select>
+  
+  <select id="getUsersByBeanApp" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.user.app.UsersApp">
+    select <include refid="Base_Column_List" /> 
+      from users 
+    <where>
+      <if test="employeeId != 0" >
+       and employee_id=#{employeeId,jdbcType=INTEGER}
+      </if>
+      <if test="password != null" >
+       and password= #{password,jdbcType=VARCHAR}
+      </if>
+      <if test="status != 0" >
+        and status=#{status,jdbcType=INTEGER}
+      </if>
+    </where>
+  </select>  
+  
+  <!-- 根据bean 获取用户集合，207-03-08 -->
+  <select id="getUsersAppListByUsers" parameterType="com.czz.hwy.bean.user.app.UsersApp" resultMap="BaseResultMap">
+	  select * from users
+	  <where>
+	 	 status = 1
+	  	<if test="employeeId != 0">
+	  	and employee_id = #{employeeId}
+	  	</if>
+	  	<if test="showname != null and showname != ''">
+	  	and showname = #{showname}
+	  	</if>
+	  </where>
+  </select>
+  
+  <!-- 根据员工ID和员工名称，修改员工手机标识和手机号，2017-03-08-->
+  <update id="updateUsersAppByBeanApp" parameterType="com.czz.hwy.bean.user.app.UsersApp">
+  	update users 
+  	<set>
+  		<if test="hasMobile != 0">
+  		has_mobile = #{hasMobile},
+  		update_at = now(),
+  		</if>
+  		<if test="tel != 0">
+  		tel = #{tel},
+  		</if>
+  	</set>
+  	<where>
+	 	status = 1
+	  	<if test="employeeId != 0">
+	  	and employee_id = #{employeeId}
+	  	</if>
+	  	<if test="showname != null and showname != ''">
+	  	and showname = #{showname}
+	  	</if>
+	 </where>
+  </update>
+</mapper>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=MXDf0gIa6ce8G7anDfMCkyWxb21Tkj4Q"></script>
+<script type="text/javascript" src="../jquery-1.7.2.min.js"></script>
+<title>测试接口</title>
+</head>
+<body>
+	<div id="allmap"></div>
+</body>
+<script type="text/javascript">
+	//banzhuId ,banzhuName,createUserId,createAt,updateUserid,updateAt
+	$(function() {
+		
+
+		//查询任务信息列表
+		$.ajax({
+           url :'http://192.168.1.7:8080/hwyRestful/taskInformationController/taskInformation',
+			async : true,
+			type : 'get' ,
+			data : {
+						acceptContent : 
+							JSON.stringify(
+								{	
+									taskName: '测试',
+	                                taskAddress: '测试',
+									taskStart: '2016-05-12',//'',
+									taskEnd: '2016-11-15',//'',//'2016-11-15',
+									taskStatus:  0,//1已结束 2进行中 3计划中
+									taskDutyPeople :'志1',
+									taskCreatePeopleName:'高',
+									page : 1,
+									rows : 10
+								}
+						)
+					}, 
+			dataType : "json",
+			xhrFields: {withCredentials: true},
+            crossDomain: true,
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		});
+
+
+		
+
+
+
+	});
+</script>
+
+

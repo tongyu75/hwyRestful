@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.HwgLoginStatus">
+	<resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.HwgLoginStatus">
+		<result column="employeeId" property="employeeId" jdbcType="VARCHAR"/>
+		<result column="employeeName" property="employeeName" jdbcType="VARCHAR"/>
+		<result column="areaId" property="areaId" jdbcType="VARCHAR"/>
+		<result column="areaName" property="areaName" jdbcType="VARCHAR"/>
+		<result column="loginStatus" property="loginStatus" jdbcType="VARCHAR"/>
+		<result column="createAt" property="createAt" jdbcType="VARCHAR"/>
+	</resultMap>
+	<sql id="Base_Column_List">
+		employeeId,employeeName,areaId,loginStatus,createAt
+	</sql>
+	
+	<select id="getHwgLoginStatusForCountByBean" resultType="int" parameterType="com.czz.hwy.bean.manager.HwgLoginStatus">
+	select count(1) from (	
+		select DISTINCT(t.employee_id),a.showname,if(c.employeeId,1,2) loginStatus,c.create_at
+		from dutyplans t 
+		join users a on t.employee_id = a.employee_id
+		
+		left join 
+			(select DISTINCT b.employeeId,b.create_at from attendanceforplans b 
+							join (select dd.employeeId,min(dd.id) maxid from (
+									select d.id,d.create_at,d.employeeId from attendanceforplans d 
+									<where>
+										<if test="areaId != null and areaId != ''">
+										and d.duty_area = #{areaId}
+										</if>
+										<if test="createAt != null and createAt != ''">
+										and DATE_FORMAT(d.recorddate,'%Y-%m-%d') = #{createAt}
+										</if>
+									</where>
+									ORDER BY d.create_at) dd GROUP BY dd.employeeId 
+								) t2 on b.employeeId = t2.employeeId and t2.maxid = b.id
+							<where>
+								<if test="areaId != null and areaId != ''">
+								and b.duty_area = #{areaId}
+								</if>
+								<if test="createAt != null and createAt != ''">
+								and DATE_FORMAT(b.recorddate,'%Y-%m-%d') = #{createAt}
+								</if>
+							</where>
+			)c on t.employee_id = c.employeeId 	
+		<where>
+			t.employee_id > 0
+			
+			<if test="createAt != null and createAt != ''">
+				and DATE_FORMAT(t.duty_from_date,'%Y-%m-%d') &lt;= #{createAt}
+			</if>
+			
+			<if test="createAt != null and createAt != ''">
+				and DATE_FORMAT(t.duty_to_date,'%Y-%m-%d') &gt;= #{createAt}
+			</if>
+			
+			<if test="createAt != null and createAt != ''">
+				and (t.status = 1 or (t.status = 2 and DATE_FORMAT(t.update_at,'%Y-%m-%d') &gt;= #{createAt}))
+			</if>
+			
+			<if test="areaId != null and areaId != ''">
+				and t.duty_area_id = #{areaId}
+			</if>
+			
+			<if test="employeeId != null and employeeId != ''">
+				and t.employee_id = #{employeeId}
+			</if>
+			
+			<if test="loginStatus != null and loginStatus != '' and loginStatus == 1">
+				and c.employeeId is not null
+			</if>
+			
+			<if test="loginStatus != null and loginStatus != '' and loginStatus == 2">
+				and c.employeeId is null
+			</if>	
+		</where>
+	)tt
+	</select>
+	
+	<select id="getHwgLoginStatusForByBean" resultMap="BaseResultMap" parameterType="hwgLoginStatus">
+	
+	select DISTINCT(t.employee_id) employeeId,a.showname employeeName,if(c.employeeId,1,2) loginStatus,c.create_at createAt
+		from dutyplans t 
+		join users a on t.employee_id = a.employee_id
+		
+		left join 
+			(select DISTINCT b.employeeId,b.create_at from attendanceforplans b 
+							join (select dd.employeeId,min(dd.id) maxid from (
+									select d.id,d.create_at,d.employeeId from attendanceforplans d 
+									<where>
+										<if test="areaId != null and areaId != ''">
+										and d.duty_area = #{areaId}
+										</if>
+										<if test="createAt != null and createAt != ''">
+										and d.recorddate = #{createAt}
+										</if>
+									</where>
+									ORDER BY d.create_at) dd GROUP BY dd.employeeId 
+								) t2 on b.employeeId = t2.employeeId and t2.maxid = b.id
+							<where>
+								<if test="areaId != null and areaId != ''">
+								and b.duty_area = #{areaId}
+								</if>
+								<if test="createAt != null and createAt != ''">
+								and b.recorddate = #{createAt}
+								</if>
+							</where>
+			)c on t.employee_id = c.employeeId 	
+		<where>
+			t.employee_id > 0
+			
+			<if test="createAt != null and createAt != ''">
+				and DATE_FORMAT(t.duty_from_date,'%Y-%m-%d') &lt;= #{createAt}
+			</if>
+			
+			<if test="createAt != null and createAt != ''">
+				and DATE_FORMAT(t.duty_to_date,'%Y-%m-%d') &gt;= #{createAt}
+			</if>
+			
+			<if test="createAt != null and createAt != ''">
+				and (t.status = 1 or (t.status = 2 and DATE_FORMAT(t.update_at,'%Y-%m-%d') &gt;= #{createAt}))
+			</if>
+			
+			<if test="areaId != null and areaId != ''">
+				and t.duty_area_id = #{areaId}
+			</if>
+			
+			<if test="employeeId != null and employeeId != ''">
+				and t.employee_id = #{employeeId}
+			</if>
+			
+			<if test="loginStatus != null and loginStatus != '' and loginStatus == 1">
+				and c.employeeId is not null
+			</if>
+			
+			<if test="loginStatus != null and loginStatus != '' and loginStatus == 2">
+				and c.employeeId is null
+			</if>	
+		</where>
+		order by t.employee_id desc 
+	    <if test="row != 0 || rows != 0" >
+	      limit #{row},#{rows}
+	    </if>
+	</select>
+</mapper>

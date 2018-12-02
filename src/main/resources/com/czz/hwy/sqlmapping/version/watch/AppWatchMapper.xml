@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.version.watch.App" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.version.App" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="version_code" property="versionCode" jdbcType="INTEGER" />
+    <result column="version_name" property="versionName" jdbcType="VARCHAR" />
+    <result column="app_name" property="appName" jdbcType="VARCHAR" />
+    <result column="app_type" property="appType" jdbcType="VARCHAR" />
+    <result column="size" property="size" jdbcType="DOUBLE" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="publish_time" property="publishTime" jdbcType="TIMESTAMP" />
+    <result column="apk_desc" property="apkDesc" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="download_census" property="downloadCensus" jdbcType="INTEGER"/>
+    <result column="appfunction" property="appFunction"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, version_code, version_name, app_name, app_type, size, employee_id, publish_time, 
+    apk_desc, status, create_at, update_at,download_census,appfunction
+  </sql>
+  
+  <select id="getAppByMaxCodeWatch" resultMap="BaseResultMap">
+      select * from app where version_code in(select max(version_code) from app where appfunction = 4) and appfunction = 4
+  </select>  
+</mapper>

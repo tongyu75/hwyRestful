@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.FinesCount" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.FinesCount" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="dept_id" property="deptId" jdbcType="INTEGER" />
+    <result column="amount" property="amount" jdbcType="DOUBLE" />
+    <result column="count" property="count" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="month" property="month" jdbcType="TIMESTAMP" />
+    <result column="dept_name" property="deptName" jdbcType="VARCHAR" />
+    <result column="showname" property="showname" jdbcType="VARCHAR" />
+    <result column="months" property="months" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, employee_id, dept_id, amount, count, create_at, update_at, month
+  </sql>
+  <select id="getFinesCountById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from finescount
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="getFinesCountByBean" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.FinesCount" >
+    select 
+    <include refid="Base_Column_List" />
+    from finescount
+    <where>
+    <if test="id != 0" >
+       and id = #{id,jdbcType=INTEGER}
+      </if>
+    <if test="employeeId != 0" >
+        and employee_id = #{employeeId,jdbcType=INTEGER}
+      </if>
+      <if test="deptId != 0" >
+        and dept_id = #{deptId,jdbcType=INTEGER}
+      </if>
+      <if test="amount != 0.0" >
+        and amount = #{amount,jdbcType=DOUBLE}
+      </if>
+      <if test="count != 0" >
+        and count = #{count,jdbcType=INTEGER}
+      </if>
+      <if test="createAt != null" >
+        and create_at = #{createAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="updateAt != null" >
+        and update_at = #{updateAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="month != null" >
+        and date_format(month,'%Y-%m')=date_format(DATE_SUB(#{month,jdbcType=TIMESTAMP}, INTERVAL 1 MONTH),'%Y-%m')
+      </if>
+    </where>
+  </select>
+  <delete id="deleteFinesCount" parameterType="java.lang.Integer" >
+    delete from finescount
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertFinesCount" parameterType="com.czz.hwy.bean.manager.FinesCount" >
+    insert into finescount (id, employee_id, dept_id, 
+      amount, count, create_at, 
+      update_at, month)
+    values (#{id,jdbcType=INTEGER}, #{employeeId,jdbcType=INTEGER}, #{deptId,jdbcType=INTEGER}, 
+      #{amount,jdbcType=DOUBLE}, #{count,jdbcType=INTEGER}, #{createAt,jdbcType=TIMESTAMP}, 
+      #{updateAt,jdbcType=TIMESTAMP}, #{month,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.czz.hwy.bean.manager.FinesCount" >
+    insert into finescount
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="employeeId != null" >
+        employee_id,
+      </if>
+      <if test="deptId != null" >
+        dept_id,
+      </if>
+      <if test="amount != null" >
+        amount,
+      </if>
+      <if test="count != null" >
+        count,
+      </if>
+      <if test="createAt != null" >
+        create_at,
+      </if>
+      <if test="updateAt != null" >
+        update_at,
+      </if>
+      <if test="month != null" >
+        month,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="deptId != null" >
+        #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=DOUBLE},
+      </if>
+      <if test="count != null" >
+        #{count,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="month != null" >
+        #{month,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateFinesCount" parameterType="com.czz.hwy.bean.manager.FinesCount" >
+    update finescount
+    <set >
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="deptId != null" >
+        dept_id = #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=DOUBLE},
+      </if>
+      <if test="count != null" >
+        count = #{count,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="month != null" >
+        month = #{month,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.manager.FinesCount" >
+    update finescount
+    set employee_id = #{employeeId,jdbcType=INTEGER},
+      dept_id = #{deptId,jdbcType=INTEGER},
+      amount = #{amount,jdbcType=DOUBLE},
+      count = #{count,jdbcType=INTEGER},
+      create_at = #{createAt,jdbcType=TIMESTAMP},
+      update_at = #{updateAt,jdbcType=TIMESTAMP},
+      month = #{month,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="getCount" resultType="java.lang.Integer" parameterType="com.czz.hwy.bean.manager.FinesCount" >
+    select count(id) from finescount
+    <where>
+    <if test="id != 0" >
+       and id = #{id,jdbcType=INTEGER}
+      </if>
+    <if test="employeeId != 0" >
+        and employee_id = #{employeeId,jdbcType=INTEGER}
+      </if>
+      <if test="deptId != 0" >
+        and dept_id = #{deptId,jdbcType=INTEGER}
+      </if>
+      <if test="amount != 0.0" >
+        and amount = #{amount,jdbcType=DOUBLE}
+      </if>
+      <if test="count != 0" >
+        and count = #{count,jdbcType=INTEGER}
+      </if>
+      <if test="createAt != null" >
+        and create_at = #{createAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="updateAt != null" >
+        and update_at = #{updateAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="month != null" >
+        and date_format(month,'%Y-%m')=date_format(#{month,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </where>
+  </select>
+  
+  <select id="getAllFinesCountByBean" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.FinesCount" >
+    select A.id,A.employee_id,A.amount,A.count,A.create_at,showname,dept_name,DATE_FORMAT(month,'%Y-%m') as months from finescount A join users B on A.employee_id=B.employee_id join departments C on A.dept_id=C.dept_id order by create_at DESC
+    <!-- select A.*,showname,dept_name from finescount A join users B on A.employee_id=B.employee_id join departments C on A.dept_id=C.dept_id order by create_at DESC --> 
+    <if test="row != 0 || rows != 0" >
+      limit #{row},#{rows}
+      </if>
+  </select>
+  
+  <select id="getAllFinesCountBySearch" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.FinesCount" >
+    select A.id,A.employee_id,A.amount,A.count,A.create_at,showname,dept_name,DATE_FORMAT(month,'%Y-%m') as months from finescount A join users B on A.employee_id=B.employee_id join departments C on A.dept_id=C.dept_id
+    <where>
+    <if test="id != 0" >
+       and A.id = #{id,jdbcType=INTEGER}
+      </if>
+    <if test="employeeId != 0" >
+        and A.employee_id = #{employeeId,jdbcType=INTEGER}
+      </if>
+      <if test="deptId != 0" >
+        and A.dept_id = #{deptId,jdbcType=INTEGER}
+      </if>
+      <if test="amount != 0.0" >
+        and A.amount = #{amount,jdbcType=DOUBLE}
+      </if>
+      <if test="count != 0" >
+        and A.count = #{count,jdbcType=INTEGER}
+      </if>
+      <if test="createAt != null" >
+        and A.create_at = #{createAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="updateAt != null" >
+        and A.update_at = #{updateAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="month != null" >
+        and date_format(A.month,'%Y-%m')=date_format(#{month,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </where>
+    order by create_at DESC
+    <if test="row != 0 || rows != 0" >
+      limit #{row},#{rows}
+      </if>
+  </select>
+  
+  <select id="getFinesCountInfo" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.FinesCount" >
+    select sum(count) as 'totalCou',count(DISTINCT(employee_id)) as 'totalPeo' from finescount 
+    where dept_id=#{deptId,jdbcType=INTEGER} and DATE_FORMAT(month,'%Y-%m')=DATE_FORMAT(DATE_SUB(CURDATE(),INTERVAL 1 MONTH),'%Y-%m')
+  </select>
+</mapper>

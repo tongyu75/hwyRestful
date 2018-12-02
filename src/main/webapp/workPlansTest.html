@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=MXDf0gIa6ce8G7anDfMCkyWxb21Tkj4Q"></script>
+<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+<title>测试接口</title>
+</head>
+<body>
+	<div id="allmap"></div>
+</body>
+<script type="text/javascript">
+	//banzhuId ,banzhuName,createUserId,createAt,updateUserid,updateAt
+	$(function() {
+		
+
+		//查询没有替班的本责任区的所有员工信息
+		/*$.ajax({
+           url :'http://192.168.1.14:8080/hwyRestfulInterface/workPlansController/employeeForPlans',
+			async : true,
+			type : 'get' ,
+			data : {
+					acceptContent : 
+						JSON.stringify(
+							{
+								areaId : 1,
+								roleId : 1,
+								employeeId : '',
+								employeeName : ''
+							}
+						)
+			}, 
+			dataType : "json",
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		});
+*/
+
+		//查询某责任区某责任点的排班计划
+		/*$.ajax({
+			url :'http://192.168.1.14:8080/hwyRestfulInterface/workPlansController/workPlans',
+			async : true,
+			type : 'get' ,
+			data : {
+					acceptContent : 
+						JSON.stringify(
+							{
+								areaId : 1,
+								pointId:16,
+                                roleId : 1
+								
+							}
+						)
+			}, 
+			dataType : "json",
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		}); */
+
+		//保存责任点排班计划
+		/*$.ajax({
+			url : 'http://192.168.1.14:8080/hwyRestfulInterface/workPlansController/workPlans',
+			async : true,
+			type : 'post',
+			data : {
+				acceptContent:
+					JSON.stringify({ 
+						areaId : 1,//责任区ID
+						pointId: 1,  //当前页责任点ID集合的字符串，比如：‘1,2,3,4’
+					    roleId:1,//角色ID，用于表示是哪个角色的排班，环卫工排班传递1，
+					    employeeId : 1001,//当前排班人ID
+						plansList : [  
+							{
+									id : 1,
+									pointId : 1,
+									employeeId : 6,
+									tradeEmployeeId : 21,
+									banzuId : 1
+							},
+							{
+									id : 2,
+									pointId : 2,
+									employeeId : 21,
+									tradeEmployeeId : 6,
+									banzuId : 2
+							},
+							{
+									id : 3,
+										pointId : 3,
+									employeeId : 145,
+									tradeEmployeeId : 319,
+									banzuId : 1
+							},{
+									id : 4,
+									pointId : 4,
+									employeeId : 319,
+									tradeEmployeeId : 145,
+									banzuId : 2
+							}
+						]
+					})
+			} ,
+			dataType : "json",
+			//contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		});   */
+
+		//添加考核员排班计划
+		/*$.ajax({
+			url :'http://192.168.1.7:8080/hwyRestful/workPlansController/workPlansForKH',
+			async : true,
+			type : 'post',
+			data : {acceptContent:
+				JSON.stringify({ 
+					employeeId:8001,//考核员员工ID 
+					banzuId:23,//班组ID
+					roleId : 3,//考核员的角色ID是2
+					areaId: '1,2,3,4'  //该考核员所管辖的责任区ID字符串，比如：‘1,2,3,4’
+				})
+			} ,
+			dataType : "json",
+			//contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		});  */
+		//清空考核员排班计划
+		/*$.ajax({
+			url :'http://192.168.1.7:8080/hwyRestful/workPlansController/workPlansForKH',
+			async : true,
+			type : 'post',
+			data : {acceptContent:
+				JSON.stringify({ 
+					employeeId:8001,//考核员员工ID 
+					banzuId:'',//班组ID
+					roleId : 3,//考核员的角色ID是2
+					areaId: ''  //该考核员所管辖的责任区ID字符串，比如：‘1,2,3,4’
+				})
+			} ,
+			dataType : "json",
+			//contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		});  */
+
+		//查询考核员排班计划
+		$.ajax({
+			url :'http://192.168.1.7:8080/hwyRestful/workPlansController/workPlansForKH',
+			async : true,
+			type : 'get' ,
+			data :{
+					acceptContent : 
+						JSON.stringify(
+							{
+								roleId : 3,
+                                employeeId : 8001,
+							    employeeName : '',
+                                areaId : 2,
+								page : 1,
+								rows : 10
+							}
+						)
+    			}, 
+			dataType : "json",
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		}); 
+		
+	/*	$.ajax({
+			url :'http://192.168.1.7:8080/hwyRestful/workPlansController/workPlansForKH',
+			async : true,
+			type : 'get' ,
+			data :{
+					acceptContent : 
+						JSON.stringify(
+							{
+								roleId : 3,
+                                employeeId : '',
+							    employeeName : '',
+                                areaId : '',
+								page : 1,
+								rows : 10
+							}
+						)
+    			}, 
+			dataType : "json",
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		}); */
+
+
+
+	});
+</script>
+
+

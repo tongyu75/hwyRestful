@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.watch.WorkPlans">
+    <resultMap type="com.czz.hwy.bean.mission.watch.WorkPlans" id="base_result_map">
+        <id column="id" property="id"/>
+        <result column="area_id" property="areaId" jdbcType="INTEGER"/>
+        <result column="point_id" property="pointId" jdbcType="INTEGER"/>
+        <result column="employee_id" property="employeeId" jdbcType="INTEGER"/>
+        <result column="trade_employee_id" property="tradeEmployeeId" jdbcType="INTEGER"/>
+        <result column="banzu_id" property="banzuId" jdbcType="INTEGER"/>
+        <result column="ordernum" property="orderNum" jdbcType="INTEGER"/>
+        <result column="trade_rate" property="tradeRate" jdbcType="INTEGER"/>
+        <result column="time" property="time" jdbcType="TIMESTAMP"/>
+        <result column="week" property="week" jdbcType="INTEGER"/>
+        <result column="day" property="day" jdbcType="INTEGER"/>
+        <result column="oldplanids" property="oldplanIds" jdbcType="VARCHAR"/>
+        <result column="create_id" property="createId" jdbcType="INTEGER"/>
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+        <result column="update_id" property="updateId" jdbcType="INTEGER"/>
+        <result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+        <result column="role_id" property="roleId" jdbcType="INTEGER"/>
+        <result column="roleName" property="roleName" jdbcType="VARCHAR"/>
+        <result column="banciInfo" property="banciInfo" jdbcType="VARCHAR"/>
+        <result column="areaName" property="areaName" jdbcType="VARCHAR"/>
+        <result column="pointName" property="pointName" jdbcType="VARCHAR"/>
+        <result column="employeeName" property="employeeName" jdbcType="VARCHAR"/>
+        <result column="tradeEmployeeName" property="tradeEmployeeName" jdbcType="VARCHAR"/>
+        <result column="banzuName" property="banzuName" jdbcType="VARCHAR"/>
+        <result column="createName" property="createName" jdbcType="VARCHAR"/>
+        <result column="updateName" property="updateName" jdbcType="VARCHAR"/>
+    </resultMap>
+    
+    <!-- 表字段 -->
+    <sql id="base_column_list">
+        id,area_id,point_id,employee_id,trade_employee_id,banzu_id,order,trade_rate,time,week,day,create_id,create_at,update_id,update_at,role_id
+    </sql> 
+    
+    <!-- 获得排班计划中的排班时间 -->
+    <select id="getWorkPlansTimeWatch" resultType="com.czz.hwy.bean.mission.watch.WorkPlans" parameterType="com.czz.hwy.bean.mission.WorkPlans" >
+        select distinct duty_on_time dutyOnTime, duty_off_time dutyOffTime
+          from workplans A
+          left join banci B on A.banzu_id = B.banzu_id
+         where A.employee_id = #{employeeId}
+           and B.status = 1
+         order by duty_on_time
+    </select>
+    
+<!--     根据员工ID获取对应的手表通讯录信息，2016-10-26
+    <select id="getAddressBookByEmpIdWatch" resultType="com.czz.hwy.bean.mission.WorkPlans" parameterType="java.lang.Integer" >
+      select distinct A.employee_id employeeId, C.showname, C.tel
+        from workplans A
+        join (select DISTINCT area_id 
+                from workplans  
+               where employee_id = 1001) B
+          on A.area_id = B.area_id
+        join users C on A.employee_id = C.employee_id
+       where A.role_id = 2
+       order by A.employee_id desc
+    </select>
+    
+    获得排班计划中不重复的开始与结束时间
+    <select id="getTimeListByBeanByDateWatch" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.mission.WorkPlans" >
+      select DISTINCT B.duty_on_time dutyOnTime, B.duty_off_time dutyOffTime
+        from workplans A
+        left join banci B on A.banzu_id = B.banzu_id
+       where A.employee_id = #{employeeId,jdbcType=INTEGER} 
+         and B.status = 1
+         order by B.duty_on_time
+    </select>  
+    
+    获得请假员工出勤信息
+    <select id="getDutyPlansForLeaveWatch" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.mission.WorkPlans" >
+      select <include refid="Base_Column_List" />
+      from workplans
+      where employee_id  = #{employeeId,jdbcType=INTEGER} 
+    </select>    
+    
+  <select id="getDutyPlansForLeaveRolesWatch" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.mission.WorkPlans" >
+    select <include refid="Base_Column_List" />
+      from workplans
+     where role_id = #{roleId,jdbcType=INTEGER}
+       AND area_id = #{areaId,jdbcType=INTEGER} 
+      2016-10-20 ，取消使用责任点去过滤检测员s
+      <if test="roleValue == 2">
+          AND duty_point_id = #{dutyPointId,jdbcType=INTEGER} 
+      </if>
+  </select>      
+  
+  <select id="getInfoListByBeanByDateWatch" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.mission.DutyPlans" >
+    select <include refid="Base_Column_List" />
+      from workplans
+      where employee_id  = #{employeeId,jdbcType=INTEGER} 
+  </select>     -->
+</mapper>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.user.AttendanceForDuty">
+	<resultMap id="BaseResultMap" type="com.czz.hwy.bean.user.AttendanceForDuty">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+		<result column="duty_date" property="dutyDate" jdbcType="TIMESTAMP" />
+		<result column="duty_on_time" property="dutyOnTime" jdbcType="TIMESTAMP" />
+		<result column="record_on_time" property="recordOnTime" jdbcType="TIMESTAMP" />
+		<result column="duty_off_time" property="dutyOffTime" jdbcType="TIMESTAMP" />
+		<result column="record_off_time" property="recordOffTime" jdbcType="TIMESTAMP" />
+		<result column="go_on_status" property="goOnStatus" jdbcType="VARCHAR" />
+		<result column="get_off_status" property="getOffStatus" jdbcType="VARCHAR" />
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+		<result column="month" property="month" jdbcType="TIMESTAMP" />	
+		<result column="showname" property="showname" jdbcType="VARCHAR" />	
+		<result column="dept_name" property="deptName" jdbcType="VARCHAR" />	
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, employee_id, duty_date, duty_on_time, record_on_time, duty_off_time, record_off_time,go_on_status,get_off_status,
+		create_at,month
+	</sql>
+	<select id="getAllAttendanceForDutyByBean" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.user.AttendanceForDuty">
+		select A.*,B.showname,C.dept_name from attendanceforduty A join users B on A.employee_id=B.employee_id join departments C on B.dept_id=C.dept_id
+		<where>
+			<if test="id != 0">
+				and id = #{id,jdbcType=INTEGER}
+			</if>
+			<if test="employeeId != 0">
+				and employee_id = #{employeeId,jdbcType=INTEGER}
+			</if>
+			<if test="dutyDate != null">
+				and duty_date = #{dutyDate,jdbcType=TIMESTAMP}
+			</if>
+			<if test="dutyOnTime != null">
+				and duty_on_time = #{dutyOnTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="recordOnTime != null">
+				and record_on_time = #{recordOnTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="dutyOffTime != null">
+				and duty_off_time = #{dutyOffTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="recordOffTime != null">
+				and record_off_time = #{recordOffTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="goOnStatus != null">
+				and go_on_status = #{goOnStatus,jdbcType=VARCHAR}
+			</if>
+			<if test="getOffStatus != null">
+				and get_off_status = #{getOffStatus,jdbcType=VARCHAR}
+			</if>
+			<if test="createAt != null">
+				and create_at = #{createAt,jdbcType=TIMESTAMP}
+			</if>
+			<if test="month != null">
+				and month = #{month,jdbcType=TIMESTAMP}
+			</if>
+			<if test="showname != null">
+				and B.showname = #{showname,jdbcType=VARCHAR}
+			</if>
+			<if test="deptName != null">
+				and C.dept_name = #{deptName,jdbcType=VARCHAR}
+			</if>
+			<if test="beginDate != null" >
+	     		and duty_date between #{beginDate,jdbcType=TIMESTAMP}
+	    	</if>
+	    	<if test="endDate != null" >
+	     		and #{endDate,jdbcType=TIMESTAMP}
+	    	</if>
+		</where>
+		order by A.create_at desc 
+	    <if test="row != 0 || rows != 0" >
+	      limit #{row},#{rows}
+	    </if>
+	</select>
+	
+	<select id="getAllAttendanceForDutyCount" resultType="java.lang.Integer" parameterType="com.czz.hwy.bean.user.AttendanceForDuty">
+	select count(A.id) from attendanceforduty A join users B on A.employee_id=B.employee_id join departments C on B.dept_id=C.dept_id
+	<where>
+		<if test="showname != null">
+			and B.showname = #{showname,jdbcType=VARCHAR}
+		</if>
+		<if test="beginDate != null" >
+	     	and duty_date between #{beginDate,jdbcType=TIMESTAMP}
+	    </if>
+	    <if test="deptName != null">
+				and C.dept_name = #{deptName,jdbcType=VARCHAR}
+		</if>
+	    <if test="endDate != null" >
+	     	and #{endDate,jdbcType=TIMESTAMP}
+	    </if>
+	</where>
+		order by A.employee_id ASC 
+	</select>
+	
+	<!-- 根据员工号 上班日期 上下班时间获取数据 -->
+	<select id="getAttendanceForDuty" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"/> from attendanceforduty 
+		where employee_id=#{employeeId} 
+				and date_format(duty_date,'%Y%m%d')=#{dutyDate}
+				and date_format(duty_on_time,'%H%i%s')=#{dutyOnTime}
+				and date_format(duty_off_time,'%H%i%s')=#{dutyOffTime}
+	</select>
+	<!-- 插入数据 -->
+	<insert id="insertAttendanceForDuty" parameterType="com.czz.hwy.bean.user.AttendanceForDuty">
+		insert into attendanceforduty (employee_id,duty_date,duty_on_time,record_on_time,duty_off_time
+				,record_off_time,go_on_status,get_off_status,month,create_at)
+		values(#{employeeId},#{dutyDate},#{dutyOnTime},#{recordOnTime},#{dutyOffTime
+				},#{recordOffTime},#{goOnStatus},#{getOffStatus},#{month},current_timestamp())
+	</insert>
+	<!-- 更新数据 -->
+	<update id="updateAttendanceForDuty" parameterType="com.czz.hwy.bean.user.AttendanceForDuty">
+		update attendanceforduty set record_on_time=#{recordOnTime},
+									 record_off_time=#{recordOffTime},
+									 go_on_status=#{goOnStatus},
+									 get_off_status=#{getOffStatus},
+									 update_at=current_timestamp()
+				where duty_date=date_format(#{dutyDate},'%Y-%m-%d')
+					and duty_on_time=date_format(#{dutyOnTime},'%H:%i:%s')
+					and duty_off_time=date_format(#{dutyOffTime},'%H:%i:%s')
+					and employee_id=#{employeeId}
+		
+	</update>
+</mapper>

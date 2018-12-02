@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.app.SubTopicsApp" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.app.SubTopicsApp" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="msg_type" property="msgType" jdbcType="INTEGER" />
+    <result column="device_id" property="deviceId" jdbcType="VARCHAR" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="topics" property="topics" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, msg_type, device_id, employee_id, topics, status, create_at, update_at
+  </sql>
+
+  <!-- 获取订阅通知信息，2016-12-20 -->
+  <select id="getSubTopicsAppByBeanApp" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.app.SubTopicsApp" >
+    select 
+    <include refid="Base_Column_List" />
+    from subtopics
+    <where>
+    <if test="id != 0" >
+       and id = #{id,jdbcType=INTEGER}
+      </if>
+    <if test="msgType != 0" >
+       and msg_type = #{msgType,jdbcType=INTEGER}
+      </if>
+      <if test="deviceId != null" >
+       and device_id = #{deviceId,jdbcType=VARCHAR}
+      </if>
+      <if test="employeeId != 0" >
+       and employee_id = #{employeeId,jdbcType=INTEGER}
+      </if>
+      <if test="topics != null" >
+       and topics = #{topics,jdbcType=VARCHAR}
+      </if>
+      <if test="status != 0" >
+       and status = #{status,jdbcType=INTEGER}
+      </if>
+      <if test="createAt != null" >
+       and create_at = #{createAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="updateAt != null" >
+       and update_at = #{updateAt,jdbcType=TIMESTAMP}
+      </if>
+    </where>
+  </select>
+  <update id="updateSubTopicsApp" parameterType="com.czz.hwy.bean.manager.app.SubTopicsApp" >
+    update subtopics
+    <set >
+      <if test="msgType != null" >
+        msg_type = #{msgType,jdbcType=INTEGER},
+      </if>
+      <if test="deviceId != null" >
+        device_id = #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="topics != null" >
+        topics = #{topics,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>  
+  <insert id="insertSubTopicsApp" parameterType="com.czz.hwy.bean.manager.app.SubTopicsApp" >
+    insert into subtopics (id, msg_type, device_id, 
+      employee_id, topics, status, 
+      create_at, update_at)
+    values (#{id,jdbcType=INTEGER}, #{msgType,jdbcType=INTEGER}, #{deviceId,jdbcType=VARCHAR}, 
+      #{employeeId,jdbcType=INTEGER}, #{topics,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, 
+      #{createAt,jdbcType=TIMESTAMP}, #{updateAt,jdbcType=TIMESTAMP})
+  </insert>  
+</mapper>

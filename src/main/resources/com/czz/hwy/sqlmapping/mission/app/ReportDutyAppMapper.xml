@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.ReportDutyApp">
+	<resultMap id="BaseResultMap" type="com.czz.hwy.bean.mission.app.ReportDutyApp">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="supervisor_id" property="supervisorId" jdbcType="INTEGER" />
+		<result column="supervisor_Type" property="supervisorType" jdbcType="INTEGER" />
+		<result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+		<result column="employee_name" property="employeeName" jdbcType="VARCHAR" />
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+		<result column="area_id" property="areaId" jdbcType="INTEGER" />
+   		<result column="point_id" property="pointId" jdbcType="INTEGER" />
+   		<result column="point_name" property="pointName" jdbcType="VARCHAR" />
+   		<result column="fines" property="fines" jdbcType="DOUBLE" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, supervisor_id, employee_id,employee_name,fines create_at, update_at
+	</sql>
+	
+	<!-- 根据list集合，批量新增考核责任人记录，2016-12-22 -->
+	<insert id="batchAddReportsDutyByListApp" parameterType="java.util.List">
+	 insert into report_duty 
+	    	(
+		    	id, 
+		    	supervisor_id, 
+		    	supervisor_Type,
+		    	employee_id,
+		    	employee_name,
+		    	fines,
+				create_at, 
+				update_at,
+				area_id,
+				point_id
+			)
+	    values 
+	    <foreach collection="list" item="reportDutyApp" index="index" separator=",">
+	    (
+	    	#{reportDutyApp.id,jdbcType=INTEGER},
+	    	#{reportDutyApp.supervisorId,jdbcType=INTEGER},
+	        #{reportDutyApp.supervisorType,jdbcType=INTEGER}, 
+	    	#{reportDutyApp.employeeId,jdbcType=INTEGER}, 
+	        #{reportDutyApp.employeeName,jdbcType=VARCHAR}, 
+	        #{reportDutyApp.fines,jdbcType=DOUBLE}, 
+	        #{reportDutyApp.createAt,jdbcType=TIMESTAMP},
+	        #{reportDutyApp.updateAt,jdbcType=TIMESTAMP},
+	        #{reportDutyApp.areaId,jdbcType=INTEGER},
+	        #{reportDutyApp.pointId,jdbcType=INTEGER}
+	     )
+	    </foreach>
+	</insert>
+	
+	<!-- 查看近一周全市每一项监察下每一个责任区下责任人列表， 2017-04-17 -->
+	<select id="selectSupervisePeopleDetailsByBeanApp" parameterType="com.czz.hwy.bean.mission.app.ReportDutyApp" resultMap="BaseResultMap">
+	select t.employee_id, t.employee_name, t.POINT_ID, t1.point_name,t.create_at 
+	from report_duty t
+	join dutypoint t1 on t.POINT_ID = t1.id and t1.status = 1
+	where t.supervisor_Type = #{supervisorType}
+	and t.AREA_ID = #{areaId}
+	and DATE_FORMAT(t.create_at,'%Y-%m-%d') &lt;= CURDATE()
+	and DATE_FORMAT(t.create_at,'%Y-%m-%d') &gt;= DATE_SUB(CURDATE(),INTERVAL #{days} DAY)
+	</select>
+	
+	
+</mapper>

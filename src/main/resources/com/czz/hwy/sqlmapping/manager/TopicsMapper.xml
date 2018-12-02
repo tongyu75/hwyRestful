@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.Topics" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.Topics" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="publish_time" property="publishTime" jdbcType="TIMESTAMP" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, title, content, publish_time, employee_id, create_at, update_at
+  </sql>
+  <select id="getTopicsById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from topics
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="getTopicsByBean" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.Topics" >
+    select 
+    <include refid="Base_Column_List" />
+    from topics
+    <where>
+    <if test="id != 0" >
+       and id = #{id,jdbcType=INTEGER}
+      </if>
+    <if test="title != null" >
+        and title = #{title,jdbcType=VARCHAR}
+      </if>
+      <if test="content != null" >
+        and content = #{content,jdbcType=VARCHAR}
+      </if>
+      <if test="publishTime != null" >
+        and publish_time = #{publishTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="employeeId != 0" >
+        and employee_id = #{employeeId,jdbcType=INTEGER}
+      </if>
+      <if test="createAt != null" >
+        and create_at = #{createAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="updateAt != null" >
+        and update_at = #{updateAt,jdbcType=TIMESTAMP}
+      </if>
+    </where>
+  </select>
+  <delete id="deleteTopics" parameterType="java.lang.Integer" >
+    delete from topics
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertTopics" parameterType="com.czz.hwy.bean.manager.Topics" >
+    insert into topics (id, title, content, 
+      publish_time, employee_id, create_at, 
+      update_at)
+    values (#{id,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, 
+      #{publishTime,jdbcType=TIMESTAMP}, #{employeeId,jdbcType=INTEGER}, current_timestamp(), 
+      #{updateAt,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateTopics" parameterType="com.czz.hwy.bean.manager.Topics" >
+    update topics
+    <set >
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="publishTime != null" >
+        publish_time = #{publishTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.manager.Topics" >
+    update topics
+    set title = #{title,jdbcType=VARCHAR},
+      content = #{content,jdbcType=VARCHAR},
+      publish_time = #{publishTime,jdbcType=TIMESTAMP},
+      employee_id = #{employeeId,jdbcType=INTEGER},
+      create_at = #{createAt,jdbcType=TIMESTAMP},
+      update_at = #{updateAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

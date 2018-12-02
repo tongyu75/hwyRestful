@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.CheckImageApp">
+    <resultMap type="com.czz.hwy.bean.mission.app.CheckImageApp" id="base_result_map">
+        <id column="id" property="id"/>
+        <result column="check_id" property="checkId" jdbcType="INTEGER"/>
+        <result column="eval_id" property="evalId" jdbcType="INTEGER"/>
+        <result column="image_file_name" property="imageFileName" jdbcType="VARCHAR"/>
+        <result column="image_content_type" property="imageContentType" jdbcType="VARCHAR"/>
+        <result column="image_file_size" property="imageFileSize" jdbcType="VARCHAR"/>
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+        <result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    
+    <sql id="base_column_list">
+        id,check_id,eval_id,image_file_name,image_content_type,image_file_size,create_at,update_at
+    </sql> 
+    
+    <!-- 新增一条图片信息记录，2016-11-09 -->
+    <insert id="insetCheckImageByBeanApp" parameterType="checkImageApp" >
+    insert into checkimage 
+    (
+    	id, 
+    	check_id, 
+    	eval_id, 
+        image_file_name, 
+        image_content_type, 
+        image_file_size, 
+        create_at, 
+        update_at
+   	)
+    values 
+    (
+    	#{id,jdbcType=INTEGER}, 
+    	#{checkId,jdbcType=INTEGER}, 
+    	#{evalId,jdbcType=INTEGER}, 
+        #{imageFileName,jdbcType=VARCHAR},
+        #{imageContentType,jdbcType=VARCHAR}, 
+        #{imageFileSize,jdbcType=VARCHAR}, 
+        #{createAt,jdbcType=TIMESTAMP}, 
+        #{updateAt,jdbcType=TIMESTAMP}
+    )
+  </insert>
+  
+  <!-- 根据外键ID和考核类型ID，删除图片信息。2016-11-09 -->
+  <delete id="deleteCheckImageByBeanApp" parameterType="checkImageApp" >
+  delete from checkimage
+  <where>
+  	<if test="checkId != 0">
+  	and check_id = #{checkId}
+  	</if>
+  	<if test="evalId != 0">
+  	and eval_id = #{evalId}
+  	</if>
+  </where>
+  </delete>
+    
+    
+</mapper>

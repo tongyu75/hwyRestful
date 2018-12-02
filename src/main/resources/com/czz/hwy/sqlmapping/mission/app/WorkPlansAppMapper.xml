@@ -1,0 +1,703 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.WorkPlansApp">
+	<resultMap type="workPlansApp" id="base_result_map">
+		<id column="id" property="id"/>
+		<result column="area_id" property="areaId" jdbcType="INTEGER"/>
+		<result column="point_id" property="pointId" jdbcType="INTEGER"/>
+		<result column="employee_id" property="employeeId" jdbcType="INTEGER"/>
+		<result column="trade_employee_id" property="tradeEmployeeId" jdbcType="INTEGER"/>
+		<result column="banzu_id" property="banzuId" jdbcType="INTEGER"/>
+		<result column="ordernum" property="orderNum" jdbcType="INTEGER"/>
+		<result column="trade_rate" property="tradeRate" jdbcType="INTEGER"/>
+		<result column="time" property="time" jdbcType="TIMESTAMP"/>
+		<result column="week" property="week" jdbcType="INTEGER"/>
+		<result column="day" property="day" jdbcType="INTEGER"/>
+		<result column="oldplanids" property="oldplanIds" jdbcType="VARCHAR"/>
+		<result column="create_id" property="createId" jdbcType="INTEGER"/>
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+		<result column="update_id" property="updateId" jdbcType="INTEGER"/>
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+		<result column="role_id" property="roleId" jdbcType="INTEGER"/>
+		<result column="roleName" property="roleName" jdbcType="VARCHAR"/>
+		<result column="banciInfo" property="banciInfo" jdbcType="VARCHAR"/>
+		<result column="areaName" property="areaName" jdbcType="VARCHAR"/>
+		<result column="pointName" property="pointName" jdbcType="VARCHAR"/>
+		<result column="employeeName" property="employeeName" jdbcType="VARCHAR"/>
+		<result column="tradeEmployeeName" property="tradeEmployeeName" jdbcType="VARCHAR"/>
+		<result column="banzuName" property="banzuName" jdbcType="VARCHAR"/>
+		<result column="createName" property="createName" jdbcType="VARCHAR"/>
+		<result column="updateName" property="updateName" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<!-- 表字段 -->
+	<sql id="base_column_list">
+		id,area_id,point_id,employee_id,trade_employee_id,banzu_id,order,trade_rate,time,week,day,create_id,create_at,update_id,update_at,role_id
+	</sql> 
+	
+	<!-- 表字段和视图字段 -->
+	<sql id="map_column_list">
+		id,area_id,areaName,point_id,pointName,employee_id,employeeName,
+		trade_employee_id,tradeEmployeeName,banzu_id,banzuName,
+		order,trade_rate,time,week,day,create_id,createName,create_at,update_id,updateName,update_at,role_id
+	</sql> 
+
+    <!-- 查询本责任区且不是替班人员的用户信息集合总数，2016-10-18 -->
+    <select id="selectEmployeeCountApp" parameterType="workPlansApp" resultType="int">
+    select count(1)
+    from user_area t
+    join  users t3 on t3.employee_id = t.employee_id and t3.status = 1
+    left join roles t4 on t3.role_id = t4.value and t4.status = 1
+    left join dutyarea t5 on t.area_id = t5.id and t5.status = 1
+    <where>
+        not EXISTS(select 1 from relay a where a.employee_id = t.employee_id and a.area_id = t.area_id) 
+        <if test="areaId != 0 ">
+            and t.area_id = #{areaId}
+        </if>
+        <if test="employeeId != 0 ">
+            and t.employee_id = #{employeeId}
+        </if>
+        <if test="roleId != 0 ">
+            and t3.role_id = #{roleId}
+        </if>
+        <if test="employeeName != null and  employeeName != ''">
+            and t3.showname like concat('%',#{employeeName},'%')
+        </if>
+    </where>
+    </select>
+
+    <!--查询某责任区某责任点某角色的排班计划记录总条数,2016-10-18  -->
+    <select id="getWorkPlansCountBySelApp" parameterType="workPlansApp" resultType="int">
+    select count(1)
+    from workplans t
+    join users t1 on t.employee_id = t1.employee_id and t1.status = 1 
+    <where>  
+        <if test="areaId != 0">
+        and t.area_id = #{areaId}
+        </if>
+        <if test="pointId != 0">
+        and t.point_id = #{pointId}
+        </if>
+        <if test="roleId != 0">
+        and t.role_id = #{roleId}
+        </if>
+        <if test="employeeId != 0">
+        and t.employee_id = #{employeeId}
+        </if>
+        <if test="employeeName != null and employeeName != ''">
+        and t1.showname like CONCAT('%',#{employeeName},'%')
+        </if>
+    </where>
+    </select>
+
+    <!-- 查询某责任区某责任点某角色的排班计划记录集合，2016-10-18-->
+    <select id="getWorkPlansListBySelApp" parameterType="workPlansApp" resultMap="base_result_map">
+        select t.id,
+                t.area_id, t2.area_name areaName,
+                t.point_id,t3.point_name pointName,
+                t.role_id,t4.name roleName,
+                t.employee_id,t1.showname employeeName,
+                t.trade_employee_id, t5.showname tradeEmployeeName,
+                t.banzu_id, CONCAT(t6.banzu_name,' ', t7.banciInfo) banzuName, t7.banciInfo
+            
+    
+        from workplans t
+        join users t1 on t.employee_id = t1.employee_id and t1.status = 1 
+        join dutyarea t2 on t2.id = t.area_id and t2.status = 1
+        join dutypoint t3 on t3.id = t.point_id and t3.status = 1
+        join roles t4 on t4.value = t.role_id and t4.status = 1
+        left join users t5 on t5.employee_id  = t.trade_employee_id and t5.status = 1
+        join banzu t6 on t.banzu_id = t6.banzu_id 
+        left join(
+            select a.banzu_id, GROUP_CONCAT(CAST(CONCAT(a.duty_on_time,'-',a.duty_off_time)as CHAR)) banciInfo from banci a
+            where status = 1
+            group by a.banzu_id
+        
+        ) t7 on t.banzu_id = t7.banzu_id
+        
+        <where>  
+            <if test="areaId != 0">
+            and t.area_id = #{areaId}
+            </if>
+            <if test="pointId != 0">
+            and t.point_id = #{pointId}
+            </if>
+            <if test="roleId != 0">
+            and t.role_id = #{roleId}
+            </if>
+            <if test="employeeId != 0">
+            and t.employee_id = #{employeeId}
+            </if>
+            <if test="employeeName != null and employeeName != ''">
+            and t1.showname like CONCAT('%',#{employeeName},'%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据责任区和责任点删除排班计划。2016-10-18 -->
+    <delete id="deleteWorkPlansByMapApp" parameterType="java.util.Map">
+        delete from workplans 
+        <where>
+            <if test="areaId != null and areaId != '' and areaId != 0">
+            and area_id = #{areaId} 
+            </if>
+            <if test="pointId != null and pointId != '' and pointId != 0">
+            and point_id = #{pointId}
+            </if>
+            <if test="roleId != null and roleId != '' and roleId != 0">
+            and role_id = #{roleId}  
+            </if>
+        </where>
+    </delete>
+
+    <!-- 获取本责任区的轮班频率，2016-10-18 -->
+    <select id="getSelectRateByBeanApp" parameterType="workPlansApp" resultMap="base_result_map">
+    select * from workplans 
+    <where>
+        <if test="areaId != null and areaId != '' and areaId != 0">
+            and area_id = #{areaId} 
+        </if>
+         <if test="roleId != null and roleId != '' and roleId != 0">
+            and role_id = #{roleId} 
+        </if>
+    </where>
+    limit 1
+    </select>
+
+    <!-- 根据责任区ID和责任点ID和角色ID，删除旧系统排班计划表数据,2016-10-19,暂时逻辑删除，之后改成物理删除 -->
+    <!-- <delete id="deleteDutyForBanciByMap" parameterType="java.util.Map">
+    delete from dutyforbanci where duty_area_id = #{areaId} 
+    <if test="roleId != 2">
+    and duty_point_id in(${pointIds})
+    </if>  
+    and roles_value = #{roleId}
+    </delete> -->
+    <update id="deleteDutyForBanciByMapApp" parameterType="java.util.Map">
+    update dutyforbanci 
+        set status = 2,
+            update_at=#{curDate},
+            update_id=#{employeeId}
+    <where>
+        <if test="areaId != null and areaId != '' and areaId != 0">
+        and duty_area_id = #{areaId} 
+        </if>
+        <if test="pointId != null and pointId != '' and pointId != 0">
+        and duty_point_id  = #{pointId}
+        </if>
+        <if test="roleId != null and roleId != '' and roleId != 0">
+        and roles_value = #{roleId}
+        </if>
+    </where>
+    </update>
+
+    <!-- 根据责任区ID和责任点ID和角色ID，删除旧系统排班计划表数据,2016-10-19,暂时逻辑删除，之后改成物理删除 -->
+    <!-- <delete id="deleteDutyPlansByMap" parameterType="java.util.Map">
+    delete from dutyplans 
+    where duty_area_id = #{areaId}  
+    <if test="roleId != 2">
+    and duty_point_id in(${pointIds})
+    </if> 
+    and roles_value = #{roleId}
+    </delete> -->
+    <update id="deleteDutyPlansByMapApp" parameterType="java.util.Map">
+    update dutyplans 
+        set status = 2,
+            update_at=#{curDate},
+            update_id=#{employeeId}
+    <where>
+        <if test="areaId != null and areaId != '' and areaId != 0">
+        and duty_area_id = #{areaId} 
+        </if>
+        <if test="pointId != null and pointId != '' and pointId != 0">
+        and duty_point_id  = #{pointId}
+        </if>
+        <if test="roleId != null and roleId != '' and roleId != 0">
+        and roles_value = #{roleId}
+        </if>
+    </where>
+    </update>
+
+    <!-- 批量新增排班计划，2016-10-18 -->
+    <insert id="batchAddWorkPlansApp" parameterType="java.util.List">
+     insert into workplans(
+            area_id,point_id,
+            employee_id,trade_employee_id,
+            banzu_id, ordernum,
+            trade_rate,time,
+            week,day,
+            create_id,create_at,
+            role_id)
+    values
+    <foreach collection="list" item="workPlans" index="index" separator=",">
+        ( 
+            #{workPlans.areaId}, #{workPlans.pointId}  ,
+            #{workPlans.employeeId} , #{workPlans.tradeEmployeeId},
+            #{workPlans.banzuId} , #{workPlans.orderNum} ,
+            #{workPlans.tradeRate} , #{workPlans.time},
+            #{workPlans.week} , #{workPlans.day} ,
+            #{workPlans.createId} , #{workPlans.createAt},
+            #{workPlans.roleId} )
+    
+    </foreach>
+    </insert>
+    
+    <!-- 根据责任区ID和责任点ID，角色ID，往旧系统排班计划表添加数据。2016-10-19 -->
+    <insert id="batchAddDutyForBanciByMapApp" parameterType="java.util.Map">
+        insert into dutyforbanci
+        (
+            duty_area_id, duty_point_id, employee_id,
+            duty_from_date, duty_to_date,
+            dutynumber, 
+            seq,
+            duty_type, status, roles_value,
+            distributor_id, create_id, create_at
+        )
+        select 
+            t.area_id,t.point_id,t.employee_id,
+            CURDATE() duty_from_date, DATE_ADD(CURDATE(),INTERVAL 1 YEAR) duty_to_date,
+            t1.dutynumber,
+            CONCAT(t.area_id,'_',t.point_id,'_', t.employee_id,'_',timestampdiff(SECOND,'1970-01-01 00:00:00',t.create_at),'_',t1.dutynumber)  seq,
+            2 duty_type,1 status, t.role_id roles_value,
+            t.create_id distributor_id, t.create_id, t.create_at 
+        from workplans t
+        join banci t1 on t.banzu_id = t1.banzu_id and t1.status = 1
+        
+        <where>
+            <if test="areaId != null and areaId != '' and areaId != 0">
+            and t.area_id = #{areaId} 
+            </if>
+            <if test="pointId != null and pointId != '' and pointId != 0">
+            and t.point_id  = #{pointId}
+            </if>
+            <if test="roleId != null and roleId != '' and roleId != 0">
+            and t.role_id = #{roleId}
+            </if>
+        </where>
+    </insert>    
+    
+    <!-- 根据责任区ID和责任点ID，角色ID，往旧系统排班计划表添加数据。2016-10-19 -->
+    <insert id="batchAddDutyPlansByMapApp" parameterType="java.util.Map">
+        insert into dutyplans
+        (
+            duty_area_id, duty_point_id, employee_id,
+            duty_from_date, duty_to_date,
+            duty_on_time, duty_off_time, 
+            seq,
+            duty_type, status, roles_value,
+            distributor_id, create_id, create_at
+        )
+        select 
+            t.area_id,t.point_id,t.employee_id,
+            CURDATE() duty_from_date, DATE_ADD(CURDATE(),INTERVAL 1 YEAR) duty_to_date,
+            t1.duty_on_time,duty_off_time,
+            CONCAT(t.area_id,'_',t.point_id,'_', t.employee_id,'_',timestampdiff(SECOND,'1970-01-01 00:00:00',t.create_at),'_',t1.dutynumber)  seq,
+            2 duty_type,1 status, t.role_id roles_value,
+            t.create_id distributor_id, t.create_id, t.create_at 
+        from workplans t
+        join banci t1 on t.banzu_id = t1.banzu_id and t1.status = 1
+        
+        <where>
+            <if test="areaId != null and areaId != '' and areaId != 0">
+            and t.area_id = #{areaId} 
+            </if>
+            <if test="pointId != null and pointId != '' and pointId != 0">
+            and t.point_id  = #{pointId}
+            </if>
+            <if test="roleId != null and roleId != '' and roleId != 0">
+            and t.role_id = #{roleId}
+            </if>
+        </where>
+    </insert>    
+    
+    <!-- 查询本责任区且不是替班人员的用户信息集合，2016-10-18 -->
+    <select id="selectEmployeeListApp" parameterType="workPlansApp" resultType="com.czz.hwy.bean.mission.UserArea">
+    select t.id,t.area_id areaId,t5.area_name areaName, 
+           t.employee_id employeeId,t3.showname employeeName,
+           t3.role_id roleId, t4.name roleName
+    from user_area t
+    join users t3 on t3.employee_id = t.employee_id and t3.status = 1
+    left join roles t4 on t3.role_id = t4.value and t4.status = 1
+    left join dutyarea t5 on t.area_id = t5.id and t5.status = 1
+    <where>
+        not EXISTS(select 1 from relay a where a.employee_id = t.employee_id and a.area_id = t.area_id) 
+        <if test="areaId != 0 ">
+            and t.area_id = #{areaId}
+        </if>
+        <if test="employeeId != 0 ">
+            and t.employee_id = #{employeeId}
+        </if>
+        <if test="roleId != 0 ">
+            and t3.role_id = #{roleId}
+        </if>
+        <if test="employeeName != null and  employeeName != ''">
+            and t3.showname like concat('%',#{employeeName},'%')
+        </if>
+    </where>
+    </select>   
+    
+    <!-- 获取某个责任区责任点下正在上班的员工列表，2016-11-08 --> 
+    <select id="getCurWorkPlansListByBeanApp" parameterType="com.czz.hwy.bean.mission.app.WorkInfoApp" resultMap="base_result_map">
+	    select DISTINCT t.employee_id 
+		from workplans t
+		join banci t1 on t.banzu_id = t1.banzu_id and t1.status = 1
+		<where>
+			t.role_id = 1
+			<if test="areaId != 0">
+			and t.area_id = #{areaId}
+			</if>
+			<if test="pointId != 0">
+			and t.point_id = #{pointId}
+			</if>
+			<if test="checkTime != null">
+			and t1.duty_on_time &lt;= #{checkTime} 
+			and t1.duty_off_time &gt;= #{checkTime}
+			</if>
+		</where>
+    </select>
+    
+    <!-- 查询某个员工在【当前时间，当天24点之前】时间段内，需要换班的排班计划，2016-11-11 -->
+    <select id="getWorkPlansListByMapApp" parameterType="workPlansApp" resultMap="base_result_map">
+		select DISTINCT t.employee_id, t.trade_employee_id
+		 from workplans t
+		where employee_id = #{employeeId}
+		  and t.trade_rate != 1
+		  and DATE_FORMAT(CONCAT(DATE_FORMAT( #{nowDate}, '%Y-%m-%d'), ' ', t.time),'%Y-%m-%d %H:%i:%s') &gt;= #{nowDate}
+		  and CONCAT(DATE_FORMAT( #{nowDate}, '%Y-%m-%d'), ' ', t.time) &lt;= DATE_FORMAT(CONCAT(DATE_FORMAT( #{nowDate}, '%Y-%m-%d'), ' ', '23:59:59'),'%Y-%m-%d %H:%i:%s')
+		  and t.trade_employee_id is not null
+		  and t.trade_employee_id != 0
+		 and (
+			 t.trade_rate = 2
+			 or(t.trade_rate  = 3 and t.week = #{week})
+			 or (t.trade_rate = 4 and t.day = #{day})
+		 )
+    </select>
+    
+     <!-- 获取某员工上下班时间不重复的排班计划集合，2016-11-11  -->
+	<select id="getWorkPlansListByEmployeeIdApp" parameterType="java.lang.String" resultType="java.util.Map">
+	select 
+		distinct t.employee_id employeeId,
+		t1.duty_on_time dutyOnTime, 
+		t1.duty_off_time dutyOffTime, 
+		'' onStatus,
+		'' offStatus
+	from workplans t
+	join banci t1 on t.banzu_id = t1.banzu_id and t1.status = 1
+	where employee_id in(${_parameter})
+	</select>
+	<!-- <select id="getWorkPlansListByEmployeeIdApp" parameterType="java.lang.String" resultMap="base_result_map">
+	select * from workplans where employee_id = #{employeeId}
+	</select> -->
+	
+	<!-- 获取某些员工上下班时间不重复的排班计划集合，只有时间集合，2016-12-12  -->
+	<select id="getDistinctWorkPlansListByEmployeeIdApp" parameterType="java.lang.String" resultType="java.util.Map">
+	select DISTINCT
+		t1.duty_on_time dutyOnTime, 
+		t1.duty_off_time dutyOffTime, 
+		'' onStatus,
+		'' offStatus
+	from workplans t
+	join banci t1 on t.banzu_id = t1.banzu_id and t1.status = 1
+	where employee_id in(${_parameter})
+	</select>
+	
+	<!-- 获取某个员工在【当前时间，当天24点之前】时间段内，作为换班人存在且进行换班的排班计划，2016-11-11 -->
+     <select id="getTradeWorkPlansListByMapApp" parameterType="workPlansApp" resultMap="base_result_map">
+		select DISTINCT t.employee_id, t.trade_employee_id
+		 from workplans t
+		where trade_employee_id = #{employeeId}
+		and t.trade_rate != 1
+		and DATE_FORMAT(CONCAT(DATE_FORMAT( #{nowDate}, '%Y-%m-%d'), ' ', t.time),'%Y-%m-%d %H:%i:%s') &gt;= #{nowDate}
+		and CONCAT(DATE_FORMAT( #{nowDate}, '%Y-%m-%d'), ' ', t.time) &lt;= DATE_FORMAT(CONCAT(DATE_FORMAT( #{nowDate}, '%Y-%m-%d'), ' ', '23:59:59'),'%Y-%m-%d %H:%i:%s')
+		and t.trade_employee_id is not null
+		and t.trade_employee_id != 0
+		and (
+			t.trade_rate = 2
+			or(t.trade_rate  = 3 and t.week = #{week})
+			or (t.trade_rate = 4 and t.day = #{day})
+		)
+    </select>
+    
+    <!-- 查询某个员工在【当前时间，当天24点之前】时间段内，需要换班的排班计划和责任点名称，2016-12-12 -->
+    <select id="getWorkPlansAndPointNameListByMapApp" parameterType="workPlansApp" resultMap="base_result_map">
+        select DISTINCT t.employee_id, t.trade_employee_id
+         from workplans t
+        where employee_id = #{employeeId}
+          and t.trade_rate != 1
+          and DATE_FORMAT(CONCAT(DATE_FORMAT( #{nowDate}, '%Y-%m-%d'), ' ', t.time),'%Y-%m-%d %H:%i:%s') &gt;= #{nowDate}
+          and CONCAT(DATE_FORMAT( #{nowDate}, '%Y-%m-%d'), ' ', t.time) &lt;= DATE_FORMAT(CONCAT(DATE_FORMAT( #{nowDate}, '%Y-%m-%d'), ' ', '23:59:59'),'%Y-%m-%d %H:%i:%s')
+          and t.trade_employee_id is not null
+          and t.trade_employee_id != 0
+         and (
+             t.trade_rate = 2
+             or(t.trade_rate  = 3 and t.week = #{week})
+             or (t.trade_rate = 4 and t.day = #{day})
+         )
+    </select>
+    
+     <!-- 获取某员工上下班时间不重复的排班计划和责任点名称集合，2016-12-12  -->
+    <select id="getWorkPlansAndPointNameListByEmployeeIdApp" parameterType="java.util.Map" resultType="java.util.Map">
+           <if test="roleId == 1">
+               select distinct t.employee_id employeeId, t1.duty_on_time dutyOnTime, t1.duty_off_time dutyOffTime,
+                      CAST(GROUP_CONCAT(t2.point_name order by t2.id) as char) pointName 
+                 from workplans t
+                 join banci t1 on t.banzu_id = t1.banzu_id and t1.status = 1
+                 left join dutypoint t2 on t.point_id = t2.id and t2.status = 1
+                where employee_id in(#{employeeId})
+                group by t1.duty_on_time,t1.duty_off_time
+          </if>    
+          <if test="roleId == 2">
+              select distinct t.employee_id employeeId, t1.duty_on_time dutyOnTime, t1.duty_off_time dutyOffTime,
+                     CAST(GROUP_CONCAT(t2.area_name order by t2.id) as char) pointName 
+                from workplans t
+                join banci t1 on t.banzu_id = t1.banzu_id and t1.status = 1
+                left join dutyarea t2 on t.area_id = t2.id and t2.status = 1
+               where employee_id in(#{employeeId})
+               group by t1.duty_on_time,t1.duty_off_time
+          </if>              
+          <if test="roleId == 3">
+              select distinct t.employee_id employeeId, t1.duty_on_time dutyOnTime, t1.duty_off_time dutyOffTime,
+                     CAST(GROUP_CONCAT(t2.area_name order by t2.id) as char) pointName 
+                from workplans t
+                join banci t1 on t.banzu_id = t1.banzu_id and t1.status = 1
+                left join dutyarea t2 on t.area_id = t2.id and t2.status = 1
+               where employee_id in(#{employeeId})
+               group by t1.duty_on_time,t1.duty_off_time
+          </if>                        
+    </select>
+
+    <!-- 获取某个员工在【当前时间，当天24点之前】时间段内，作为换班人存在且进行换班的排班计划和责任点名称，2016-12-12 -->
+     <select id="getTradeWorkPlansAndPointNameListByMapApp" parameterType="workPlansApp" resultMap="base_result_map">
+        select DISTINCT t.employee_id, t.trade_employee_id
+         from workplans t
+        where trade_employee_id = #{employeeId}
+        and t.trade_rate != 1
+        and DATE_FORMAT(CONCAT(DATE_FORMAT( #{nowDate}, '%Y-%m-%d'), ' ', t.time),'%Y-%m-%d %H:%i:%s') &gt;= #{nowDate}
+        and CONCAT(DATE_FORMAT( #{nowDate}, '%Y-%m-%d'), ' ', t.time) &lt;= DATE_FORMAT(CONCAT(DATE_FORMAT( #{nowDate}, '%Y-%m-%d'), ' ', '23:59:59'),'%Y-%m-%d %H:%i:%s')
+        and t.trade_employee_id is not null
+        and t.trade_employee_id != 0
+        and (
+            t.trade_rate = 2
+            or(t.trade_rate  = 3 and t.week = #{week})
+            or (t.trade_rate = 4 and t.day = #{day})
+        )
+    </select>    
+    
+    <!--根据责任区ID和责任点Id,当前时间，获取责任人列表。责任人只能是环卫工，2016-12-14  -->
+    <select id="getDutyPeopleListByMapApp" parameterType="java.util.Map" resultType="java.util.Map">
+     select DISTINCT t.employee_id employeeId, t1.showname  employeeName
+    from workplans t
+    join users t1 on t.employee_id = t1.employee_id and t1.status = 1 and t1.role_id = 1
+		join banci t2 on t2.status = 1 and t.banzu_id = t2.banzu_id
+	<where> 
+		<if test="areaId != null and areaId != '' and areaId != 0">
+			and t.area_id = #{areaId}
+		</if>
+		<if test="pointId != null and pointId != '' and pointId != 0">
+			and t.point_id = #{pointId}
+		</if>
+		<if test="curDate != null">
+			and t2.duty_on_time &lt;= DATE_FORMAT(#{curDate},'%H:%i:%s') 
+			and t2.duty_off_time &gt;= DATE_FORMAT(#{curDate},'%H:%i:%s')
+		</if>
+	</where> 
+    </select>
+    
+     <!-- 查询出某个责任区下每个责任点针对当前时间的上一个班次有哪些员工，以及这些员工的上班时间集合。2016-12-29
+     	2017-01-13 : 之前是根据排版计划查询的，现在根据考勤记录对应的责任点进行查询
+      -->
+    <select id="selectLastBanciWorkPlansList" parameterType="workPlansApp" resultType="com.czz.hwy.bean.user.app.AttendanceForPlansApp">
+   	<!-- 获取每个责任点在当前时间之前最大的上班时间段内上班的员工 -->
+    select  DISTINCT a.area_id dutyAreaId, a.employee_id employeeId, a.duty_on_time dutyOnTime,a.duty_off_time dutyOffTime,a.role_id roleId
+	from attendanceforpoint a
+	join (
+			<!-- 获取每个责任点当前时间之前最大的上班时间段，注意检测员排班计划中没有保存责任点ID -->
+			select if(t.role_id = 2 or t.role_id = 3, CONCAT(t.area_id,'_', t.employee_id), t.point_id) point_id, MAX(t.duty_on_time) duty_on_time,MAX(t.duty_off_time) duty_off_time
+			from attendanceforpoint t
+			<where>
+				t.duty_off_time &lt; DATE_FORMAT(now(),'%H:%i:%s')
+				and t.recorddate = curdate()
+				<if test="areaId != 0">
+				and t.area_id = #{areaId}
+				</if>
+				<!-- 若是检测员查询上一班次考勤，不显示检测员角色的，显示环卫工角色的员工 -->
+				<if test="roleId == 2">
+				and t.role_id in(1)
+				</if>
+				<!-- 若考核员查询上一班次考勤，不显示考核员角色，显示检测员和环卫工角色的 员工-->
+				<if test="roleId == 3">
+				and t.role_id in(1,2)
+				</if>
+                <!-- 其它若是督察员查询上一班次考勤，显示考核员、检测员和环卫工角色的 员工-->
+			</where>
+			group by if(t.role_id = 2 or t.role_id = 3, CONCAT(t.area_id, '_', t.employee_id), t.point_id)
+	)a2 on a2.duty_off_time = a.duty_off_time and a2.duty_on_time = a.duty_on_time  and if(a.role_id = 2 or a.role_id = 3,  CONCAT(a.area_id,'_', a.employee_id), a.point_id) = a2.point_id
+	<where>
+		a.duty_off_time &lt; DATE_FORMAT(now(),'%H:%i:%s')
+		and a.recorddate = curdate()
+		<if test="areaId != 0">
+		and a.area_id = #{areaId}
+		</if>
+        <!-- 若是检测员查询上一班次考勤，不显示检测员角色的，显示环卫工角色的员工 -->
+        <if test="roleId == 2">
+        and a.role_id in(1)
+        </if>
+        <!-- 若考核员查询上一班次考勤，不显示考核员角色，显示检测员和环卫工角色的 员工-->
+        <if test="roleId == 3">
+        and a.role_id in(1,2)
+        </if>
+        <!-- 其它若是督察员查询上一班次考勤，显示考核员、检测员和环卫工角色的 员工-->                
+	</where>
+    </select>
+    
+    <!-- 查询出某个责任区下每个责任点针对当前时间的上一个班次有哪些员工，以及这些员工的上班时间集合。2016-12-29，不再使用这个 -->
+    <select id="selectLastBanciWorkPlansList1" parameterType="workPlansApp" resultType="com.czz.hwy.bean.user.app.AttendanceForPlansApp">
+    select  DISTINCT a.area_id dutyAreaId, a.employee_id employeeId, a1.duty_on_time dutyOnTime,a1.duty_off_time dutyOffTime,a.role_id roleId
+	from workplans a
+	join banci a1 on a.banzu_id = a1.banzu_id and a1.status = 1
+	join (
+			<!-- 获取每个责任点当前时间之前最大的上班时间段，注意检测员排班计划中没有保存责任点ID -->
+			select if(t.role_id = 2, CONCAT(t.area_id,'_', t.employee_id), t.point_id) point_id, MAX(t1.duty_on_time) duty_on_time,MAX(t1.duty_off_time) duty_off_time
+			from workplans t
+			join banci t1 on t.banzu_id = t1.banzu_id and t1.status = 1
+			<where>
+				t1.duty_off_time &lt; DATE_FORMAT(now(),'%H:%i:%s')
+				<if test="areaId != 0">
+				and t.area_id = #{areaId}
+				</if>
+				<!-- 若是检测员查询上一班次考勤，不显示检测员角色的，显示环卫工角色的员工 -->
+				<if test="roleId == 2">
+				and t.role_id in(1)
+				</if>
+				<!-- 若是督察员或考核员查询上一班次考勤，显示检测员和环卫工角色的 员工 -->
+				<if test="roleId != 2">
+				and t.role_id in(1,2)
+				</if>
+			</where>
+			group by if(t.role_id = 2, CONCAT(t.area_id, '_', t.employee_id), t.point_id)
+	)a2 on a2.duty_off_time = a1.duty_off_time and a2.duty_on_time = a1.duty_on_time  and if(a.role_id = 2,  CONCAT(a.area_id,'_', a.employee_id), a.point_id) = a2.point_id
+	<where>
+		a1.duty_off_time &lt; DATE_FORMAT(now(),'%H:%i:%s')
+		<if test="areaId != 0">
+		and a.area_id = #{areaId}
+		</if>
+		<!-- 若是检测员查询上一班次考勤，不显示检测员角色的，显示环卫工角色的员工 -->
+		<if test="roleId == 2">
+		and a.role_id in(1)
+		</if>
+		<!-- 若是督察员或考核员查询上一班次考勤，显示检测员和环卫工角色的 员工 -->
+		<if test="roleId != 2">
+		and a.role_id in(1,2)
+		</if>
+	</where>
+    </select>
+    
+    <!-- 根据排班计划获取检测员或考核员负责的责任区，2017-02-21 -->
+    <select id="getDutyAreaByEmployeeId" parameterType="java.lang.Integer" resultMap="base_result_map">
+        select distinct A.area_id, A.employee_id, B.area_name areaName, A.role_id
+          from workplans A
+          join dutyarea B on A.area_id = B.id and B.status = 1  
+         where A.employee_id = #{employeeId}
+         order by A.area_id
+    </select>
+    
+    <!-- 根据责任区ID获取当前责任区下的所有员工，2017-02-21 -->
+    <select id="getEmployeeInfoByDutyAreaId" parameterType="java.util.Map" resultType="java.util.Map">
+         <!-- 检测员下的所有员工 -->
+         <if test="roleId == 2">
+             select distinct t.employee_id employeeId, t1.showname userName, 
+                    t.area_id areaId, B.area_name areaName, D.name roleName
+               from user_area t
+               join users t1 on t.employee_id = t1.employee_id and t1.status = 1 and t1.role_id = 1
+               join dutyarea B on t.area_id = B.id and B.status = 1
+               join roles D on t1.role_id = D.value and D.status = 1               
+              where t.area_id = #{areaId}
+              order by employeeId
+         </if>
+         <!-- 考核员下的所有员工（需要将userArea表中的环卫工与workPlans表中的检测员进行合并） -->
+         <if test="roleId == 3">
+             (select distinct t.employee_id employeeId, t1.showname userName, 
+                     t.area_id areaId, B.area_name areaName, D.name roleName
+                from user_area t
+                join users t1 on t.employee_id = t1.employee_id and t1.status = 1 and t1.role_id = 1
+                join dutyarea B on t.area_id = B.id and B.status = 1
+                join roles D on t1.role_id = D.value and D.status = 1               
+               where t.area_id = #{areaId})
+               union all
+             (select distinct A.employee_id employeeId, C.showname userName, 
+                     A.area_id areaId, B.area_name areaName, D.name roleName
+                from workplans A
+                join dutyarea B on A.area_id = B.id and B.status = 1
+                join users C on A.employee_id = C.employee_id and C.status = 1
+                join roles D on C.role_id = D.value and D.status = 1
+               where A.area_id = #{areaId}
+                 and A.role_id = 2)
+               order by employeeId desc
+         </if>         
+    </select>  
+	
+	<!-- 根据员工ID和员工角色获取员工所在责任区，2017-04-25 -->
+	<select id="getAreaListByBeanApp" parameterType="workPlansApp" resultMap="base_result_map">
+		<!-- 环卫工所属责任区从所属责任区关系表中取得 -->
+	   	<if test="roleId == 1">
+		   select distinct area_id
+		   from user_area t 
+		   <where>
+		   	<if test="employeeId != 0">
+		   		and employee_id = #{employeeId}
+		   	</if>
+		   </where>
+	   	</if>
+	   
+	   <!-- 检测员，考核员根据排版计划取得 -->
+	   <if test="roleId != 1">
+		   select distinct area_id
+		   from workplans t 
+		   <where>
+		   	<if test="employeeId != 0">
+		   		and employee_id = #{employeeId}
+		   	</if>
+		   </where>
+		   
+		   union all
+		   
+		   select distinct area_id
+		   from relay t 
+		   <where>
+		   	<if test="employeeId != 0">
+		   		and employee_id = #{employeeId}
+		   	</if>
+		   </where>
+	   </if>
+	</select>
+	
+	<!-- 根据角色ID和责任区ID集合获取负责人列表(获取检测员、考核员或督察员列表)，2017-04-25 -->
+	<select id="getHeadPeopleListByMap" parameterType="java.util.Map" resultType="java.lang.String">
+	
+	<!-- 如果角色为检测员或考核员，从排班计划中获取 -->
+	<if test="roleId != 4">
+		 select distinct employee_id
+	     from workplans t 
+	     <where>
+	   	 <if test="roleId != 0">
+	   		and role_id = #{roleId}
+	   	 </if>
+	   	 <if test="areaIds != null || areaIds != '' ">
+	   		and area_id in (${areaIds})
+	   	 </if>
+	     </where>
+     </if>
+     
+     <!-- 如果角色为督察员，从用户列表中获取 -->
+	<if test="roleId == 4">
+		select DISTINCT employee_id 
+		from users t
+		<where>
+		status = 1
+		<if test="roleId != 0">
+		and t.role_id = #{roleId}
+		</if>
+		</where>
+	</if>
+	</select>
+ 
+</mapper>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.app.FinesCountApp" >
+	<resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.app.FinesCountApp" >
+	  <id column="id" property="id" jdbcType="INTEGER" />
+	  <result column="employee_id" property="employeeId" jdbcType="INTEGER"/>
+	  <result column="dept_id" property="deptId" jdbcType="INTEGER" />
+	  <result column="amount" property="amount" jdbcType="DOUBLE" />
+	  <result column="count" property="count" jdbcType="INTEGER" />
+	  <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+	  <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+	  <result column="month" property="month" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List" >
+	  id, employee_id, dept_id, amount, count, create_at, update_at, month
+	</sql>
+	
+	<!-- 根据bean获取罚款总计信息，2016-12-20 -->
+	<select id="getFinesCountAppByBeanApp" parameterType="com.czz.hwy.bean.manager.app.FinesCountApp" resultMap="BaseResultMap">
+		select 
+	    <include refid="Base_Column_List" />
+	    from finescount
+	    <where>
+	    <if test="id != 0" >
+	       and id = #{id,jdbcType=INTEGER}
+	      </if>
+	    <if test="employeeId != 0" >
+	        and employee_id = #{employeeId,jdbcType=INTEGER}
+	      </if>
+	      <if test="deptId != 0" >
+	        and dept_id = #{deptId,jdbcType=INTEGER}
+	      </if>
+	      <if test="amount != 0.0" >
+	        and amount = #{amount,jdbcType=DOUBLE}
+	      </if>
+	      <if test="count != 0" >
+	        and count = #{count,jdbcType=INTEGER}
+	      </if>
+	      <if test="createAt != null" >
+	        and create_at = #{createAt,jdbcType=TIMESTAMP}
+	      </if>
+	      <if test="updateAt != null" >
+	        and update_at = #{updateAt,jdbcType=TIMESTAMP}
+	      </if>
+	      <if test="month != null" >
+	        and date_format(month,'%Y-%m')=date_format(#{month,jdbcType=TIMESTAMP},'%Y-%m')
+	      </if>
+	    </where>
+	</select>
+	
+	<!-- 更新罚款总计信息，2016-12-20 -->
+	<update id="updateFinesCountByBeanApp" parameterType="com.czz.hwy.bean.manager.app.FinesCountApp">
+	 update finescount
+    <set >
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="deptId != null" >
+        dept_id = #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=DOUBLE},
+      </if>
+      <if test="count != null" >
+        count = #{count,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="month != null" >
+        month = #{month,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<!-- 新增罚款总计记录，2016-12-20 -->
+	<insert id="insertFinesAppByBeanApp" parameterType="com.czz.hwy.bean.manager.app.FinesCountApp">
+	insert into finescount 
+		(
+			id, 
+			employee_id, 
+			dept_id, 
+       	 	amount, 
+       	 	count, 
+       	 	create_at, 
+        	update_at, 
+        	month
+        )
+    values 
+    	(
+    		#{id,jdbcType=INTEGER}, 
+    		#{employeeId,jdbcType=INTEGER}, 
+    		#{deptId,jdbcType=INTEGER}, 
+            #{amount,jdbcType=DOUBLE}, 
+            #{count,jdbcType=INTEGER}, 
+            #{createAt,jdbcType=TIMESTAMP}, 
+            #{updateAt,jdbcType=TIMESTAMP}, 
+            #{month,jdbcType=TIMESTAMP}
+         )
+	</insert>
+</mapper>

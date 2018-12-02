@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.user.watch.Attendances">
+	<resultMap id="BaseResultMap" type="com.czz.hwy.bean.user.watch.Attendances">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+		<result column="attendance_date" property="attendanceDate"
+			jdbcType="TIMESTAMP" />
+		<result column="record_time" property="recordTime" jdbcType="TIMESTAMP" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="lat" property="lat" jdbcType="DOUBLE" />
+		<result column="lng" property="lng" jdbcType="DOUBLE" />
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, employee_id, attendance_date, record_time, address, lat, lng,
+		create_at
+	</sql>
+
+    <!-- 批量新增考勤轨迹记录  2016-08-30 -->
+    <insert id="batchAddAttendancesWatch" parameterType="List">
+        insert into attendances (
+            id, 
+            employee_id, 
+            attendance_date,
+            record_time, 
+            address, lat,
+            lng, 
+            create_at,
+            at_point,
+            is_exception
+        )
+        values
+         <foreach collection="list" item="item" index="index" separator=",">  
+             (
+                #{item.id,jdbcType=INTEGER},
+                #{item.employeeId,jdbcType=INTEGER},
+                #{item.attendanceDate,jdbcType=TIMESTAMP},
+                #{item.recordTime,jdbcType=TIMESTAMP}, 
+                #{item.address,jdbcType=VARCHAR},
+                #{item.lat,jdbcType=DOUBLE},
+                #{item.lng,jdbcType=DOUBLE}, 
+                #{item.createAt,jdbcType=TIMESTAMP},
+                #{item.atPoint,jdbcType=INTEGER},
+                #{item.isExcetion,jdbcType=INTEGER}
+             )
+         </foreach>
+    </insert>
+
+	<select id="getAttendancesById" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from attendances
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<!-- 张纪才 添加条件 <![CDATA[record_time<CURRENT_TIMESTAMP()]]> 20150826194600-->
+	<select id="getDateByBean" resultType="java.lang.String"
+		parameterType="com.czz.hwy.bean.user.watch.Attendances">
+		select DISTINCT DATE_FORMAT(record_time,'%Y-%m-%d') from attendances where
+		employee_id=#{employeeId} and <![CDATA[record_time<CURRENT_TIMESTAMP()]]> ORDER BY DATE_FORMAT(record_time,'%Y-%m-%d')
+		DESC limit #{row},10
+	</select>
+	<select id="getInfoByDate" resultMap="BaseResultMap"
+		parameterType="com.czz.hwy.bean.user.watch.Attendances">
+		select
+		<include refid="Base_Column_List"></include>
+		from attendances where employee_id=#{employeeId} and
+		DATE_FORMAT(record_time,'%Y-%m-%d')
+		=DATE_FORMAT(#{recordTime},'%Y-%m-%d')
+		and <![CDATA[TIMESTAMPDIFF(MINUTE,record_time,CURRENT_TIMESTAMP())<15 ]]>
+		and <![CDATA[TIMESTAMPDIFF(MINUTE,record_time,CURRENT_TIMESTAMP())>0]]>
+			<!-- 小于当前时间 -->
+		AND <![CDATA[record_time<CURRENT_TIMESTAMP()]]>
+		ORDER BY record_time asc
+	</select>
+	<select id="getInfoByDateForkaoqin" resultMap="BaseResultMap"
+		parameterType="com.czz.hwy.bean.user.watch.Attendances">
+		select
+		<include refid="Base_Column_List"></include>
+		from attendances where employee_id=#{employeeId} and
+		DATE_FORMAT(record_time,'%Y-%m-%d')
+		=DATE_FORMAT(#{recordTime},'%Y-%m-%d')
+			<!-- 小于当前时间 -->
+		AND <![CDATA[record_time<CURRENT_TIMESTAMP()]]>
+		ORDER BY record_time desc
+	</select>
+	<delete id="deleteAttendances" parameterType="java.lang.Integer">
+		delete from attendances
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	<!-- 新增一条考勤轨迹表，并记录是否在责任点的范围内 -->
+	<insert id="insertAttendances" parameterType="com.czz.hwy.bean.user.watch.Attendances">
+		insert into attendances (id, employee_id, attendance_date,
+		record_time, address, lat,
+		lng, create_at,at_point)
+		values (#{id,jdbcType=INTEGER}, #{employeeId,jdbcType=INTEGER},
+		#{attendanceDate,jdbcType=TIMESTAMP},
+		#{recordTime,jdbcType=TIMESTAMP}, #{address,jdbcType=VARCHAR},
+		#{lat,jdbcType=DOUBLE},
+		#{lng,jdbcType=DOUBLE}, #{createAt,jdbcType=TIMESTAMP},#{atPoint,jdbcType=INTEGER})
+	</insert>
+	
+    <!-- 将当天轨迹数据插入到用于地图查询的轨迹表中去,2016-09-20-->
+    <insert id="batchAddAttendancesForMapWatch" parameterType="List">
+        insert into attendancesformap (
+            id, 
+            employee_id, 
+            attendance_date,
+            record_time, 
+            address, lat,
+            lng, 
+            create_at,
+            at_point,
+            is_exception
+        )
+        values
+         <foreach collection="list" item="item" index="index" separator=",">  
+             (
+                #{item.id,jdbcType=INTEGER},
+                #{item.employeeId,jdbcType=INTEGER},
+                #{item.attendanceDate,jdbcType=TIMESTAMP},
+                #{item.recordTime,jdbcType=TIMESTAMP}, 
+                #{item.address,jdbcType=VARCHAR},
+                #{item.lat,jdbcType=DOUBLE},
+                #{item.lng,jdbcType=DOUBLE}, 
+                #{item.createAt,jdbcType=TIMESTAMP},
+                #{item.atPoint,jdbcType=INTEGER},
+                #{item.isExcetion,jdbcType=INTEGER}
+             )
+         </foreach>
+    </insert>	
+    
+    <!-- 根据员工ID，查询员工最后一次位置 -->
+    <select id="selectAttendancesByIdWatch" parameterType="String" resultType="com.czz.hwy.bean.user.Attendances">
+        SELECT t1.lat,t1.lng,t1.address from attendances t1 where id = (SELECT MAX(id) FROM attendances t2 where t2.employee_id = #{employeeId,jdbcType=VARCHAR})
+    </select>
+    
+    <!-- 根据考勤记录中的员工ID，上班时间，下班时间，日期获取按采集时间升序排列的在责任点的轨迹集合，2017-05-05  -->
+	<select id="getAttendancesListByAttPlansBeanForWatch" parameterType="com.czz.hwy.bean.user.watch.AttendanceForPlans" resultMap="BaseResultMap">
+	select * from attendancesformap
+	where employee_id = #{employeeId}
+	and DATE_FORMAT(record_time,'%Y-%m-%d') = DATE_FORMAT(#{recordDate},'%Y-%m-%d')
+	and DATE_FORMAT(record_time,'%H:%i:%s') &gt;= DATE_FORMAT(#{dutyOnTime},'%H:%i:%s')
+	and DATE_FORMAT(record_time,'%H:%i:%s') &lt;= DATE_FORMAT(#{dutyOffTime},'%H:%i:%s')
+	and at_point = 1
+	order by record_time
+	</select>
+    
+</mapper>

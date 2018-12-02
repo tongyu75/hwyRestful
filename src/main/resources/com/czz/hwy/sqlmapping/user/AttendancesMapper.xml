@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.user.Attendances">
+	<resultMap id="BaseResultMap" type="com.czz.hwy.bean.user.Attendances">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+		<result column="attendance_date" property="attendanceDate"
+			jdbcType="TIMESTAMP" />
+		<result column="record_time" property="recordTime" jdbcType="TIMESTAMP" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="lat" property="lat" jdbcType="DOUBLE" />
+		<result column="lng" property="lng" jdbcType="DOUBLE" />
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, employee_id, attendance_date, record_time, address, lat, lng,
+		create_at
+	</sql>
+	<select id="getAttendancesById" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from attendances
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+
+	<select id="getDateByBean" resultType="java.lang.String"
+		parameterType="com.czz.hwy.bean.user.Attendances">
+		select DISTINCT DATE_FORMAT(record_time,'%Y-%m-%d') from attendances where
+		employee_id=#{employeeId} ORDER BY DATE_FORMAT(record_time,'%Y-%m-%d')
+		DESC limit #{row},#{rows}
+	</select>
+	<select id="getInfoByDate" resultMap="BaseResultMap"
+		parameterType="com.czz.hwy.bean.user.Attendances">
+		select
+		<include refid="Base_Column_List"></include>
+		from attendances where employee_id=#{employeeId} and
+		DATE_FORMAT(record_time,'%Y-%m-%d')
+		=DATE_FORMAT(#{recordTime},'%Y-%m-%d')
+	</select>
+	<delete id="deleteAttendances" parameterType="java.lang.Integer">
+		delete from attendances
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insertAttendances" parameterType="com.czz.hwy.bean.user.Attendances">
+		insert into attendances (id, employee_id, attendance_date,
+		record_time, address, lat,
+		lng, create_at)
+		values (#{id,jdbcType=INTEGER}, #{employeeId,jdbcType=INTEGER},
+		#{attendanceDate,jdbcType=TIMESTAMP},
+		#{recordTime,jdbcType=TIMESTAMP}, #{address,jdbcType=VARCHAR},
+		#{lat,jdbcType=DOUBLE},
+		#{lng,jdbcType=DOUBLE}, #{createAt,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="com.czz.hwy.bean.user.Attendances">
+		insert into attendances
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="employeeId != null">
+				employee_id,
+			</if>
+			<if test="attendanceDate != null">
+				attendance_date,
+			</if>
+			<if test="recordTime != null">
+				record_time,
+			</if>
+			<if test="address != null">
+				address,
+			</if>
+			<if test="lat != null">
+				lat,
+			</if>
+			<if test="lng != null">
+				lng,
+			</if>
+			<if test="createAt != null">
+				create_at,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=INTEGER},
+			</if>
+			<if test="employeeId != null">
+				#{employeeId,jdbcType=INTEGER},
+			</if>
+			<if test="attendanceDate != null">
+				#{attendanceDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="recordTime != null">
+				#{recordTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="address != null">
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="lat != null">
+				#{lat,jdbcType=DOUBLE},
+			</if>
+			<if test="lng != null">
+				#{lng,jdbcType=DOUBLE},
+			</if>
+			<if test="createAt != null">
+				#{createAt,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateAttendances" parameterType="com.czz.hwy.bean.user.Attendances">
+		update attendances
+		<set>
+			<if test="employeeId != null">
+				employee_id = #{employeeId,jdbcType=INTEGER},
+			</if>
+			<if test="attendanceDate != null">
+				attendance_date = #{attendanceDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="recordTime != null">
+				record_time = #{recordTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="address != null">
+				address = #{address,jdbcType=VARCHAR},
+			</if>
+			<if test="lat != null">
+				lat = #{lat,jdbcType=DOUBLE},
+			</if>
+			<if test="lng != null">
+				lng = #{lng,jdbcType=DOUBLE},
+			</if>
+			<if test="createAt != null">
+				create_at = #{createAt,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.user.Attendances">
+		update attendances
+		set employee_id = #{employeeId,jdbcType=INTEGER},
+		attendance_date = #{attendanceDate,jdbcType=TIMESTAMP},
+		record_time = #{recordTime,jdbcType=TIMESTAMP},
+		address = #{address,jdbcType=VARCHAR},
+		lat = #{lat,jdbcType=DOUBLE},
+		lng = #{lng,jdbcType=DOUBLE},
+		create_at = #{createAt,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<!-- 张纪才 根据employee_id及当前日期获取人员考勤信息 -->
+	<select id="getAttendanceByEmployeeIdCurdate" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include> from attendances where employee_id=#{employeeId} 
+		<if test="isvalidate!=null and isvalidate!=0">
+			and isvalidate=#{isvalidate} 
+		</if>
+		<if test="ischeckattend!=null and ischeckattend!=0">
+			and ischeckattend=#{ischeckattend} 
+		</if>
+		<if test="f_date!=null">
+			<![CDATA[ and record_time>=#{f_date}]]>
+		</if>
+		<if test="t_date!=null">
+			<![CDATA[ and record_time<#{t_date}]]>
+		</if>
+		and date_format(attendance_date,'%Y%m%d')=current_date()
+		order by record_time asc
+	</select>
+	<!-- 张纪才 更新isvalidate状态为2表示已经扫描过 -->
+	<update id="sqlSessionTemplate" parameterType="java.lang.String">
+		update attendances set isvalidate=2
+		<where>
+			<if test="_parameter!=null and _parameter!=''">
+				id in (${_parameter})
+			</if>
+			<if test="_parameter==null or _parameter==''">
+				1!=1
+			</if>
+		</where>
+	</update>
+	
+	<!-- 获取某责任区，当前时间正在上班的员工的最新坐标。2016-09-14 -->
+	<select id="getNewCoorList" parameterType="Map" resultType="java.util.Map">
+	select DISTINCT  t2.area_name areaName,
+	if(t4.roles_value = 2,t2.area_name,t4.pointName) pointName,
+		t.employeeId , t1.showname employeeName,
+		t3.lat,t3.lng,
+		date_format(t3.record_time,'%Y-%m-%d %H:%i:%s') recordTime,
+		t1.tel,
+		t5.dept_name deptName
+	from attendanceforplans t
+	
+	join users t1 on t1.employee_id = t.employeeId and t1.status = 1 and (t1.role_id = 1 or t1.role_id = 2)
+	
+	join departments t5 on t1.dept_id = t5.dept_id and t5.status = 1 
+	
+	join dutyarea t2 on t2.id = t.duty_area and t2.status = 1
+	
+	join(
+		select b.employee_id,b.lat,b.lng,b.record_time from attendancesformap b 
+		<where>
+			<if test="dateStr != null and dateStr != ''">
+			and DATE_FORMAT(b.record_time,'%Y-%m-%d') = #{dateStr}
+			</if>
+			<if test="timeStr != null and timeStr != ''">
+			and DATE_FORMAT(b.record_time,'%H:%i') &lt;= #{timeStr}
+			</if>
+			<!-- <if test="beginTime != null and beginTime != ''">
+			and DATE_FORMAT(b.record_time,'%H:%i') &gt;= #{beginTime}
+			</if>
+			<if test="endTime != null and endTime != ''">
+			and DATE_FORMAT(b.record_time,'%H:%i') &lt;= #{endTime}
+			</if> -->
+			and EXISTS(
+				select c.employee_id,c.maxid from 
+					(select DISTINCT a.employee_id,max(a.id) maxid from attendancesformap a 
+						<where>
+							<if test="dateStr != null and dateStr != ''">
+							and DATE_FORMAT(a.record_time,'%Y-%m-%d') = #{dateStr}
+							</if>
+							<if test="timeStr != null and timeStr != ''">
+							and DATE_FORMAT(a.record_time,'%H:%i') &lt;= #{timeStr}
+							</if>
+							<!-- <if test="beginTime != null and beginTime != ''">
+							and DATE_FORMAT(a.record_time,'%H:%i') &gt;= #{beginTime}
+							</if>
+							<if test="endTime != null and endTime != ''">
+							and DATE_FORMAT(a.record_time,'%H:%i') &lt;= #{endTime}
+							</if> -->
+						</where>
+						group by a.employee_id 
+					) c
+				where b.id = c.maxid and b.employee_id = c.employee_id
+			)
+		</where>
+	)t3 on t.employeeId = t3.employee_id
+	
+	<!-- 关联取每个人的责任点名称拼接串 -->	
+	left join(
+		select a.employee_id employeeId,group_concat(b.point_name) pointName,a.roles_value 
+		from (
+			select DISTINCT aa.employee_id,aa.duty_point_id,aa.roles_value from dutyplans aa
+			where aa.STATUS = 1
+				<if test="areaId != null and areaId != ''">
+				AND aa.duty_area_id = #{areaId}
+				</if>	 
+		) a
+		join dutypoint b on a.duty_point_id = b.id and b.status = 1
+		GROUP BY a.employee_id
+	)t4 on t4.employeeId = t.employeeId
+	
+	<where>
+		<if test="dateStr != null and dateStr != ''">
+		 and t.recorddate = #{dateStr}
+		</if>
+		<if test="areaId != null and areaId != ''">
+		and t.duty_area = #{areaId}
+		</if>
+		<if test="timeStr != null and timeStr != ''">
+		and t.duty_on_time &lt;= #{timeStr} and t.duty_off_time &gt;= #{timeStr}
+		</if>
+	</where>
+	order by t.employeeId desc
+	</select>
+	
+	<!--获取某个员工所有的坐标点：某日期，某时间前所有的坐标点，2016-09-15  -->
+	<select id="getEmployeeOfCoorList"  parameterType="Map" resultType="Map">
+	select 	
+	t1.id,
+	t1.employeeId,
+	b.showname employeeName,
+	t1.lat,
+	t1.lng,
+	date_format(t1.record_time,'%Y-%m-%d %H:%i:%s') recordTime
+	from attendanceforplans a
+	join users b on a.employeeId = b.employee_id and b.status = 1
+	join(
+		select
+		t.id,
+		t.employee_id employeeId,
+		t.lat,
+		t.lng,
+		t.record_time
+		from attendancesformap t
+		<where>
+			<if test="dateStr != null and dateStr != ''">
+			 and DATE_FORMAT(t.record_time,'%Y-%m-%d') = #{dateStr}
+			</if>
+		</where>
+		order by t.record_time
+	) t1 
+	on a.employeeId = t1.employeeId
+	and  date_format(t1.record_time,'%H:%i:%s') &gt;= DATE_FORMAT(a.duty_on_time,'%H:%i:%s')
+	and  date_format(t1.record_time,'%H:%i:%s') &lt;= DATE_FORMAT(a.duty_off_time,'%H:%i:%s')
+	<where>
+		<if test="dateStr != null and dateStr != ''">
+		 and a.recorddate = #{dateStr}
+		</if>
+		<if test="areaId != null and areaId != ''">
+		and a.duty_area = #{areaId}
+		</if>
+		<if test="timeStr != null and timeStr != ''">
+		and a.duty_on_time &lt;= #{timeStr} and a.duty_off_time &gt;= #{timeStr}
+		</if>
+		<if test="employeeName != null and employeeName != ''">
+		and b.showname like concat('%',#{employeeName},'%')
+		</if>
+	</where>
+	</select>
+	
+	<!-- 获取某责任区，当前时间正在上班的员工的最新的两个坐标。2016-09-26 -->
+	<select id="getNewTwoCoorList" parameterType="Map" resultType="java.util.Map">
+	select DISTINCT  t2.area_name areaName,
+	if(t4.roles_value = 2,t2.area_name,t4.pointName) pointName,
+		t.employeeId , t1.showname employeeName,
+		t3.lat,t3.lng,
+		date_format(t3.record_time,'%Y-%m-%d %H:%i:%s') recordTime
+	from attendanceforplans t
+	
+	join users t1 on t1.employee_id = t.employeeId and t1.status = 1
+	
+	join dutyarea t2 on t2.id = t.duty_area and t2.status = 1
+	
+	join(
+		SELECT a.employee_id,a.lat,a.lng,a.record_time
+		FROM attendancesformap a
+		LEFT JOIN attendancesformap b
+		ON a.employee_id = b.employee_id  AND a.record_time &lt;= b.record_time
+		<where> 
+			<if test="dateStr != null and dateStr != ''">
+			and DATE_FORMAT(a.record_time,'%Y-%m-%d') = #{dateStr}
+			</if>
+			<if test="timeStr != null and timeStr != ''">
+			and DATE_FORMAT(a.record_time,'%H:%i') &lt;= #{timeStr}
+			</if>
+			<if test="dateStr != null and dateStr != ''">
+			and DATE_FORMAT(b.record_time,'%Y-%m-%d') = #{dateStr}
+			</if>
+			<if test="timeStr != null and timeStr != ''">
+			and DATE_FORMAT(b.record_time,'%H:%i') &lt;= #{timeStr}
+			</if>
+		</where>
+		GROUP BY a.id
+		HAVING COUNT(1) &lt;= 2
+		ORDER BY a.employee_id,a.record_time desc
+	)t3 on t.employeeId = t3.employee_id
+	
+	<!-- 关联取每个人的责任点名称拼接串 -->	
+	left join(
+		select a.employee_id employeeId,group_concat(b.point_name) pointName,a.roles_value 
+		from (
+			select DISTINCT aa.employee_id,aa.duty_point_id,aa.roles_value from dutyplans aa
+			where aa.STATUS = 1
+				<if test="areaId != null and areaId != ''">
+				AND aa.duty_area_id = #{areaId}
+				</if>	 
+		) a
+		join dutypoint b on a.duty_point_id = b.id and b.status = 1
+		GROUP BY a.employee_id
+	)t4 on t4.employeeId = t.employeeId
+	
+	<where>
+		<if test="dateStr != null and dateStr != ''">
+		 and t.recorddate = #{dateStr}
+		</if>
+		<if test="areaId != null and areaId != ''">
+		and t.duty_area = #{areaId}
+		</if>
+		<if test="timeStr != null and timeStr != ''">
+		and t.duty_on_time &lt;= #{timeStr} and t.duty_off_time &gt;= #{timeStr}
+		</if>
+	</where>
+	order by t.employeeId desc
+	</select>
+	
+    <!-- 获取出勤信息时，获取坐标内容。2016-11-15 -->
+    <select id="getAttendancesCoordinate" parameterType="Map" resultType="java.util.Map">
+<!--         select  1 type, A.lat, A.lng, date_format(A.record_time, '%Y.%m.%d %H:%i') recordTime, A.address 
+          from attendances A
+         where A.employee_id = #{employeeId}
+           and date_format(A.record_time, '%Y-%m-%d') = #{attendanceTime}
+           and date_format(A.record_time, '%H:%i:%s') &gt;  date_format(date_sub(CONCAT('1977-01-01 ', #{dutyOnTime}, ':00'),interval 60 minute),'%H:%i:%s')
+           and date_format(A.record_time, '%H:%i:%s') &lt; CONCAT(#{dutyOnTime}, ':00')
+         union all
+                select  2 type, B.lat, B.lng, date_format(B.record_time, '%Y.%m.%d %H:%i') recordTime, B.address 
+          from attendances B
+         where B.employee_id = #{employeeId}
+           and date_format(B.record_time, '%Y-%m-%d') = #{attendanceTime}
+           and date_format(B.record_time, '%H:%i:%s') &gt;= CONCAT(#{dutyOnTime},':00') 
+           and date_format(B.record_time, '%H:%i:%s') &lt;= CONCAT(#{dutyOffTime},':00') 
+         order by recordTime -->
+         select B.lat, B.lng, date_format(B.record_time, '%Y.%m.%d %H:%i') recordTime, B.address 
+          from attendances B
+         where B.employee_id = #{employeeId}
+           and date_format(B.record_time, '%Y-%m-%d') = #{attendanceTime}
+           and date_format(B.record_time, '%H:%i:%s') &gt;= CONCAT(#{dutyOnTime},':00') 
+           and date_format(B.record_time, '%H:%i:%s') &lt;= CONCAT(#{dutyOffTime},':00') 
+         order by recordTime
+    </select>	
+    
+    <!-- 获取经纬度信息，用于当前用户轨迹的查看。2016-11-21 -->
+    <select id="getCoordinateForUsrePath" parameterType="Map" resultType="java.util.Map">
+        select A.at_point atPoint, A.lat, A.lng, date_format(A.record_time, '%Y-%m-%d %H:%i:%s') recordTime, A.address, A.employee_id employeeId
+          from attendancesformap A 
+          join workplans B on A.employee_id = B.employee_id
+        <where>
+            <if test="startTimeStr != null and startTimeStr != ''">
+                and date_format(A.record_time, '%H:%i:%s') &gt;= #{startTimeStr}
+            </if>
+            <if test="endTimeStr != null and endTimeStr != ''">
+                and date_format(A.record_time, '%H:%i:%s') &lt;= #{endTimeStr}
+            </if>            
+            <if test="areaId != null and areaId != ''">
+                and B.area_id = #{areaId}
+            </if>    
+           and A.employee_id = #{employeeId}
+           and date_format(A.record_time, '%Y-%m-%d') = date_format(now(), '%Y-%m-%d')
+        </where>
+         order by A.record_time
+    </select>       
+</mapper>

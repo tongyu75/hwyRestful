@@ -1,0 +1,126 @@
+ <!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=MXDf0gIa6ce8G7anDfMCkyWxb21Tkj4Q"></script>
+<script type="text/javascript" src="../jquery-1.7.2.min.js"></script>
+<title>测试接口</title>
+</head>
+<body>
+	<div id="allmap"></div>
+</body>
+<script type="text/javascript">
+	//banzhuId ,banzhuName,createUserId,createAt,updateUserid,updateAt
+	$(function() {
+		
+
+		//查询上一个班次的考勤记录
+		$.ajax({
+           url :'http://192.168.1.18:8080/hwyRestful/attInspectAppController/lastBanciAttendanceList',
+           //url :'http://218.95.176.67:8088/hwyRestful/attendanceForPlansAppController/workPlans/167/2016-12-15%2018:40:00',
+			async : true,
+			type : 'get', 
+			dataType : "json",
+			data : {
+				acceptContent:
+					JSON.stringify(
+						{
+							"roleId" : 2,
+				            "areaId" : 3
+						}
+
+					)
+			} , 
+			xhrFields: {withCredentials: true},
+         	crossDomain: true,
+			// contentType : "application/x-www-form-urlencoded",
+			//contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		});   
+		
+		 $.ajax({
+	           url :'http://192.168.1.18:8080/hwyRestful/attInspectAppController/lastBanciAttendanceListForMOV',
+	           //url :'http://218.95.176.67:8088/hwyRestful/attendanceForPlansAppController/workPlans/167/2016-12-15%2018:40:00',
+				async : true,
+				type : 'get', 
+				dataType : "json",
+				data : {
+					acceptContent:
+						JSON.stringify(
+							{
+								"roleId" : 2,
+					            "areaId" : 3
+							}
+
+						)
+				} , 
+				xhrFields: {withCredentials: true},
+	         	crossDomain: true,
+				// contentType : "application/x-www-form-urlencoded",
+				//contentType : "application/json;charset=UTF-8",
+				success : function(data) {
+					console.log(data);
+				}
+			});  
+ 
+		//修改下班状态	
+		 /* $.ajax({
+	           url :'http://192.168.1.5:8080/hwyRestful/attInspectAppController/offStatus',
+				async : true,
+				type : 'post', 
+				dataType : "json",
+				data : {
+					acceptContent:
+						JSON.stringify(
+							
+							{
+								"employeeId" : 3,
+								"dutyOnTime": "1970-01-01 10:00:00",
+								"dutyOffTime" : "1970-01-01 14:00:00",
+								"status" : 1,
+								"offStatusReason" : "保持原有状态"
+							}
+
+						)
+				} , 
+				xhrFields: {withCredentials: true},
+	         	crossDomain: true,
+				// contentType : "application/x-www-form-urlencoded",
+				//contentType : "application/json;charset=UTF-8",
+				success : function(data) {
+					console.log(data);
+				}
+			});  */ 
+ 
+
+	/* {
+		"employeeId" : 8005,
+		"dutyOnTime": "1970-01-01 09:00:00",
+		"dutyOffTime" : "1970-01-01 14:00:00",
+		"status" : 3,
+		"offStatusReason" : "未上班该为正常"
+	} */
+		
+		/* {
+			"employeeId" : 8005,
+			"dutyOnTime": "1970-01-01 09:00:00",
+			"dutyOffTime" : "1970-01-01 14:00:00",
+			"status" : 2,
+			"offStatusReason" : "早退该为正常"
+		} */
+			
+		/* {
+		"employeeId" : 8005,
+		"dutyOnTime": "1970-01-01 09:00:00",
+		"dutyOffTime" : "1970-01-01 14:00:00",
+		"status" : 1,
+		"offStatusReason" : "保持原有状态不动"
+	} */
+	
+	});
+</script>
+
+

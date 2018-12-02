@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.czz.hwy.bean.manager.CheckParameter">
+	<resultMap id="checkParameterBean" type="com.czz.hwy.bean.manager.CheckParameter">
+		<result property="id" column="id" />
+		<result property="passCount" column="pass_count" />
+		<result property="accessRate" column="access_rate" />
+		<result property="createAt" column="create_at" />
+	</resultMap>
+	<insert id="insertCheckParameter" parameterType="com.czz.hwy.bean.manager.CheckParameter">
+		insert into
+		check_parameter
+		values(#{passCount},#{accessRate},#{createAt})
+	</insert>
+
+	<select id="getCheckParameterInfo" parameterType="com.czz.hwy.bean.manager.CheckParameter"
+		resultType="AdminLogs">
+		select * from check_parameter
+		<where>
+			<if test="id !=0">
+				and id=#{id}
+			</if>
+			<if test="passCount !=null">
+				and pass_count=#{passCount}
+			</if>
+			<if test="accessRate !=0">
+				and access_rate=#{accessRate}
+			</if>
+			<if test="#{createAt} !=''">
+				and create_at=#{createAt}
+			</if>
+		</where>
+	</select>
+
+	<select id="getAllCheckParameterInfo" resultMap="checkParameterBean">
+		select * from
+		check_parameter
+	</select>
+
+	<select id="getCheckParameterById" parameterType="java.lang.Integer"
+		resultType="Users">
+		select * from check_parameter where id=#{id}
+	</select>
+
+	<select id="getCountById" parameterType="java.lang.Integer"
+		resultType="java.lang.Integer">
+		select count(*) from AppLogs where id=#{id}
+	</select>
+
+	<delete id="deleteCheckParameter" parameterType="com.czz.hwy.bean.manager.CheckParameter">
+		delete from check_parameter
+		where id=#{id}
+	</delete>
+
+	<update id="updateCheckParameter" parameterType="com.czz.hwy.bean.manager.CheckParameter">
+		UPDATE check_parameter
+		<set>
+			<if test="passCount !=null">
+				 pass_count=#{passCount},
+			</if>
+			<if test="accessRate !=0">
+				 access_rate=#{accessRate},
+			</if>
+			<if test="#{createAt} !=''">
+				 create_at=#{createAt},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+</mapper>

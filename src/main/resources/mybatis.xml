@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="logImpl" value="LOG4J"/>  
+	</settings>
+	<typeAliases>
+		
+		<!-- ===================================后台系统 实体类,开始====================================== --> 
+		
+        <typeAlias alias="leave" type="com.czz.hwy.bean.manager.Leave" /> 	
+        <typeAlias alias="dutyRecode" type="com.czz.hwy.bean.user.DutyRecode" />
+        <typeAlias alias="attendances" type="com.czz.hwy.bean.user.Attendances" />
+        <typeAlias alias="dutyArea" type="com.czz.hwy.bean.area.DutyArea" />
+        <typeAlias alias="checkGram" type="com.czz.hwy.bean.mission.CheckGram" />
+        <typeAlias alias="attendanceForPlans" type="com.czz.hwy.bean.user.AttendanceForPlans"/>        
+        <typeAlias alias="app" type="com.czz.hwy.bean.version.App" /> 
+        <typeAlias alias="banZu" type="com.czz.hwy.bean.mission.BanZu" />
+        <typeAlias alias="banci" type="com.czz.hwy.bean.mission.Banci" />
+        <typeAlias alias="dutyForBanci" type="com.czz.hwy.bean.mission.DutyForBanci"/> 
+        <typeAlias alias="dutyPlans" type="com.czz.hwy.bean.mission.DutyPlans" />
+        <typeAlias alias="dutyPoint" type="com.czz.hwy.bean.area.DutyPoint" />
+        <typeAlias alias="userArea" type="com.czz.hwy.bean.mission.UserArea" />
+        <typeAlias alias="workPlans" type="com.czz.hwy.bean.mission.WorkPlans" />
+        <typeAlias alias="relay" type="com.czz.hwy.bean.mission.Relay" />
+        <typeAlias alias="roles" type="com.czz.hwy.bean.user.Roles" />
+        <typeAlias alias="departments" type="com.czz.hwy.bean.user.Departments" />
+        <typeAlias alias="noQualifiedNumber" type="com.czz.hwy.bean.mission.NoQualifiedNumber" />
+        <typeAlias alias="checkTime" type="com.czz.hwy.bean.mission.CheckTime" />
+        <typeAlias alias="adminLogs" type="com.czz.hwy.bean.manager.AdminLogs" />
+        <typeAlias alias="boderPointFile" type="com.czz.hwy.bean.area.BoderPointFile" />
+        <typeAlias alias="dutyPointGather" type="com.czz.hwy.bean.area.DutyPointGather" />
+        <typeAlias alias="coverWork" type="com.czz.hwy.bean.manager.CoverWork" />        
+        <typeAlias alias="taskInformation" type="com.czz.hwy.bean.mission.TaskInformation"/>         
+        <typeAlias alias="taskPojo" type="com.czz.hwy.bean.mission.TaskInformationPojo"/>            
+        <typeAlias alias="leave" type="com.czz.hwy.bean.manager.Leave" />             
+        <typeAlias alias="subTopics" type="com.czz.hwy.bean.manager.SubTopics" />   
+        <typeAlias alias="topics" type="com.czz.hwy.bean.manager.Topics" />        
+        <typeAlias alias="bindingInformation" type="com.czz.hwy.bean.user.BindingInformation" />        
+        <typeAlias alias="oneClickAlarm" type="com.czz.hwy.bean.manager.OneClickAlarm"/> 
+        <typeAlias alias="evalType" type="com.czz.hwy.bean.manager.EvalTypes"/> 
+        <typeAlias alias="evaluations" type="com.czz.hwy.bean.manager.Evaluations"/> 
+        <typeAlias alias="message" type="com.czz.hwy.bean.manager.Message"/>
+        <typeAlias alias="reports" type="com.czz.hwy.bean.mission.Reports" />
+        <typeAlias alias="users" type="com.czz.hwy.bean.user.Users" />
+        <typeAlias alias="evalTypeCheck" type="com.czz.hwy.bean.manager.EvalTypeCheck"/>  
+         <typeAlias alias="reportInfo" type="com.czz.hwy.bean.mission.ReportInfo"/>
+         <typeAlias alias="employee" type="com.czz.hwy.bean.user.Employee" />
+         <typeAlias alias="employeeConfig" type="com.czz.hwy.bean.user.EmployeeConfig" />
+         <typeAlias alias="employeeSelect" type="com.czz.hwy.bean.user.EmployeeSelect" />       
+        <!-- ===================================后台系统 实体类,结束====================================== --> 
+        
+        
+        <!-- ===================================App 实体类,开始====================================== --> 
+        
+        <typeAlias alias="dutyAreaApp" type="com.czz.hwy.bean.area.app.DutyAreaApp"/>   
+        <typeAlias alias="dutyPointApp" type="com.czz.hwy.bean.area.app.DutyPointApp"/>  
+        <typeAlias alias="workPlansApp" type="com.czz.hwy.bean.mission.app.WorkPlansApp"/> 
+        <typeAlias alias="checkTimeForSelectApp" type="com.czz.hwy.bean.mission.app.CheckTimeForSelectApp"/>  
+        <typeAlias alias="checkTimeApp" type="com.czz.hwy.bean.mission.app.CheckTimeApp"/> 
+        <typeAlias alias="checkDutyApp" type="com.czz.hwy.bean.mission.app.CheckDutyApp"/>   
+        <typeAlias alias="checkImageApp" type="com.czz.hwy.bean.mission.app.CheckImageApp"/>  
+        <typeAlias alias="evalTypeApp" type="com.czz.hwy.bean.mission.app.EvalTypeApp"/>  
+        <typeAlias alias="workInfoApp" type="com.czz.hwy.bean.mission.app.WorkInfoApp"/>  
+        <typeAlias alias="attendanceForPlansApp" type="com.czz.hwy.bean.user.app.AttendanceForPlansApp"/>
+        <typeAlias alias="leaveApp" type="com.czz.hwy.bean.manager.app.LeaveApp"/>     
+        <typeAlias alias="taskInformationApp" type="com.czz.hwy.bean.mission.app.TaskInformationApp"/>  
+        <typeAlias alias="worksForHwyApp" type="com.czz.hwy.bean.mission.app.WorksForHwyApp"/>   
+        <typeAlias alias="qualifiedNumberApp" type="com.czz.hwy.bean.mission.app.QualifiedNumberApp"/>               
+        <typeAlias alias="coverWorkApp" type="com.czz.hwy.bean.manager.app.CoverWorkApp" />        
+        <typeAlias alias="relayApp" type="com.czz.hwy.bean.mission.app.RelayApp" />
+        <typeAlias alias="evalTypeCheckApp" type="com.czz.hwy.bean.mission.app.EvalTypeCheckApp" />
+        <typeAlias alias="evaluationsApp" type="com.czz.hwy.bean.mission.app.EvaluationsApp" />
+        <typeAlias alias="usersApp" type="com.czz.hwy.bean.user.app.UsersApp" />
+        <typeAlias alias="checkGramApp" type="com.czz.hwy.bean.mission.app.CheckGramApp"/> 
+        <typeAlias alias="subTopicsApp" type="com.czz.hwy.bean.manager.app.SubTopicsApp"/> 
+        <typeAlias alias="finesDetailApp" type="com.czz.hwy.bean.manager.app.FinesDetailApp"/> 
+        <typeAlias alias="finesCountApp" type="com.czz.hwy.bean.manager.app.FinesCountApp"/> 
+        <typeAlias alias="checkGramForSelectApp" type="com.czz.hwy.bean.mission.app.CheckGramForSelectApp"/> 
+        <typeAlias alias="reportsApp" type="com.czz.hwy.bean.mission.app.ReportsApp"/> 
+        <typeAlias alias="reportsDutyApp" type="com.czz.hwy.bean.mission.app.ReportDutyApp"/> 
+        <typeAlias alias="attendanceForPointApp" type="com.czz.hwy.bean.user.app.AttendanceForPointApp"/>
+        <typeAlias alias="topicsApp" type="com.czz.hwy.bean.manager.app.TopicsApp" />          
+        <typeAlias alias="messageApp" type="com.czz.hwy.bean.manager.app.MessageApp"/>
+        <typeAlias alias="toiletInformationApp" type="com.czz.hwy.bean.manager.app.ToiletInformationApp"/>   
+        <typeAlias alias="reportsCountApp" type="com.czz.hwy.bean.mission.app.ReportsCountApp"/>       
+        <typeAlias alias="reportInfoApp" type="com.czz.hwy.bean.mission.app.ReportInfoApp"/>       
+        <!-- ===================================App 实体类,结束====================================== --> 
+                     
+        <!-- <typeAlias alias="checkGram" type="com.czz.hwy.bean.mission.CheckGram" />
+		<typeAlias alias="checkImage" type="com.czz.hwy.bean.mission.CheckImage" />
+		<typeAlias alias="reports" type="com.czz.hwy.bean.mission.Reports" />
+		<typeAlias alias="reportTypes" type="com.czz.hwy.bean.mission.ReportTypes" />
+		<typeAlias alias="workTypes" type="com.czz.hwy.bean.mission.WorkTypes" />
+		<typeAlias alias="app" type="com.czz.hwy.bean.version.App" />
+		<typeAlias alias="areaManagerFile" type="com.czz.hwy.bean.area.AreaManagerFile" />
+		<typeAlias alias="pointParameter" type="com.czz.hwy.bean.area.PointParameter" />
+		<typeAlias alias="dutyPointGather" type="com.czz.hwy.bean.area.DutyPointGather" />
+		<typeAlias alias="boderPointFile" type="com.czz.hwy.bean.area.BoderPointFile" />
+		<typeAlias alias="apperrLogs" type="com.czz.hwy.bean.manager.ApperrLogs" />
+		<typeAlias alias="appLogs" type="com.czz.hwy.bean.manager.AppLogs" />
+		<typeAlias alias="checkParameter" type="com.czz.hwy.bean.manager.CheckParameter" />
+		<typeAlias alias="evalPoint" type="com.czz.hwy.bean.area.EvalPoint" />
+		<typeAlias alias="evaluations" type="com.czz.hwy.bean.manager.Evaluations" />
+		<typeAlias alias="finesCount" type="com.czz.hwy.bean.manager.FinesCount" />
+		<typeAlias alias="finesDetail" type="com.czz.hwy.bean.manager.FinesDetail" />
+		<typeAlias alias="standardFines" type="com.czz.hwy.bean.manager.StandardFines" />
+		<typeAlias alias="subTopics" type="com.czz.hwy.bean.manager.SubTopics" />
+		<typeAlias alias="topics" type="com.czz.hwy.bean.manager.Topics" />
+		<typeAlias alias="avatars" type="com.czz.hwy.bean.user.Avatars" />
+		<typeAlias alias="checkDuty" type="com.czz.hwy.bean.mission.CheckDuty" />
+		<typeAlias alias="checkTime" type="com.czz.hwy.bean.mission.CheckTime" />
+		<typeAlias alias="departments" type="com.czz.hwy.bean.user.Departments" />
+		<typeAlias alias="feedBacks" type="com.czz.hwy.bean.user.FeedBacks" />
+		<typeAlias alias="reportDuty" type="com.czz.hwy.bean.mission.ReportDuty" />
+		<typeAlias alias="roles" type="com.czz.hwy.bean.user.Roles" />
+		<typeAlias alias="trackMap" type="com.czz.hwy.bean.mission.TrackMap" />
+		<typeAlias alias="users" type="com.czz.hwy.bean.user.Users" />
+		<typeAlias alias="kindInfo" type="com.czz.hwy.bean.mission.KindInfo" />
+		<typeAlias alias="attendanceForDuty" type="com.czz.hwy.bean.user.AttendanceForDuty" />
+		<typeAlias alias="checktype" type="com.czz.hwy.bean.syspar.CheckType"/>
+		<typeAlias alias="checkstandard" type="com.czz.hwy.bean.syspar.CheckStandard"/>
+		<typeAlias alias="finesstandard" type="com.czz.hwy.bean.syspar.FinesStandard"/>
+		<typeAlias alias="pointpar" type="com.czz.hwy.bean.syspar.Pointpar"/>
+		<typeAlias alias="message" type="com.czz.hwy.bean.manager.Message"/>
+		<typeAlias alias="appealFines" type="com.czz.hwy.bean.manager.AppealFines"/>
+	    <typeAlias alias="pushMessage" type="com.czz.hwy.bean.manager.PushMessage" />
+	    <typeAlias alias="attendanceForPlans" type="com.czz.hwy.bean.user.AttendanceForPlans"/>
+	    <typeAlias alias="defaultSalary" type="com.czz.hwy.bean.manager.DefaultSalary"/>
+	    <typeAlias type="com.czz.hwy.bean.mission.TaskInformation" alias="taskInformation"/>
+        <typeAlias alias="articleInfo" type="com.czz.hwy.bean.manager.ArticleInfo" />
+        <typeAlias alias="articleTypes" type="com.czz.hwy.bean.manager.ArticleTypes" />
+        <typeAlias alias="articleTypesManage" type="com.czz.hwy.bean.manager.ArticleTypesManage" />	       
+ 		<typeAlias alias="salaryDetail" type="com.czz.hwy.bean.manager.SalaryDetail"/>  
+ 		<typeAlias alias="oneClickAlarm" type="com.czz.hwy.bean.manager.OneClickAlarm"/> 
+ 		<typeAlias alias="oneClickAlarm" type="com.czz.hwy.bean.manager.OneClickAlarm"/>
+        <typeAlias alias="coverWork" type="com.czz.hwy.bean.manager.CoverWork" />
+ 		<typeAlias alias="hwgLoginStatus" type="com.czz.hwy.bean.manager.HwgLoginStatus"/> 	  -->
+    </typeAliases>
+	<mappers>
+		
+		 <!-- ===================================后台系统,开始====================================== --> 
+		 
+        <mapper resource="com/czz/hwy/sqlmapping/manager/LeaveMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/user/AttendancesMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/user/DutyRecodeMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/area/DutyAreaMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/mission/CheckGramMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/user/AttendanceForPlansMapper.xml"/>        
+        <mapper resource="com/czz/hwy/sqlmapping/version/AppMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/mission/BanZuMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/mission/BanciMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/mission/DutyForBanciMapper.xml" />	
+        <mapper resource="com/czz/hwy/sqlmapping/mission/DutyPlansMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/area/DutyPointMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/mission/UserAreaMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/mission/WorkPlansMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/user/UsersMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/mission/RelayMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/user/DepartmentsMapper.xml" />        
+        <mapper resource="com/czz/hwy/sqlmapping/user/RolesMapper.xml" />        
+        <mapper resource="com/czz/hwy/sqlmapping/mission/NoQualifiedNumberMapper.xml" />        
+        <mapper resource="com/czz/hwy/sqlmapping/mission/CheckTimeMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/manager/AdminLogsMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/area/BoderPointFileMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/area/DutyPointGatherMapper.xml" />        
+        <mapper resource="com/czz/hwy/sqlmapping/manager/SubTopicsMapper.xml" />        
+        <mapper resource="com/czz/hwy/sqlmapping/manager/OneClickAlarmMapper.xml" />   
+    	<mapper resource="com/czz/hwy/sqlmapping/manager/EvalTypeMapper.xml" />   
+    	<mapper resource="com/czz/hwy/sqlmapping/manager/EvaluationsMapper.xml" /> 
+        <mapper resource="com/czz/hwy/sqlmapping/manager/MessageMapper.xml"/>
+        <mapper resource="com/czz/hwy/sqlmapping/manager/TopicsMapper.xml" />        
+        <mapper resource="com/czz/hwy/sqlmapping/mission/ReportsMapper.xml" />  
+        <mapper resource="com/czz/hwy/sqlmapping/mission/TaskInformationMapper.xml" /> 
+        <mapper resource="com/czz/hwy/sqlmapping/manager/CoverWorkMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/manager/EvalTypeCheckMapper.xml" />
+         <mapper resource="com/czz/hwy/sqlmapping/mission/ReportInfoMapper.xml" />
+         <mapper resource="com/czz/hwy/sqlmapping/user/EmployeeMapper.xml" />
+         <mapper resource="com/czz/hwy/sqlmapping/user/EmployeeConfigMapper.xml" />
+         <mapper resource="com/czz/hwy/sqlmapping/user/EmployeeSelectMapper.xml" />   
+         <!-- ===================================后台系统,结束====================================== --> 
+        
+                
+         <!-- ===================================APP,开始====================================== --> 
+         
+        <mapper resource="com/czz/hwy/sqlmapping/manager/app/CoverWorkAppMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/BanZuAppMapper.xml" />        
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/RelayAppMapper.xml" />        
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/WorkPlansAppMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/area/app/DutyAreaAppMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/area/app/DutyPointAppMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/user/app/AttendanceForPlansAppMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/CheckTimeAppMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/CheckDutyAppMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/CheckImageAppMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/manager/app/LeaveAppMapper.xml" />  
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/TaskInformationAppMapper.xml" />  
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/QualifiedNumberAppMapper.xml" />  
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/EvalTypeAppMapper.xml" />  
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/EvalTypeCheckAppMapper.xml" /> 
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/EvaluationsAppMapper.xml" /> 
+        <mapper resource="com/czz/hwy/sqlmapping/user/app/UsersAppMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/CheckGramAppMapper.xml" />  
+        <mapper resource="com/czz/hwy/sqlmapping/manager/app/SubTopicsAppMapper.xml" />  
+        <mapper resource="com/czz/hwy/sqlmapping/manager/app/FinesDetailAppMapper.xml" />  
+        <mapper resource="com/czz/hwy/sqlmapping/manager/app/FinesCountAppMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/ReportsAppMapper.xml" />  
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/ReportDutyAppMapper.xml" />    
+        <mapper resource="com/czz/hwy/sqlmapping/user/app/AttendanceForPointAppMapper.xml" />    
+        <mapper resource="com/czz/hwy/sqlmapping/manager/app/TopicsAppMapper.xml" />            
+        <mapper resource="com/czz/hwy/sqlmapping/manager/app/MessageAppMapper.xml"/>
+        <mapper resource="com/czz/hwy/sqlmapping/manager/app/ToiletInformationAppMapper.xml" />        
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/ReportsCountAppMapper.xml" />  
+        <mapper resource="com/czz/hwy/sqlmapping/mission/app/ReportInfoAppMapper.xml" />  
+        <!-- ===================================APP,结束====================================== -->        
+        
+        
+        
+        <!-- ===================================Watch,结束====================================== -->  
+              
+        <mapper resource="com/czz/hwy/sqlmapping/mission/watch/DutyPlansWatchMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/user/watch/UsersWatchMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/user/watch/AttendanceForPlansWatchMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/mission/watch/TaskInformationWatchMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/mission/watch/DutyPlansWatchMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/mission/watch/WorkPlansWatchMapper.xml" />      
+        <mapper resource="com/czz/hwy/sqlmapping/manager/watch/LeaveWatchMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/manager/watch/SubTopicsWatchMapper.xml" />      
+        <mapper resource="com/czz/hwy/sqlmapping/manager/watch/TopicsWatchMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/version/watch/AppWatchMapper.xml" />        
+        <mapper resource="com/czz/hwy/sqlmapping/user/watch/BindingInformationWatchMapper.xml" />    
+        <mapper resource="com/czz/hwy/sqlmapping/user/watch/AttendancesWatchMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/area/watch/DutyPointGatherWatchMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/manager/watch/OneClickAlarmWatchMapper.xml" />  
+         <!-- ===================================Watch,结束====================================== -->        
+
+        <!-- <mapper resource="com/czz/hwy/sqlmapping/mission/CheckGramMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/mission/CheckImageMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/mission/ReportsMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/mission/ReportTypesMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/mission/WorkTypesMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/version/AppMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/area/PointParameterMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/area/DutyPointGatherMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/area/BoderPointFileMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/manager/ApperrLogsMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/manager/AppLogsMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/manager/CheckParameterMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/area/EvalPointMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/manager/EvaluationsMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/manager/FinesCountMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/manager/FinesDetailMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/manager/StandardFinesMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/manager/SubTopicsMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/manager/TopicsMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/manager/AppealFinesMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/user/AvatarsMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/mission/CheckDutyMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/mission/CheckTimeMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/user/DepartmentsMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/user/FeedBacksMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/mission/ReportDutyMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/user/RolesMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/mission/TrackMapMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/user/UsersMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/user/AttendanceForDutyMapper.xml" />
+		<mapper resource="com/czz/hwy/sqlmapping/syspar/CheckTypeMapper.xml"/>
+		<mapper resource="com/czz/hwy/sqlmapping/syspar/CheckStandardMapper.xml"/>
+		<mapper resource="com/czz/hwy/sqlmapping/syspar/FinesStandardMapper.xml"/>
+		<mapper resource="com/czz/hwy/sqlmapping/syspar/PointparMapper.xml"/>
+		<mapper resource="com/czz/hwy/sqlmapping/manager/MessageMapper.xml"/>
+		<mapper resource="com/czz/hwy/sqlmapping/manager/PushMessageMapper.xml" />	
+		<mapper resource="com/czz/hwy/sqlmapping/user/AttendanceForPlansMapper.xml"/>
+		<mapper resource="com/czz/hwy/sqlmapping/manager/DefaultSalaryMapper.xml"/>
+        <mapper resource="com/czz/hwy/sqlmapping/manager/ArticleInfoMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/manager/ArticleTypesMapper.xml" />
+        <mapper resource="com/czz/hwy/sqlmapping/manager/ArticleTypesManageMapper.xml" />   
+        <mapper resource="com/czz/hwy/sqlmapping/manager/SalaryDetailMapper.xml"/>		
+        <mapper resource="com/czz/hwy/sqlmapping/manager/OneClickAlarmMapper.xml"/>	
+        <mapper resource="com/czz/hwy/sqlmapping/manager/HwgLoginStatusMapper.xml" />     -->  
+	</mappers>
+</configuration>	

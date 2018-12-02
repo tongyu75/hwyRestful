@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.Banci">
+	<resultMap type="banci" id="base_result_map">
+		<id column="id" property="id"/>
+		<result column="dutynumber" property="dutyNumber" jdbcType="INTEGER"/>
+		<result column="duty_on_time" property="dutyOntime" jdbcType="TIMESTAMP"/>
+		<result column="duty_off_time" property="dutyOfftime" jdbcType="TIMESTAMP"/>
+		<result column="dutyroles" property="dutyRoles" jdbcType="INTEGER"/>
+		<result column="status" property="status" jdbcType="INTEGER"/>
+		<result column="banzu_id" property="banzuId" jdbcType="INTEGER"/>
+		<result column="banzuName" property="banzuName" jdbcType="VARCHAR"/>
+		<result column="create_userid" property="createUserId" jdbcType="INTEGER"/>
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+		<result column="update_userid" property="updateUserId" jdbcType="INTEGER"/>
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+	</resultMap>
+	
+	<!-- 表字段 -->
+	<sql id="base_column_list">
+		id,dutynumber,duty_on_time,duty_off_time,dutyroles,status,banzu_id,create_userid,creat_at,update_userid,update_at
+	</sql> 
+	
+	<!-- 表和视图字段 -->
+	<sql id="map_column_list">
+		id,dutynumber,duty_on_time,duty_off_time,dutyroles,status,banzu_id,banzuName,create_userid,creat_at,update_userid,update_at
+	</sql> 
+	
+	<!-- 根据班组ID，查询班次列表，2016-09-28 -->
+	<select id="selectBanciListByBanZuId" parameterType="String" resultMap="base_result_map">
+	select * from banci where status = 1 and banzu_id = #{banzuId}
+	</select>
+	
+	<!-- 根据班次序号获取班次集合，2016-09-28 -->
+	<!-- <select id="getBanciListByNumber" parameterType="String" resultMap="base_result_map">
+	select * from banci where dutynumber = #{dutyNumber} 
+	</select> -->
+	<!-- 根据班次序号获取班次集合，2016-10-09，目前删除是逻辑删除，班次序号只要保证status = 1的唯一性即可，当换了新系统只有，就要用上面的语句 -->
+	<select id="getBanciListByNumber" parameterType="String" resultMap="base_result_map">
+	select * from banci where dutynumber = #{dutyNumber} and status = 1
+	</select>
+
+	<!-- 新增一条班次记录,2016-09-28 -->
+	<insert id="insertBanci" parameterType="com.czz.hwy.bean.mission.Banci">
+		insert into banci (dutynumber,duty_on_time,duty_off_time,dutyroles,banzu_id,create_userid,creat_at)
+				values(#{dutyNumber},#{dutyOntime},#{dutyOfftime},#{dutyRoles},#{banzuId},#{createUserId},#{createAt})
+	</insert>
+	
+	<!-- 根据班组Id查询班次集合,2016-09-28 -->
+	<select id="getBanciListByBanZuId" parameterType="String" resultMap="base_result_map">
+	select * from banci where banzu_id = #{banZuId} and status = 1
+	</select>
+	
+	<!-- 更新一条班次信息，2016-09-28 -->
+	<update id="updateBanci" parameterType="banci">
+		update banci set 
+			duty_on_time = #{dutyOntime},duty_off_time = #{dutyOfftime},update_at = #{updateAt},update_userid=#{updateUserId},banzu_id = #{banzuId}
+		where id = #{id}
+	</update>
+	
+	<!--  根据班次Id获取班次信息，2016-09-28 -->
+	<select id="getBanciById" parameterType="banci" resultMap="base_result_map">
+	select * from banci where id = #{banciId} and status = 1
+	</select>
+	
+	<!-- 逻辑删除一条班次记录，2016-09-28 -->
+	<update id="updateBanciForDelete" parameterType="banci">
+	update banci set status = #{status},update_userid = #{updateUserId},update_at = #{updateAt}
+	where id = #{id}
+	</update>
+	
+	<!-- 物理删除一条班次记录，2016-10-28 -->
+	<delete id="deleteBanciByBean" parameterType="banci">
+	delete from banci where id = #{id}
+	</delete>
+	
+	<!-- 根据条件获取一个班次信息 -->
+	<select id="getBanciByBean" parameterType="banci" resultMap="base_result_map">
+		select <include refid="base_column_list" /> from banci
+			<where>
+				<if test="dutyNumber != 0">
+					and dutynumber = #{dutyNumber}
+				</if>
+				<if test="dutyOntime != null">
+					and duty_on_time  &gt;= DATE_FORMAT(#{dutyOntime},'%H:%i:%s')
+				</if>
+				<if test="dutyOfftime != null">
+					and duty_off_time &lt;= DATE_FORMAT(#{dutyOfftime},'%H:%i:%s')
+				</if>
+				<if test="dutyRoles != 0">
+					and dutyroles = #{dutyRoles}
+				</if>
+				<if test="banzuId != 0">
+					and banzu_id = #{banzuId}
+				</if>
+				and status = 1
+			</where>
+	</select>
+	
+	<!-- 根据条件，获取班次集合，分页 -->
+	<select id="getBanciList" parameterType="banci" resultMap="base_result_map">
+		<!-- select a.*,b.banzu_name banzuName from banci a join banzu b on a.banzu_id = b.banzu_id -->
+		select a.*,b.banzu_name banzuName from banci a left join banzu b on a.banzu_id = b.banzu_id
+			<where>
+				<if test="dutyNumber != 0">
+					and a.dutynumber = #{dutyNumber}
+				</if>
+				<if test="dutyOntime != null">
+					and a.duty_on_time  &gt;= DATE_FORMAT(#{dutyOntime},'%H:%i:%s')
+				</if>
+				<if test="dutyOfftime != null">
+					and a.duty_off_time &lt;= DATE_FORMAT(#{dutyOfftime},'%H:%i:%s')
+				</if>
+				<if test="dutyRoles != 0">
+					and a.dutyroles = #{dutyRoles}
+				</if>
+				<if test="banzuId != 0">
+					and a.banzu_id = #{banzuId}
+				</if>
+					and a.status = 1
+			</where>
+			limit #{row},#{rows}
+	</select>
+	
+	<!-- 根据条件，获取班次集合，不分页 -->
+	<select id="getAllBanciList" parameterType="banci" resultMap="base_result_map">
+		<!-- select a.*,b.banzu_name banzuName from banci a join banzu b on a.banzu_id = b.banzu_id -->
+		select a.*,b.banzu_name banzuName from banci a left join banzu b on a.banzu_id = b.banzu_id
+			<where>
+				<if test="dutyNumber != 0">
+					and a.dutynumber = #{dutyNumber}
+				</if>
+				<if test="dutyOntime != null">
+					and a.duty_on_time  &gt;= DATE_FORMAT(#{dutyOntime},'%H:%i:%s')
+				</if>
+				<if test="dutyOfftime != null">
+					and a.duty_off_time &lt;= DATE_FORMAT(#{dutyOfftime},'%H:%i:%s')
+				</if>
+				<if test="dutyRoles != 0">
+					and a.dutyroles = #{dutyRoles}
+				</if>
+				<if test="banzuId != 0">
+					and a.banzu_id = #{banzuId}
+				</if>
+					and a.status = 1
+			</where>
+	</select>
+	
+	<!-- 根据条件，获取班次总条数 -->
+	<select id="getBanciCount" parameterType="banci" resultType="int">
+		<!-- select count(dutynumber) from banci a join banzu b on a.banzu_id = b.banzu_id -->
+		select count(dutynumber) from banci a left join banzu b on a.banzu_id = b.banzu_id
+			<where>
+				<if test="dutyNumber != 0">
+					and a.dutynumber = #{dutyNumber}
+				</if>
+				<if test="dutyOntime != null">
+					and a.duty_on_time  &gt;= DATE_FORMAT(#{dutyOntime},'%H:%i:%s')
+				</if>
+				<if test="dutyOfftime != null">
+					and a.duty_off_time &lt;= DATE_FORMAT(#{dutyOfftime},'%H:%i:%s')
+				</if>
+				<if test="dutyRoles != 0">
+					and a.dutyroles = #{dutyRoles}
+				</if>
+				<if test="banzuId != 0">
+					and a.banzu_id = #{banzuId}
+				</if>
+					and a.status = 1
+			</where>
+	</select>
+	
+	<!--  更新班次信息 -->
+	<update id="updateBanciByBean" parameterType="banci">
+		update banci set 
+			status = #{status},duty_on_time = #{dutyOntime},duty_off_time = #{dutyOfftime},dutyroles = #{dutyRoles},update_at = #{updateAt}
+		where dutynumber = #{dutyNumber} and status = 1
+	</update>
+	
+	
+	
+</mapper>

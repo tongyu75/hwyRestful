@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.user.watch.BindingInformationMapper" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.user.watch.BindingInformation" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="tel" property="tel" jdbcType="VARCHAR" />
+    <result column="device_id" property="deviceId" jdbcType="VARCHAR" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="create_id" property="createId" jdbcType="INTEGER" />
+    <result column="update_id" property="updateId" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, employee_id, tel, device_id, create_at, update_at, create_id, update_id, status
+  </sql>
+
+  <insert id="insertBindingInfoWatch" parameterType="com.czz.hwy.bean.user.watch.BindingInformation" >
+    insert into binding_information (id, employee_id, tel, 
+      device_id, create_at, update_at, 
+      create_id, update_id, status
+      )
+    values (#{id,jdbcType=INTEGER}, #{employeeId,jdbcType=INTEGER}, #{tel,jdbcType=VARCHAR}, 
+      #{deviceId,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, #{updateAt,jdbcType=TIMESTAMP}, 
+      #{createId,jdbcType=INTEGER}, #{updateId,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}
+      )
+  </insert>
+  
+  <update id="updateBindingInfoWatch" parameterType="com.czz.hwy.bean.user.watch.BindingInformation" >
+    update binding_information
+    <set >                        
+      <if test="status != 0" >
+        status=#{status,jdbcType=INTEGER},
+      </if>                 
+      update_at = now()
+    </set>
+    where employee_id = #{employeeId,jdbcType=INTEGER}
+      and status = 1
+  </update>   
+  
+</mapper>

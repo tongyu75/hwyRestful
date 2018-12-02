@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.ReportInfoApp">
+	<resultMap id="BaseResultMap" type="reportInfoApp">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="supervisor_id" property="supervisorId" jdbcType="INTEGER" />
+		<result column="supervisor_name" property="supervisorName" jdbcType="VARCHAR" />
+		<result column="supervisor_role" property="supervisorRole" jdbcType="INTEGER" />
+		<result column="areaIds" property="areaIds" jdbcType="VARCHAR" />
+		<result column="eval_value" property="evalValue" jdbcType="INTEGER" />
+		<result column="eval_name" property="evalName" jdbcType="VARCHAR" />
+		<result column="address_from" property="addressFrom" jdbcType="VARCHAR" />
+		<result column="check_time" property="checkTime" jdbcType="TIMESTAMP" />
+		<result column="check_lat" property="checkLat" jdbcType="DOUBLE" />
+		<result column="check_lng" property="checkLng" jdbcType="DOUBLE" />
+		<result column="memo" property="memo" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="manage_role" property="manageRole" jdbcType="INTEGER" />
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+		<result column="jcy_manage_id" property="jcyManageId" jdbcType="INTEGER" />
+		<result column="jcy_manage_name" property="jcyManageName" jdbcType="VARCHAR" />
+		<result column="jcy_manage_status" property="jcyManageStatus" jdbcType="INTEGER" />
+		<result column="jcy_manage_date" property="jcyManageDate" jdbcType="TIMESTAMP" />
+		<result column="jcy_manage_memo" property="jcyManageMemo" jdbcType="VARCHAR" />
+		<result column="khy_manage_id" property="khyManageId" jdbcType="INTEGER" />
+		<result column="khy_manage_name" property="khyManageName" jdbcType="VARCHAR" />
+		<result column="khy_manage_status" property="khyManageStatus" jdbcType="INTEGER" />
+		<result column="khy_manage_date" property="khyManageDate" jdbcType="TIMESTAMP" />
+		<result column="khy_manage_memo" property="khyManageMemo" jdbcType="VARCHAR" />
+		<result column="dcy_manage_id" property="dcyManageId" jdbcType="INTEGER" />
+		<result column="dcy_manage_name" property="dcyManageName" jdbcType="VARCHAR" />
+		<result column="dcy_manage_status" property="dcyManageStatus" jdbcType="INTEGER" />
+		<result column="dcy_manage_date" property="dcyManageDate" jdbcType="TIMESTAMP" />
+		<result column="dcy_manage_memo" property="dcyManageMemo" jdbcType="VARCHAR" />
+		<result column="manageMemo" property="manageMemo" jdbcType="VARCHAR" />
+		<result column="dealBeforImageCount" property="dealBeforImageCount" jdbcType="INTEGER" />
+		<result column="dealAfterImageCount" property="dealAfterImageCount" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		id, 
+		supervisor_id, supervisor_name,supervisor_role, 
+		areaIds, eval_value, 
+		address_from,check_time, check_lat,check_lng,
+		memo, status, manage_role,
+		create_at, update_at,
+		jcy_manage_id, jcy_manage_name, jcy_manage_status,jcy_manage_date, jcy_manage_memo,
+		khy_manage_id, khy_manage_name, khy_manage_status,khy_manage_date, khy_manage_memo, 
+		dcy_manage_id, dcy_manage_name, dcy_manage_status,dcy_manage_date, dcy_manage_memo
+	</sql>
+	
+	<!-- 获取30分钟内该考核类型的举报记录列表(未处理的)，2017-04-24 -->
+	<select id="getExitsReportInfoAppByBeanApp" parameterType="reportInfoApp" resultMap="BaseResultMap">
+	SELECT 
+	<include refid="Base_Column_List" /> 
+	from reportinfo
+	where TIMESTAMPDIFF(MINUTE,check_time,SYSDATE()) &lt;=30
+	and TIMESTAMPDIFF(MINUTE,check_time,SYSDATE()) &gt;=0
+	and eval_value = #{evalValue}
+	and status = 2
+	</select>
+	
+	<!-- 新增举报信息，并将新增数据的主键ID返回,2017-04-25 -->
+	<insert id="insertReportInfoAppByBeanApp" parameterType="reportInfoApp" >
+	<selectKey resultType="java.lang.Integer" order="AFTER"
+			keyProperty="id">
+			SELECT LAST_INSERT_ID() AS id
+		</selectKey>
+		insert into reportinfo 
+			(
+				supervisor_id, 
+				supervisor_name,
+				supervisor_role, 
+				areaIds, 
+				eval_value, 
+				address_from,
+				check_time, 
+				check_lat,
+				check_lng,
+				memo, 
+				status, 
+				manage_role,
+				create_at, 
+				update_at
+				<!-- 如果上报人为检测员 -->
+				<if test="supervisorRole == 2">
+				,jcy_manage_id, jcy_manage_name, jcy_manage_status,jcy_manage_date, jcy_manage_memo
+				</if>
+				<!-- 如果上报人为考核员 -->
+				<if test="supervisorRole == 3">
+				,khy_manage_id, khy_manage_name, khy_manage_status,khy_manage_date, khy_manage_memo
+				</if>
+				<!-- 如果上报人为督察员 -->
+				<if test="supervisorRole == 4">
+				,dcy_manage_id, dcy_manage_name, dcy_manage_status,dcy_manage_date, dcy_manage_memo
+				</if>
+			)
+		values 
+			(
+				#{supervisorId},
+				#{supervisorName},
+				#{supervisorRole},
+				#{areaIds},
+				#{evalValue},
+				#{addressFrom},
+				#{checkTime},
+				#{checkLat},
+				#{checkLng},
+				#{memo},
+				#{status},
+				#{manageRole},
+				#{createAt},
+				#{updateAt}
+				
+				<!-- 如果上报人为检测员 -->
+				<if test="supervisorRole == 2">
+				,#{jcyManageId},
+				#{jcyManageName},
+				#{jcyManageStatus},
+				#{jcyManageDate},
+				#{jcyManageMemo}
+				</if>
+				<!-- 如果上报人为考核员 -->
+				<if test="supervisorRole == 3">
+				,#{khyManageId},
+				#{khyManageName},
+				#{khyManageStatus},
+				#{khyManageDate},
+				#{khyManageMemo}
+				</if>
+				<!-- 如果上报人为督察员 -->
+				<if test="supervisorRole == 4">
+				,#{dcyManageId},
+				#{dcyManageName},
+				#{dcyManageStatus},
+				#{dcyManageDate},
+				#{dcyManageMemo}
+				</if>
+			)
+	</insert>
+   
+   <!-- 环卫工：查看一段时间内自己举报的举报记录列表,2017-04-26 -->
+   <select id="getReportInfoListByBeanAppForHWG" parameterType="reportInfoApp" resultMap="BaseResultMap">
+     select t.id, 
+		t.supervisor_id, t.supervisor_name, t.supervisor_role, 
+		t.areaIds, t.eval_value, 
+		t.address_from, t.check_time, t.check_lat, t.check_lng,
+		t.memo, t.status, t.manage_role,
+		t.create_at, t.update_at,
+		t.jcy_manage_id, t.jcy_manage_name, t.jcy_manage_status,t.jcy_manage_date, t.jcy_manage_memo,
+		t.khy_manage_id, t.khy_manage_name, t.khy_manage_status,t.khy_manage_date, t.khy_manage_memo, 
+		t.dcy_manage_id, t.dcy_manage_name, t.dcy_manage_status,t.dcy_manage_date, t.dcy_manage_memo,
+		sum(case t1.status when 1 then 1 else 0 end) dealAfterImageCount,
+		sum(case t1.status when 2 then 1 else 0 end) dealBeforImageCount
+   from reportinfo t
+   left join reportimage t1 on t.id = t1.check_id and t.eval_value = t1.eval_value
+   <where>
+   	<!-- 常规的举报查询不用传递该参数。点击消息推送进入举报查询界面时传递该参数可直接定位到具体的举报记录。 -->
+   	<if test="id != 0">
+   		and t.id = #{id}
+   	</if>
+   	<if test="startDateStr != null and startDateStr != ''">
+   		and date_format(t.check_time,'%Y-%m-%d') &gt;= #{startDateStr}
+   	</if>
+   	<if test="endDateStr != null and endDateStr != ''">
+   		and date_format(t.check_time,'%Y-%m-%d') &lt;= #{endDateStr}
+   	</if>
+   	<if test="employeeId != 0">
+   		and t.supervisor_id = #{employeeId}
+   	</if>
+   </where>
+   group by id
+   order by check_time desc
+   <if test="rows != 0">
+   limit #{row},#{rows}
+   </if>
+   </select>
+   
+   <!-- 督察员：查看一段时间内所有的举报记录列表,2017-04-26-->
+   <select id="getReportInfoListByBeanAppForDCY" parameterType="reportInfoApp" resultMap="BaseResultMap">
+     select t.id, 
+		t.supervisor_id, t.supervisor_name, t.supervisor_role, 
+		t.areaIds, t.eval_value, 
+		t.address_from, t.check_time, t.check_lat, t.check_lng,
+		t.memo, t.status, t.manage_role,
+		t.create_at, t.update_at,
+		t.jcy_manage_id, t.jcy_manage_name, t.jcy_manage_status,t.jcy_manage_date, t.jcy_manage_memo,
+		t.khy_manage_id, t.khy_manage_name, t.khy_manage_status,t.khy_manage_date, t.khy_manage_memo, 
+		t.dcy_manage_id, t.dcy_manage_name, t.dcy_manage_status,t.dcy_manage_date, t.dcy_manage_memo,
+		sum(case t1.status when 1 then 1 else 0 end) dealAfterImageCount,
+		sum(case t1.status when 2 then 1 else 0 end) dealBeforImageCount
+   from reportinfo t
+   left join reportimage t1 on t.id = t1.check_id and t.eval_value = t1.eval_value
+   <where>
+   <!-- 常规的举报查询不用传递该参数。点击消息推送进入举报查询界面时传递该参数可直接定位到具体的举报记录。 -->
+   	<if test="id != 0">
+   		and t.id = #{id}
+   	</if>
+   	<if test="startDateStr != null and startDateStr != ''">
+   		and date_format(t.check_time,'%Y-%m-%d') &gt;= #{startDateStr}
+   	</if>
+   	<if test="endDateStr != null and endDateStr != ''">
+   		and date_format(t.check_time,'%Y-%m-%d') &lt;= #{endDateStr}
+   	</if>
+   </where>
+   group by id
+   order by check_time desc
+   <if test="rows != 0">
+   limit #{row},#{rows}
+   </if>
+   </select>
+   
+   <!-- 检测员：查看一段时间内自己举报的举报记录以及自己责任区环卫工举报的举报记录列表,2017-04-26-->
+   <select id="getReportInfoListByBeanAppForCJY" parameterType="reportInfoApp" resultMap="BaseResultMap">
+     select t.id, 
+		t.supervisor_id, t.supervisor_name, t.supervisor_role, 
+		t.areaIds, t.eval_value, 
+		t.address_from, t.check_time, t.check_lat, t.check_lng,
+		t.memo, t.status, t.manage_role,
+		t.create_at, t.update_at,
+		t.jcy_manage_id, t.jcy_manage_name, t.jcy_manage_status,t.jcy_manage_date, t.jcy_manage_memo,
+		t.khy_manage_id, t.khy_manage_name, t.khy_manage_status,t.khy_manage_date, t.khy_manage_memo, 
+		t.dcy_manage_id, t.dcy_manage_name, t.dcy_manage_status,t.dcy_manage_date, t.dcy_manage_memo,
+		sum(case t1.status when 1 then 1 else 0 end) dealAfterImageCount,
+		sum(case t1.status when 2 then 1 else 0 end) dealBeforImageCount
+   from reportinfo t
+   left join reportimage t1 on t.id = t1.check_id and t.eval_value = t1.eval_value
+   <where>
+   	<!-- 常规的举报查询不用传递该参数。点击消息推送进入举报查询界面时传递该参数可直接定位到具体的举报记录。 -->
+   	<if test="id != 0">
+   		and t.id = #{id}
+   	</if>
+   	<if test="startDateStr != null and startDateStr != ''">
+   		and date_format(t.check_time,'%Y-%m-%d') &gt;= #{startDateStr}
+   	</if>
+   	<if test="endDateStr != null and endDateStr != ''">
+   		and date_format(t.check_time,'%Y-%m-%d') &lt;= #{endDateStr}
+   	</if>
+   	<if test="employeeId != 0">
+   		and EXISTS (select 1 from workplans a where a.employee_id = #{employeeId} and find_in_set(a.area_id, t.areaIds) > 0 )
+   	</if>
+   	<if test="roleId != 0">
+   		and t.supervisor_role &lt; #{roleId}
+   		<if test="employeeId != 0">
+   		or (t.supervisor_role = #{roleId} and t.supervisor_id = #{employeeId} )
+   		</if>
+   	</if>
+   </where>
+   group by id
+   order by check_time desc
+   <if test="rows != 0">
+   limit #{row},#{rows}
+   </if>
+   </select>
+   
+   <!-- 考核员：查看一段时间内自己举报的举报记录以及自己负责的责任区下环卫工或检测员举报的季报记录列表,2017-04-26-->
+   <select id="getReportInfoListByBeanAppForKHY" parameterType="reportInfoApp" resultMap="BaseResultMap">
+     select t.id, 
+		t.supervisor_id, t.supervisor_name, t.supervisor_role, 
+		t.areaIds, t.eval_value, 
+		t.address_from, t.check_time, t.check_lat, t.check_lng,
+		t.memo, t.status, t.manage_role,
+		t.create_at, t.update_at,
+		t.jcy_manage_id, t.jcy_manage_name, t.jcy_manage_status,t.jcy_manage_date, t.jcy_manage_memo,
+		t.khy_manage_id, t.khy_manage_name, t.khy_manage_status,t.khy_manage_date, t.khy_manage_memo, 
+		t.dcy_manage_id, t.dcy_manage_name, t.dcy_manage_status,t.dcy_manage_date, t.dcy_manage_memo,
+		sum(case t1.status when 1 then 1 else 0 end) dealAfterImageCount,
+		sum(case t1.status when 2 then 1 else 0 end) dealBeforImageCount
+   from reportinfo t
+   left join reportimage t1 on t.id = t1.check_id and t.eval_value = t1.eval_value
+   <where>
+   	<!-- 常规的举报查询不用传递该参数。点击消息推送进入举报查询界面时传递该参数可直接定位到具体的举报记录。 -->
+   	<if test="id != 0">
+   		and t.id = #{id}
+   	</if>
+   	<if test="startDateStr != null and startDateStr != ''">
+   		and date_format(t.check_time,'%Y-%m-%d') &gt;= #{startDateStr}
+   	</if>
+   	<if test="endDateStr != null and endDateStr != ''">
+   		and date_format(t.check_time,'%Y-%m-%d') &lt;= #{endDateStr}
+   	</if>
+   	<if test="employeeId != 0">
+   		and EXISTS (select 1 from workplans a where a.employee_id = #{employeeId} and find_in_set(a.area_id, t.areaIds) > 0 )
+   	</if>
+   	<if test="roleId != 0">
+   		and t.supervisor_role &lt; #{roleId}
+   		<if test="employeeId != 0">
+   		or (t.supervisor_role = #{roleId} and t.supervisor_id = #{employeeId} )
+   		</if>
+   	</if>
+   </where>
+   group by id
+   order by check_time desc
+   <if test="rows != 0">
+   limit #{row},#{rows}
+   </if>
+   </select>
+   
+   <!-- 根据查询条件查询举报信息，2017-04-26 -->
+   <select id="getReportInfoAppByBeanApp" parameterType="reportInfoApp" resultMap="BaseResultMap">
+   	select t.*,t1.eval_name evalName 
+	from reportinfo t 
+	join evaltype t1 on t.eval_value = t1.eval_value and t1.type = 3 
+	<where>
+		<if test="id != 0">
+		 and t.id = #{id}
+		</if>
+		<if test="status != 0">
+		 and t.status = #{status}
+		</if>
+		<if test="manageRole != 0">
+		 and t.manage_role = #{manageRole}
+		</if>
+	</where>
+   </select>
+   
+   <!-- 举报上报：根据bean更新举报信息，2017-04-26 -->
+   <update id="updateReportInfoAppByBeanApp" parameterType="reportInfoApp">
+   	update reportinfo
+   	<set>
+   		<if test="status != 0">
+   		status = #{status},
+   		</if>
+   		<if test="updateAt != null">
+   		update_at = #{updateAt},
+   		</if>
+   		<if test="manageRole != 0">
+   		manage_role = #{manageRole},
+   		</if>
+   		<!-- 如果上报人为检测员，下一步处理人为考核员 -->
+		<if test="manageRole == 3">
+		jcy_manage_id = #{jcyManageId}, 
+		jcy_manage_name = #{jcyManageName}, 
+		jcy_manage_status = #{jcyManageStatus},
+		jcy_manage_date = #{jcyManageDate}, 
+		jcy_manage_memo = #{jcyManageMemo},
+		</if>
+		<!-- 如果上报人为考核员,下一步处理人为督察员 -->
+		<if test="manageRole == 4">
+		khy_manage_id = #{khyManageId}, 
+		khy_manage_name = #{khyManageName}, 
+		khy_manage_status = #{khyManageStatus},
+		khy_manage_date = #{khyManageDate}, 
+		khy_manage_memo = #{khyManageMemo},
+		</if>
+   	</set>
+   	<where>
+   		<if test="id != 0">
+		 and id = #{id}
+		</if>
+   	</where>
+   </update>
+   
+   <!-- 处理完成：根据bean更新举报信息，2017-04-27-->
+   <update id="updateReportInfoAppByBeanAppForManage" parameterType="reportInfoApp">
+   	update reportinfo
+   	<set>
+   		<if test="status != 0">
+   		status = #{status},
+   		</if>
+   		<if test="updateAt != null">
+   		update_at = #{updateAt},
+   		</if>
+   		<!-- 如果处理人为检测员，记录检测员的处理轨迹 -->
+		<if test="manageRole == 2">
+		jcy_manage_id = #{jcyManageId}, 
+		jcy_manage_name = #{jcyManageName}, 
+		jcy_manage_status = #{jcyManageStatus},
+		jcy_manage_date = #{jcyManageDate}, 
+		jcy_manage_memo = #{jcyManageMemo},
+		</if>
+		<!-- 如果处理人为考核员，记录考核员的处理轨迹 -->
+		<if test="manageRole == 3">
+		khy_manage_id = #{khyManageId}, 
+		khy_manage_name = #{khyManageName}, 
+		khy_manage_status = #{khyManageStatus},
+		khy_manage_date = #{khyManageDate}, 
+		khy_manage_memo = #{khyManageMemo},
+		</if>
+		<!-- 如果处理人为督察员，记录督察员的处理轨迹 -->
+		<if test="manageRole == 4">
+		dcy_manage_id = #{dcyManageId}, 
+		dcy_manage_name = #{dcyManageName}, 
+		dcy_manage_status = #{dcyManageStatus},
+		dcy_manage_date = #{dcyManageDate}, 
+		dcy_manage_memo = #{dcyManageMemo},
+		</if>
+   	</set>
+   	<where>
+   		<if test="id != 0">
+		 and id = #{id}
+		</if>
+   	</where>
+   </update>
+   
+   <!-- 查看近一周全市违规排污举报人详细信息， 2017-04-27 -->
+   <select id="selectReportInfoListByBeanApp" parameterType="reportInfoApp" resultMap="BaseResultMap">
+    select *
+	from reportinfo t
+	where DATE_FORMAT(t.check_time,'%Y-%m-%d') &lt;= CURDATE()
+	and DATE_FORMAT(t.check_time,'%Y-%m-%d') &gt;= DATE_SUB(CURDATE(),INTERVAL #{days} DAY)
+	and t.eval_value = #{evalValue}
+   </select>
+   
+</mapper>

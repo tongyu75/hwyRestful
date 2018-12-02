@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=MXDf0gIa6ce8G7anDfMCkyWxb21Tkj4Q"></script>
+<script type="text/javascript" src="../jquery-1.7.2.min.js"></script>
+<title>测试接口</title>
+</head>
+<body>
+	<div id="allmap"></div>
+</body>
+<script type="text/javascript">
+	//banzhuId ,banzhuName,createUserId,createAt,updateUserid,updateAt
+	$(function() {
+		
+		//提交举报考核
+		/*$.ajax({
+			url :'http://192.168.1.18:8080/hwyRestful/workCheckAppController/reportInfo',
+			async : true,
+			type : 'post',
+			data : {
+				acceptContent:
+					JSON.stringify(//检测员上报
+						{
+							"supervisorId" : 8005,
+							"supervisorName" : "党风霞",
+				            "supervisorRole" : 2,
+				            "evalValue" : 18,
+							"addressFrom" : "测试地址",
+				            "checkTime" : "2017-04-27 11:49:23",
+							"checkLat" : "37.802602",
+							"checkLng" : "108.121212",
+							"memo" :　"举报说明内容",
+							"status" : 2,//处理状态：1已处理 2未处理;
+							"manageMemo" : "处理说明或上报说明内容"
+						}
+					)
+
+					// JSON.stringify(//考核员上报
+					// 	{
+					// 		"supervisorId" : 8335,
+					// 		"supervisorName" : "高婷",
+				 //            "supervisorRole" : 3,
+				 //            "evalValue" : 5,
+					// 		"addressFrom" : "测试地址",
+				 //            "checkTime" : "2017-04-27 11:49:23",
+					// 		"checkLat" : "37.802602",
+					// 		"checkLng" : "108.121212",
+					// 		"memo" :　"举报说明内容",
+					// 		"status" : 2,//处理状态：1已处理 2未处理;
+					// 		"manageMemo" : "处理说明或上报说明内容"
+					// 	}
+					// )
+
+
+			} ,
+			dataType : "json",
+			xhrFields: {withCredentials: true},
+            crossDomain: true,
+			success : function(data) {
+				console.log(data);
+			}
+		});   */
+
+		//查询举报
+	/*$.ajax({
+           url :'http://192.168.1.18:8080/hwyRestful/workCheckAppController/reportInfo',
+			async : true,
+			type : 'get', 
+			dataType : "json",
+			data : {
+				acceptContent : 
+					// JSON.stringify(//督察员查询
+					// 	{
+					// 		"employeeId" : 9001,
+					// 		"roleId" : 4,
+     //                 		"startDateStr" : "2017-04-21",
+					// 		"endDateStr" : "2017-04-27",
+					// 		"page" : 1,
+					// 		"id" : 18
+				 // 		}
+
+					// )
+
+					// JSON.stringify(//考核员查询
+					// 	{
+					// 		"employeeId" : 8335,
+					// 		"roleId" : 3,
+     //                 		"startDateStr" : "2017-04-21",
+					// 		"endDateStr" : "2017-04-27",
+					// 		"page" : 1,
+					// 		// "id" : 18
+				 // 		}
+					// )
+
+					JSON.stringify(//检测员查询
+						{
+							"employeeId" : 1001,
+							"roleId" : 2,
+                     		"startDateStr" : "2017-04-21",
+							"endDateStr" : "2017-04-27",
+							"page" : 1,
+							// "id" : 18
+				 		}
+					)
+
+
+					// JSON.stringify(//环卫工查询
+					// 	{
+					// 		"employeeId" : 21,
+					// 		"roleId" : 1,
+     //                 		"startDateStr" : "2017-04-21",
+					// 		"endDateStr" : "2017-04-27",
+					// 		"page" : 1,
+					// 		"id" : 18
+				 // 		}
+					// )
+			}, 
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			xhrFields: {withCredentials: true},
+            crossDomain: true,
+			success : function(data) {
+				console.log(data);
+			}
+		});  */
+
+		//上报举报
+		/*$.ajax({
+			url :'http://192.168.1.18:8080/hwyRestful/workCheckAppController/reportInfoForSuperior',
+			async : true,
+			type : 'post',
+			data : {
+				acceptContent:
+					// JSON.stringify(//检测员上报
+					// 	{
+					// 		"id" : 18,
+					// 		"manageId" : 1001,
+				 //            "manageName" : "薛少华",
+				 //            "manageRole" : 2,
+					// 		"manageMemo" : "测试上报，上报给上级（考核员）"
+					// 	}
+					// )
+					JSON.stringify(//考核员上报
+						{
+							"id" : 18,
+							"manageId" : 8001,
+				            "manageName" : "黄俊英",
+				            "manageRole" : 3,
+							"manageMemo" : "测试上报，上报给上级（督察员）"
+						}
+					)
+			} ,
+			dataType : "json",
+			xhrFields: {withCredentials: true},
+            crossDomain: true,
+			success : function(data) {
+				console.log(data);
+			}
+		}); 
+*/		
+		//处理完成举报
+		$.ajax({
+			url :'http://192.168.1.18:8080/hwyRestful/workCheckAppController/reportInfoForManage',
+			async : true,
+			type : 'post',
+			data : {
+				acceptContent:
+					// JSON.stringify(//检测员处理完成
+					// 	{
+					// 		"id" : 25,
+					// 		"manageId" : 1001,
+				 //            "manageName" : "薛少华",
+				 //            "manageRole" : 2,
+					// 		"manageMemo" : "处理完成，交给张三处理"
+					// 	}
+					// )
+
+					// JSON.stringify(//考核员处理完成
+					// 	{
+					// 		"id" : 27,
+					// 		"manageId" : 8001,
+				 //            "manageName" : "黄俊英",
+				 //            "manageRole" : 3,
+					// 		"manageMemo" : "处理完成，已交给李四处理"
+					// 	}
+					// )
+
+					JSON.stringify(//督察员处理完成
+						{
+							"id" : 35,
+							"manageId" : 9001,
+				            "manageName" : "宋大千",
+				            "manageRole" : 4,
+							"manageMemo" : "处理完成，已交给王五处理"
+						}
+					)
+			} ,
+			dataType : "json",
+			xhrFields: {withCredentials: true},
+            crossDomain: true,
+			success : function(data) {
+				console.log(data);
+			}
+		}); 
+
+	});  
+</script>
+
+

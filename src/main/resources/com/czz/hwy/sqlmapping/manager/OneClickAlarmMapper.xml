@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.czz.hwy.bean.manager.OneClickAlarm">
+	<resultMap id="oneClickAlarmBean" type="com.czz.hwy.bean.manager.OneClickAlarm">
+		<id column="id" property="id" jdbcType="INTEGER"/>
+		<result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+		<result column="employeeName" property="employeeName" jdbcType="VARCHAR" />
+		<result column="lat" property="lat" jdbcType="DOUBLE" />
+		<result column="lng" property="lng" jdbcType="DOUBLE" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="alarm_at" property="alarmAt" jdbcType="TIMESTAMP" />
+		<result column="injury_situation" property="injurySituation" jdbcType="VARCHAR" />
+		<result column="alarm_status" property="alarmStatus" jdbcType="INTEGER" />
+		<result column="result" property="result" jdbcType="VARCHAR" />
+		<result column="update_id" property="updateId" jdbcType="INTEGER" />
+		<result column="updateName" property="updateName" jdbcType="VARCHAR" />
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<!-- 根据bean查询报警信息条数 -->
+	<select id="getAlarmCountByBean" parameterType="com.czz.hwy.bean.manager.OneClickAlarm" resultType="int">
+	select count(1) from oneclickalarm t left join users b on t.employee_id = b.employee_id 
+	<where>
+		<if test="employeeId != null and employeeId != ''">
+			and t.employee_id = #{employeeId,jdbcType=VARCHAR}
+		</if>
+		<if test="employeeName != null and employeeName != ''">
+			and b.showname like concat('%',concat(#{employeeName,jdbcType=VARCHAR},'%'))
+		</if>
+		<if test="beginDateStr != null and endDateStr != null and beginDateStr != '' and endDateStr != ''">
+			and DATE_FORMAT(t.alarm_at,'%Y-%m-%d') between #{beginDateStr,jdbcType=VARCHAR} and #{endDateStr,jdbcType=VARCHAR}
+		</if>
+	</where>
+	</select>
+	
+	<!-- 根据bean查询警报详细信息 -->
+	<select id="getAlarmInfosByBean" parameterType="com.czz.hwy.bean.manager.OneClickAlarm" resultMap="oneClickAlarmBean">
+	select t.id,t.employee_id,b.showname employeeName,t.lat,t.lng,t.address,date_format(t.alarm_at,"%Y-%m-%d %H:%i:%s") alarm_at,
+	       t.injury_situation,t.alarm_status,t.result,update_id,c.showname updateName,date_format(t.update_at,"%Y-%m-%d %H:%i:%s") update_at
+	from oneclickalarm t 
+	left join users b on t.employee_id = b.employee_id
+	left join users c on t.update_id = c.employee_id
+	<where>
+		<if test="employeeId != null and employeeId != ''">
+			and t.employee_id = #{employeeId,jdbcType=VARCHAR}
+		</if>
+		<if test="employeeName != null and employeeName != ''">
+			and b.showname like concat('%',concat(#{employeeName,jdbcType=VARCHAR},'%'))
+		</if>
+		<if test="beginDateStr != null and endDateStr != null and beginDateStr != '' and endDateStr != ''">
+			and DATE_FORMAT(t.alarm_at,'%Y-%m-%d') between #{beginDateStr,jdbcType=VARCHAR} and #{endDateStr,jdbcType=VARCHAR}
+		</if>
+	</where>
+	order by t.alarm_at desc
+	<if test="row != 0 || rows != 0" >
+      limit #{row},#{rows}
+    </if>
+	</select>
+	
+	<!-- 根据bean更新报警信息 -->
+	<update id="updateAlarmInfo" parameterType="com.czz.hwy.bean.manager.OneClickAlarm">
+	update oneclickalarm t 
+	set t.injury_situation = #{injurySituation,jdbcType=VARCHAR}, 
+		t.result = #{result,jdbcType=VARCHAR},
+		t.update_id = #{updateId,jdbcType=VARCHAR},
+		t.update_at = #{updateAt,jdbcType=VARCHAR}
+	where t.id = #{id,jdbcType=VARCHAR}
+	</update>
+	
+</mapper>

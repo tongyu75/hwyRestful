@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.user.app.AttendanceForPointApp">
+    <resultMap type="com.czz.hwy.bean.user.app.AttendanceForPointApp" id="BaseResultMap">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="employee_id" property="employeeId" jdbcType="INTEGER"/>
+        <result column="employee_name" property="employeeName" jdbcType="VARCHAR"/>
+        <result column="role_id" property="roleId" jdbcType="INTEGER"/>
+        <result column="area_id" property="areaId" jdbcType="INTEGER"/>
+        <result column="area_name" property="areaName" jdbcType="VARCHAR"/>
+        <result column="point_id" property="pointId" jdbcType="INTEGER"/>
+        <result column="point_name" property="pointName" jdbcType="VARCHAR"/>
+        <result column="duty_on_time" property="dutyOnTime" jdbcType="TIMESTAMP"/>
+        <result column="duty_off_time" property="dutyOffTime" jdbcType="TIMESTAMP"/>
+        <result column="recorddate" property="recordDate" jdbcType="TIMESTAMP"/>
+        <result column="is_coverwork" property="isCoverwork" jdbcType="INTEGER"/>
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+        <result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id,employee_id,employee_name,role_id,
+        area_id,area_name,point_id,point_name,
+        duty_on_time,duty_off_time,
+        recorddate,is_coverwork,create_at,update_at
+    </sql>
+    
+    <!-- 自动生成考记录对应的责任点记录，2017-01-10  -->
+    <insert id="batchAddAttendanceForPointApp">
+    	insert into attendanceforpoint 
+    	(
+			employee_id,
+			employee_name,
+			role_id,
+			area_id,
+            area_name,
+            point_id,
+            point_name,
+			duty_on_time,
+            duty_off_time,
+			recorddate,
+            is_coverwork,
+            create_at
+		)
+		select 
+            DISTINCT t.employee_id,
+			t3.showname,
+			t3.role_id,
+            t.area_id,
+			t2.area_name,
+			point_id ,
+			t1.point_name,
+            t0.duty_on_time,
+            t0.duty_off_time,
+            CURDATE() recorddate,
+            2 isCoverwork,
+            now()
+        from workplans t
+        join banci t0 on t.banzu_id = t0.banzu_id and t0.status = 1
+        left join dutypoint t1 on t.point_id = t1.id and t1.status = 1
+        join dutyarea t2 on t.area_id = t2.id and t2.status = 1
+        join users t3 on t.employee_id = t3.employee_id and t3.status = 1 and t3.role_id in (1,2,3)
+        where not EXISTS(
+            select 1 from attendanceforpoint a
+            where a.recorddate = CURDATE()
+						and a.employee_id = t.employee_id
+						and a.area_id = t.area_id
+						and a.point_id = t.point_id
+            and a.duty_on_time = t0.duty_on_time
+            and a.duty_off_time = t0.duty_off_time
+        )
+    </insert>
+    
+    <!-- 根据bean删除代班人考勤记录对应的责任点记录。2017-01-10 -->
+    <delete id="deleteAttendanceForPointAppByBeanApp" parameterType="attendanceForPointApp">
+    delete from attendanceforpoint
+    <where>
+    	<if test="recordDate != null">
+    	and recorddate = DATE_FORMAT(#{recordDate},'%Y-%m-%d')
+    	</if>
+    	<if test="employeeId != 0">
+    	and employee_id = #{employeeId}
+    	</if>
+    	<if test="areaId != 0">
+    	and area_id = #{areaId}
+    	</if>
+    	and (
+                (
+                    DATE_FORMAT(duty_on_time,'%H:%i') &lt;= DATE_FORMAT(#{dutyOnTime},'%H:%i')
+                    and DATE_FORMAT(#{dutyOnTime},'%H:%i') &lt;= DATE_FORMAT(duty_off_time,'%H:%i')
+                )
+                or 
+                (
+                    DATE_FORMAT(duty_on_time,'%H:%i') &lt;= DATE_FORMAT(#{dutyOffTime},'%H:%i')
+                    and DATE_FORMAT(#{dutyOffTime},'%H:%i') &lt;= DATE_FORMAT(duty_off_time,'%H:%i')
+                )
+                or 
+                (
+                    DATE_FORMAT(duty_on_time,'%H:%i') &lt;= DATE_FORMAT(#{dutyOnTime},'%H:%i')
+                    and DATE_FORMAT(#{dutyOffTime},'%H:%i') &lt;= DATE_FORMAT(duty_off_time,'%H:%i')
+                )
+                or 
+                (
+                    DATE_FORMAT(#{dutyOnTime},'%H:%i') &lt;= DATE_FORMAT(duty_on_time,'%H:%i') 
+                    and DATE_FORMAT(duty_off_time,'%H:%i') &lt;=  DATE_FORMAT(#{dutyOffTime},'%H:%i') 
+                )
+         )
+    </where>
+    </delete>
+    
+    <!-- 根据bean更新代班人考勤记录对应的责任点记录。2017-01-10 -->
+    <update id="updateAttendanceForPointAppByBeanApp" parameterType="attendanceForPointApp">
+     update attendanceforpoint t
+     <set>
+     	<if test="isCoverwork != 0">
+     	t.is_coverwork = #{isCoverwork},
+     	update_at = now(),
+     	</if>
+     </set>
+    <where>
+    	<if test="recordDate != null">
+    	and t.recorddate = DATE_FORMAT(#{recordDate},'%Y-%m-%d')
+    	</if>
+    	<if test="employeeId != 0">
+    	and t.employee_id = #{employeeId}
+    	</if>
+    	<if test="areaId != 0">
+    	and t.area_id = #{areaId}
+    	</if>
+    	<!-- 环卫工还需要比较上下班时间，责任点ID, 检测员只需要比较人，日期，责任区即可-->
+		<if test="roleId == 1">
+	    	<if test="dutyOnTime != null">
+	    	and t.duty_on_time = DATE_FORMAT(#{dutyOnTime},'%H:%i:%s')
+	    	</if>
+	    	<if test="dutyOffTime != null">
+	    	and t.duty_off_time = DATE_FORMAT(#{dutyOffTime},'%H:%i:%s')
+	    	</if>
+	    	<if test="leaveId != 0">
+	    	and t.point_id in(
+				select tt.point_id from (
+					SELECT a.point_id FROM attendanceforpoint a
+					<where>
+						<if test="recordDate != null">
+						and a.recorddate = DATE_FORMAT(#{recordDate},'%Y-%m-%d')
+						</if>
+						<if test="leaveId != 0">
+				    	and a.employee_id = #{leaveId}
+				    	</if>
+				    	<if test="areaId != 0">
+				    	and a.area_id = #{areaId}
+				    	</if>
+				    	<if test="dutyOnTime != null">
+				    	and a.duty_on_time = DATE_FORMAT(#{dutyOnTime},'%H:%i:%s')
+				    	</if>
+				    	<if test="dutyOffTime != null">
+				    	and a.duty_off_time = DATE_FORMAT(#{dutyOffTime},'%H:%i:%s')
+				    	</if>
+					</where>
+				)tt
+			)
+	    	</if>
+	    </if>
+    </where>
+    </update>
+    
+    <!-- 新增考勤记录对应的代班责任点记录,2017-01-10,检测员 -->
+    <insert id="insertAttendanceForPointByBeanApp" parameterType="attendanceForPointApp">
+    	insert into attendanceforpoint 
+    	(
+			employee_id,
+			employee_name,
+			role_id,
+			area_id,
+            area_name,
+            point_id,
+            point_name,
+			duty_on_time,
+            duty_off_time,
+			recorddate,
+            is_coverwork,
+            create_at
+		)
+		
+		SELECT DISTINCT
+				a.employee_id,
+				b.showname,
+				#{roleId},
+				c.id area_id,
+				c.area_name,
+				#{pointId} point_id,
+				#{pointName} point_name,
+				a.duty_on_time,
+				a.duty_off_time,
+				date_format(#{recordDate},'%Y-%m-%d') recorddate,
+			    #{isCoverwork} isCoverwork,
+			    now()
+			    FROM attendanceforpoint a
+				JOIN users b ON a.employee_id = b.employee_id AND b.STATUS = 1
+				JOIN dutyarea c ON c.id = #{areaId} AND c.STATUS = 1
+			<where>
+				<if test="employeeId != 0">
+				and a.employee_id = #{employeeId}
+				</if>
+				<if test="recordDate != null">
+				AND a.recorddate = date_format(#{recordDate},'%Y-%m-%d')
+				</if>
+				<if test="areaId != 0">
+				AND NOT EXISTS (
+					   SELECT 1 FROM attendanceforpoint t
+						 WHERE t.employee_id = a.employee_id
+						 AND t.recorddate = a.recorddate
+						 AND t.area_id = #{areaId}
+				 )
+				</if>
+			</where>
+    </insert>
+    
+    <!-- 将请假人某个时间段的责任点集合添加给代班人，2017-01-10，环卫工 -->
+    <insert id="insertAttendanceForPointByLeaveApp" parameterType="attendanceForPointApp">
+    insert into attendanceforpoint 
+    	(
+			employee_id,
+			employee_name,
+			role_id,
+			area_id,
+			area_name,
+			point_id,
+			point_name,
+			duty_on_time,
+      		duty_off_time,
+			recorddate,
+     		is_coverwork,
+     		create_at
+		)
+		select 
+      		#{employeeId},
+			t3.showname,
+			t3.role_id,
+      		t.area_id,
+			t.area_name,
+			t.point_id ,
+			t.point_name,
+			t.duty_on_time,
+			t.duty_off_time,
+			t.recorddate,
+			#{isCoverwork} isCoverwork,
+			now()
+			from attendanceforpoint t
+			join users t3 on t3.employee_id = #{employeeId} and t3.status = 1 
+			where t.area_id = #{areaId}
+			and t.employee_id = #{leaveId}
+			and t.recorddate = DATE_FORMAT(#{recordDate},'%Y-%m-%d')
+			and t.duty_on_time = DATE_FORMAT(#{dutyOnTime},'%H:%i:%s')
+			and t.duty_off_time = DATE_FORMAT(#{dutyOffTime},'%H:%i:%s')
+			and not EXISTS(
+					select 1 from attendanceforpoint a
+					where a.recorddate = t.recorddate
+					and a.employee_id = #{employeeId}
+					and a.area_id = t.area_id
+					and a.point_id = t.point_id
+					and a.duty_on_time = t.duty_on_time
+					and a.duty_off_time = t.duty_off_time
+			)
+    </insert>
+    
+    <!-- 根据责任区ID和责任点Id,当前时间，获取责任人列表。责任人只能是环卫工，2017-01-16 -->
+    <select id="getDutyPeopleListByPointMapApp" parameterType="java.util.Map" resultType="java.util.Map">
+    select DISTINCT t.employee_id employeeId, t.employee_name employeeName
+    from attendanceforpoint t
+	<where> 
+		<if test="areaId != null and areaId != '' and areaId != 0">
+			and t.area_id = #{areaId}
+		</if>
+		<if test="pointId != null and pointId != '' and pointId != 0">
+			and t.point_id = #{pointId}
+		</if>
+		<if test="curDate != null">
+			and t.duty_on_time &lt;= DATE_FORMAT(#{curDate},'%H:%i:%s') 
+			and t.duty_off_time &gt;= DATE_FORMAT(#{curDate},'%H:%i:%s')
+			and t.recorddate = DATE_FORMAT(#{curDate},'%Y:%m:%d')
+		</if>
+	</where> 
+    </select>
+</mapper>

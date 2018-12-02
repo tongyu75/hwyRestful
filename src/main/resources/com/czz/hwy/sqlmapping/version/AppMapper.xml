@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.version.App" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.version.App" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="version_code" property="versionCode" jdbcType="INTEGER" />
+    <result column="version_name" property="versionName" jdbcType="VARCHAR" />
+    <result column="app_name" property="appName" jdbcType="VARCHAR" />
+    <result column="app_type" property="appType" jdbcType="VARCHAR" />
+    <result column="size" property="size" jdbcType="DOUBLE" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="publish_time" property="publishTime" jdbcType="TIMESTAMP" />
+    <result column="apk_desc" property="apkDesc" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="download_census" property="downloadCensus" jdbcType="INTEGER"/>
+    <result column="appfunction" property="appFunction"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, version_code, version_name, app_name, app_type, size, employee_id, publish_time, 
+    apk_desc, status, create_at, update_at,download_census,appfunction
+  </sql>
+  <select id="getAppById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from app
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="getAppByMaxCode" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.version.App">
+        select * from app where version_code in(select max(version_code) from app)
+  </select>
+  <delete id="deleteApp" parameterType="java.lang.Integer" >
+    delete from app
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertApp" parameterType="com.czz.hwy.bean.version.App" >
+    insert into app (version_code, version_name, 
+      app_name, app_type, size, 
+      employee_id, publish_time, apk_desc,
+      status, create_at, update_at,download_census,appfunction
+      )
+    values (#{versionCode,jdbcType=INTEGER}, #{versionName,jdbcType=VARCHAR}, 
+      #{appName,jdbcType=VARCHAR}, #{appType,jdbcType=VARCHAR}, #{size,jdbcType=DOUBLE}, 
+      #{employeeId,jdbcType=INTEGER}, #{publishTime,jdbcType=TIMESTAMP}, #{apkDesc,jdbcType=VARCHAR}, 
+      #{status,jdbcType=INTEGER}, #{createAt,jdbcType=TIMESTAMP}, #{updateAt,jdbcType=TIMESTAMP}
+      ,#{downloadCensus,jdbcType=INTEGER},#{appFunction}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.czz.hwy.bean.version.App" >
+    insert into app
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="versionCode != null" >
+        version_code,
+      </if>
+      <if test="versionName != null" >
+        version_name,
+      </if>
+      <if test="appName != null" >
+        app_name,
+      </if>
+      <if test="appType != null" >
+        app_type,
+      </if>
+      <if test="size != null" >
+        size,
+      </if>
+      <if test="employeeId != null" >
+        employee_id,
+      </if>
+      <if test="publishTime != null" >
+        publish_time,
+      </if>
+      <if test="apkDesc != null" >
+        apk_desc,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createAt != null" >
+        create_at,
+      </if>
+      <if test="updateAt != null" >
+        update_at,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="versionCode != null" >
+        #{versionCode,jdbcType=INTEGER},
+      </if>
+      <if test="versionName != null" >
+        #{versionName,jdbcType=VARCHAR},
+      </if>
+      <if test="appName != null" >
+        #{appName,jdbcType=VARCHAR},
+      </if>
+      <if test="appType != null" >
+        #{appType,jdbcType=VARCHAR},
+      </if>
+      <if test="size != null" >
+        #{size,jdbcType=DOUBLE},
+      </if>
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="publishTime != null" >
+        #{publishTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="apkDesc != null" >
+        #{apkDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateApp" parameterType="com.czz.hwy.bean.version.App" >
+    update app
+    <set >
+      <if test="versionCode != null" >
+        version_code = #{versionCode,jdbcType=INTEGER},
+      </if>
+      <if test="versionName != null" >
+        version_name = #{versionName,jdbcType=VARCHAR},
+      </if>
+      <if test="appName != null" >
+        app_name = #{appName,jdbcType=VARCHAR},
+      </if>
+      <if test="appType != null" >
+        app_type = #{appType,jdbcType=VARCHAR},
+      </if>
+      <if test="size != null" >
+        size = #{size,jdbcType=DOUBLE},
+      </if>
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="publishTime != null" >
+        publish_time = #{publishTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="apkDesc != null" >
+        apk_desc = #{apkDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.version.App" >
+    update app
+    set version_code = #{versionCode,jdbcType=INTEGER},
+      version_name = #{versionName,jdbcType=VARCHAR},
+      app_name = #{appName,jdbcType=VARCHAR},
+      app_type = #{appType,jdbcType=VARCHAR},
+      size = #{size,jdbcType=DOUBLE},
+      employee_id = #{employeeId,jdbcType=INTEGER},
+      publish_time = #{publishTime,jdbcType=TIMESTAMP},
+      apk_desc = #{apkDesc,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      create_at = #{createAt,jdbcType=TIMESTAMP},
+      update_at = #{updateAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <!-- 获取app列表数据 -->
+  <select id="getAppsByBean" parameterType="com.czz.hwy.bean.version.App" resultType="com.czz.hwy.bean.version.App">
+  	select t.*,u.showname as employeeName   from 
+	  	(select id,version_code as versionCode,version_name as versionName,app_name as appName,app_type as appType,
+	  			employee_id as employeeId,publish_time as publishTime,apk_desc as apkDesc,
+	  			create_at as createAt,update_at as updateAt,download_census as downloadCensus
+	  	from app 
+	  	<where>
+	  		<if test="f_publishTime!=null">
+	  			<![CDATA[publish_time>=#{f_publishTime}]]>
+	  		</if>
+	  		<if test="t_publishTime!=null">
+	  			and <![CDATA[publish_time<adddate(#{t_publishTime},INTERVAL 1 DAY)]]>
+	  		</if>
+	  		<if test="versionName!=null and versionName!=''">
+	  			and version_name like concat('%',#{versionName},'%')
+	  		</if>
+	  		<if test="appName!=null and appName!=''">
+	  			and app_name like concat('%',#{appName},'%')
+	  		</if>
+	  		<if test="versionCode!=0">
+	  			and version_code=#{versionCode}
+	  		</if>
+	  		<if test="appType!=null and appType!=''">
+	  			and app_type=#{appType}
+	  		</if>
+	  		<if test="employeeId!=0">
+  				and employee_id=#{employeeId}
+  			</if>
+	  	</where>
+	  	order by create_at desc
+	  	)t left outer join users u on t.employeeId=u.employee_id
+	  	order by t.createAt desc 
+	  	limit #{row},#{rows}
+  </select>
+  <!-- 根据条件获取发布app总量 -->
+  <select id="getAppsByBeanCount" parameterType="com.czz.hwy.bean.version.App" resultType="java.lang.Integer">
+  	select count(*) as total 
+  	from app 
+  	<where>
+  		<if test="f_publishTime!=null">
+	  			<![CDATA[publish_time>=#{f_publishTime}]]>
+  		</if>
+  		<if test="t_publishTime!=null">
+  			and <![CDATA[publish_time<adddate(#{t_publishTime},INTERVAL 1 DAY)]]>
+  		</if>
+  		<if test="versionName!=null and versionName!=''">
+  			and version_name like concat('%',#{versionName},'%')
+  		</if>
+  		<if test="appName!=null and appName!=''">
+  			and app_name like concat('%',#{appName},'%')
+  		</if>
+  		<if test="versionCode!=0">
+  			and version_code=#{versionCode}
+  		</if>
+  		<if test="appType!=null and appType!=''">
+  			and app_type=#{appType}
+  		</if>
+  		<if test="employeeId!=0">
+ 				and employee_id=#{employeeId}
+ 			</if>
+  	</where>
+  </select>
+  
+    <!-- 领导APP的最大版本号 -->
+  <select id="getLeaderAppByMaxCode" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.version.App">
+      select * from app where version_code in(select max(version_code) from app where appfunction = 3) and appfunction = 3
+  </select>  
+</mapper>

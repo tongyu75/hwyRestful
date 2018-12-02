@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.app.MessageApp">
+	<!-- 根据条件查询列表数据 -->
+	<select id="getMessageByBeanApp" parameterType="com.czz.hwy.bean.manager.app.MessageApp" resultType="com.czz.hwy.bean.manager.app.MessageApp">
+	    select id,title,content,publish_time,publish_name publishName,create_id,receive_type,receive_ids,create_at 
+	      from message
+        <where>
+            <if test="title!=null and title!=''">
+                    title like concat('%',#{title},'%')
+            </if>
+            <if test="content!=null and content!=''">
+                 and content like concat('%',#{content},'%')
+            </if>
+            <if test="f_publishTime!=null">
+                <![CDATA[and publish_time>=#{f_publishTime}]]>
+            </if>
+            <if test="publishName !=null and publishName!=''">
+                and publish_name like concat('%',#{publishName},'%')
+            </if>                           
+            <if test="t_publishTime!=null">
+                <![CDATA[and publish_time<=adddate(#{t_publishTime},INTERVAL 1 DAY)]]>
+            </if>
+            <if test="create_id!=0">
+                and create_id=#{create_id}
+            </if>
+            <if test="receive_type!=0">
+                and receive_type=#{receive_type}
+            </if>
+        </where>            
+		order by publish_time desc
+		limit #{row},#{rows}
+	</select>
+	<!-- 根据条件查询总数据量 -->
+	<select id="getMessageByBeanCountApp" parameterType="com.czz.hwy.bean.manager.app.MessageApp" resultType="java.lang.Integer">
+		select count(*) total from message
+		<where>
+			<if test="title!=null and title!=''">
+				title like concat('%',#{title},'%')
+			</if>
+			<if test="content!=null and content!=''">
+				and content like concat('%',#{content},'%')
+			</if>
+             <if test="publishName !=null and publishName!=''">
+                and publish_name like concat('%',#{publishName},'%')
+            </if>			
+			<if test="f_publishTime!=null">
+				<![CDATA[and publish_time>=#{f_publishTime}]]>
+			</if>
+			<if test="t_publishTime!=null">
+				<![CDATA[and publish_time<=adddate(#{t_publishTime},INTERVAL 1 DAY)]]>
+			</if>
+			<if test="create_id!=0">
+				and create_id=#{create_id}
+			</if>
+			<if test="receive_type!=0">
+				and receive_type=#{receive_type}
+			</if>
+		</where>
+	</select>
+	<!-- 插入消息 -->
+	<insert id="insertMessageApp" parameterType="com.czz.hwy.bean.manager.app.MessageApp">
+		insert into message(title,content,publish_time,publish_name,create_id,receive_type,receive_ids,create_at)
+		values(#{title},#{content},#{publish_time},#{publishName},#{create_id},#{receive_type},#{receive_ids},current_timestamp())
+	</insert>
+</mapper>

@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.user.Users" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.user.Users" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="showname" property="showname" jdbcType="VARCHAR" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="tel" property="tel" jdbcType="VARCHAR" />
+    <result column="gener" property="gener" jdbcType="INTEGER" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="id_card" property="idCard" jdbcType="VARCHAR" />
+    <result column="dept_id" property="deptId" jdbcType="INTEGER" />
+    <result column="role_id" property="roleId" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="flag" property="flag" jdbcType="INTEGER" />
+    <result column="position" property="position" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="dept_name" property="deptName" jdbcType="VARCHAR" />
+    <result column="role_name" property="roleName" jdbcType="VARCHAR" />   
+    <result column="gener_name" property="generName" jdbcType="VARCHAR" />
+    <result column="has_mobile" property="hasMobile" jdbcType="INTEGER" />    
+    <result column="has_watch" property="hasWatch" jdbcType="INTEGER" />        
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, showname, employee_id, password, email, tel, gener, address, id_card, dept_id, 
+    role_id, status, flag, position, remark, create_at, update_at, has_mobile, has_watch
+  </sql>
+  
+  <select id="getUserInfoByEmployeeId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select <include refid="Base_Column_List" />
+      from users
+     where employee_id = #{employeeId,jdbcType=INTEGER}
+       and role_id in (4,5,6,7)
+  </select>
+  
+  <select id="getUserCount" parameterType="com.czz.hwy.bean.user.Users" resultType="java.lang.Integer">
+    select count(id) from users
+    <where>
+      <if test="showname !=null and showname != ''">
+        and showname like CONCAT(CONCAT('%', #{showname,jdbcType=VARCHAR}), '%')
+      </if>
+      <if test="employeeId != 0" >
+        and employee_id = #{employeeId,jdbcType=INTEGER}
+      </if>
+      <if test="deptId != 0" >
+        and dept_id=#{deptId,jdbcType=INTEGER}
+      </if>
+      <if test="roleId != 0" >
+        and role_id=#{roleId,jdbcType=INTEGER}
+      </if>
+        and status = 1
+    </where>
+  </select>  
+  
+  <select id="getAllUsersByBean" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.user.Users">
+    select  A.*,B.dept_name,C.name role_name, if(A.gener = 1, '男', '女') gener_name 
+      from users A 
+      join departments B on A.dept_id=B.dept_id 
+      join roles C on A.role_id=C.value
+    <where>
+      <if test="id != 0" >
+       and A.id=#{id,jdbcType=INTEGER}
+      </if>
+      <if test="showname != null and showname != ''" >
+       and A.showname like CONCAT(CONCAT('%', #{showname,jdbcType=VARCHAR}), '%')
+      </if>
+      <if test="employeeId != 0" >
+       and A.employee_id=#{employeeId,jdbcType=INTEGER}
+      </if>
+      <if test="password != null and password != ''" >
+       and A.password= #{password,jdbcType=VARCHAR}
+      </if>
+      <if test="email != null and email != ''" >
+       and A.email=#{email,jdbcType=VARCHAR}
+      </if>
+      <if test="tel != null and tel != ''" >
+       and A.tel=#{tel,jdbcType=VARCHAR}
+      </if>
+      <if test="gener != 0" >
+       and A.gener=#{gener,jdbcType=INTEGER}
+      </if>
+      <if test="address != null and address != ''" >
+       and A.address=#{address,jdbcType=VARCHAR}
+      </if>
+      <if test="idCard != null and idCard != ''" >
+        and A.id_card=#{idCard,jdbcType=VARCHAR}
+      </if>
+      <if test="deptId != 0" >
+        and A.dept_id=#{deptId,jdbcType=INTEGER}
+      </if>
+      <if test="roleId != 0" >
+        and A.role_id=#{roleId,jdbcType=INTEGER}
+      </if>
+      <if test="flag != 0" >
+        and A.flag=#{flag,jdbcType=INTEGER}
+      </if>
+      <if test="position != null and position != ''" >
+        and A.position=#{position,jdbcType=VARCHAR}
+      </if>
+      <if test="remark != null and remark != ''" >
+        and A.remark=#{remark,jdbcType=VARCHAR}
+      </if>
+      <if test="createAt != null" >
+        and A.create_at=#{createAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="updateAt != null" >
+       and  A.update_at=#{updateAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="hasMobile != 0" >
+        and A.has_mobile=#{hasMobile,jdbcType=INTEGER}
+      </if>
+      <if test="hasWatch != 0" >
+        and A.has_watch=#{hasWatch,jdbcType=INTEGER}
+      </if>               
+        and A.status =1 
+    </where>
+    order by A.create_at DESC 
+    <if test="row != 0 || rows != 0" >
+      limit #{row},#{rows}
+    </if>
+  </select>  
+  
+  <select id="getUsersByBean" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.user.Users">
+    select  A.*,B.dept_name,C.name role_name, if(A.gener = 1, '男', '女') gener_name 
+      from users A 
+      join departments B on A.dept_id=B.dept_id 
+      join roles C on A.role_id=C.value
+    <where>
+      <if test="id != 0" >
+       and A.id=#{id,jdbcType=INTEGER}
+      </if>
+      <if test="showname != null and showname != ''" >
+       and A.showname=#{showname,jdbcType=VARCHAR}
+      </if>
+      <if test="employeeId != 0" >
+       and A.employee_id=#{employeeId,jdbcType=INTEGER}
+      </if>
+      <if test="password != null and password != ''" >
+       and A.password= #{password,jdbcType=VARCHAR}
+      </if>
+      <if test="email != null and email != ''" >
+       and A.email=#{email,jdbcType=VARCHAR}
+      </if>
+      <if test="tel != null and tel != ''" >
+       and A.tel=#{tel,jdbcType=VARCHAR}
+      </if>
+      <if test="gener != 0" >
+       and A.gener=#{gener,jdbcType=INTEGER}
+      </if>
+      <if test="address != null and address != ''" >
+       and A.address=#{address,jdbcType=VARCHAR}
+      </if>
+      <if test="idCard != null and idCard != ''" >
+        and A.id_card=#{idCard,jdbcType=VARCHAR}
+      </if>
+      <if test="deptId != 0" >
+        and A.dept_id=#{deptId,jdbcType=INTEGER}
+      </if>
+      <if test="roleId != 0" >
+        and A.role_id=#{roleId,jdbcType=INTEGER}
+      </if>
+      <if test="flag != 0" >
+        and A.flag=#{flag,jdbcType=INTEGER}
+      </if>
+      <if test="position != null and position != ''" >
+        and A.position=#{position,jdbcType=VARCHAR}
+      </if>
+      <if test="remark != null and remark != ''" >
+        and A.remark=#{remark,jdbcType=VARCHAR}
+      </if>
+      <if test="createAt != null" >
+        and A.create_at=#{createAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="updateAt != null" >
+       and  A.update_at=#{updateAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="hasMobile != 0" >
+        and A.has_mobile=#{hasMobile,jdbcType=INTEGER}
+      </if>
+      <if test="hasWatch != 0" >
+        and A.has_watch=#{hasWatch,jdbcType=INTEGER}
+      </if>                     
+        and A.status = 1
+    </where>
+  </select>    
+  
+  <select id="getMessageUsersByBean" parameterType="com.czz.hwy.bean.user.Users" resultMap="BaseResultMap">
+    SELECT wp.area_id areaId, da.area_name areaName, u.*
+      FROM users u 
+      JOIN subtopics sub ON u.employee_id = sub.employee_id
+      left join workplans wp on u.employee_id = wp.employee_id
+      left join dutyarea da on wp.area_id = da.id
+     WHERE u.STATUS = 1
+       <if test="roleId != 0">
+           and u.role_id=#{roleId}
+       </if>
+     order by wp.area_id
+  </select>
+  
+  <insert id="insertUsers" parameterType="com.czz.hwy.bean.user.Users" >
+    insert into 
+        users (id, showname, employee_id, password, email, tel, gener, address, id_card, 
+        dept_id, role_id, status, flag, position, remark, create_at, update_at, has_mobile, has_watch)
+    values (#{id,jdbcType=INTEGER}, #{showname,jdbcType=VARCHAR}, #{employeeId,jdbcType=INTEGER}, 
+        #{password,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{tel,jdbcType=VARCHAR}, 
+        #{gener,jdbcType=INTEGER}, #{address,jdbcType=VARCHAR}, #{idCard,jdbcType=VARCHAR}, 
+        #{deptId,jdbcType=INTEGER}, #{roleId,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
+        #{flag,jdbcType=INTEGER}, #{position,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, 
+        now(), #{updateAt,jdbcType=TIMESTAMP}, #{hasMobile,jdbcType=INTEGER}, #{hasWatch,jdbcType=INTEGER})
+  </insert>  
+  
+  <update id="updateUsers" parameterType="com.czz.hwy.bean.user.Users" >
+    update users
+    <set >
+      <if test="showname != null and showname != ''" >
+        showname = #{showname,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null and password != ''" >
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null and email != ''" >
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="tel != null and tel != ''" >
+        tel = #{tel,jdbcType=VARCHAR},
+      </if>
+      <if test="gener != null" >
+        gener = #{gener,jdbcType=INTEGER},
+      </if>
+      <if test="address != null and address != ''" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="idCard != null and idCard != ''" >
+        id_card = #{idCard,jdbcType=VARCHAR},
+      </if>
+      <if test="deptId != 0" >
+        dept_id = #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="roleId != 0" >
+        role_id = #{roleId,jdbcType=INTEGER},
+      </if>
+      <if test="status != 0" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="flag != 0" >
+        flag = #{flag,jdbcType=INTEGER},
+      </if>
+      <if test="position != null and position != ''" >
+        position = #{position,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null and remark != ''" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != 0" >
+        status = #{status,jdbcType=INTEGER},
+      </if>      
+      <if test="hasMobile != 0" >
+        has_mobile=#{hasMobile,jdbcType=INTEGER},
+      </if>
+      <if test="hasWatch != 0" >
+        has_watch=#{hasWatch,jdbcType=INTEGER},
+      </if>                                 
+      update_at = now()
+    </set>
+    where employee_id = #{employeeId,jdbcType=INTEGER}
+  </update>  
+  <insert id="insertAllUsersInfo" parameterType="java.util.List">  
+    insert into users(id, showname, employee_id, password, email, tel,gener, address, id_card, 
+        dept_id, role_id, status, flag, position, remark, create_at, update_at, has_mobile, 
+        has_watch) values  
+    <foreach collection="list" item="item" index="index" separator="," >  
+        (#{item.id,jdbcType=INTEGER}, #{item.showname,jdbcType=VARCHAR}, #{item.employeeId,jdbcType=INTEGER}, 
+      #{item.password,jdbcType=VARCHAR}, #{item.email,jdbcType=VARCHAR}, #{item.tel,jdbcType=VARCHAR}, 
+      #{item.gener,jdbcType=INTEGER}, #{item.address,jdbcType=VARCHAR}, #{item.idCard,jdbcType=VARCHAR}, 
+      #{item.deptId,jdbcType=INTEGER}, #{item.roleId,jdbcType=INTEGER}, #{item.status,jdbcType=INTEGER}, 
+      #{item.flag,jdbcType=INTEGER}, #{item.position,jdbcType=VARCHAR}, #{item.remark,jdbcType=VARCHAR}, 
+      #{item.createAt,jdbcType=TIMESTAMP}, #{item.updateAt,jdbcType=TIMESTAMP}, #{hasMobile,jdbcType=INTEGER},
+      #{hasWatch,jdbcType=INTEGER})
+    </foreach>  
+</insert>  
+
+	<!--  查询员工记录集合，2016-11-15，不分页 -->
+	<select id="getUserList" parameterType="com.czz.hwy.bean.user.Users" resultMap="BaseResultMap">
+	select * from users
+	<where>
+		status = 1
+		<if test="employeeId != 0">
+		and employee_id = #{employeeId}
+		</if>
+		<if test="showname != null and showname != ''">
+		and showname like concat('%', #{showname}, '%')
+		</if>
+	</where>
+	</select>
+	
+    <!-- 根据责任区ID获取该责任区中的所有用户  2016-11-21-->
+    <select id="getUserIdByAreaId" resultType="Map" parameterType="com.czz.hwy.bean.user.Users" >
+        select distinct B.employee_id employeeId, B.showname showName
+          from workplans A
+          join users B on A.employee_id = B.employee_id
+       <where>
+           <if test="areaId != 0">
+               and A.area_id = #{areaId}
+           </if>
+           <if test="showname != null and showname != ''">
+			   and showname like concat('%', #{showname}, '%')
+		   </if>
+           and B.status = 1
+        </where>  
+         order by A.employee_id
+    </select>    	
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.CheckDutyApp">
+    <resultMap type="com.czz.hwy.bean.mission.app.CheckDutyApp" id="base_result_map">
+        <id column="id" property="id"/>
+        <result column="area_id" property="areaId" jdbcType="INTEGER"/>
+        <result column="point_id" property="pointId" jdbcType="INTEGER"/>
+        <result column="check_id" property="checkId" jdbcType="INTEGER"/>
+        <result column="eval_type" property="evalType" jdbcType="INTEGER"/>
+        <result column="employee_id" property="employeeId" jdbcType="INTEGER"/>
+        <result column="employee_name" property="employeeName" jdbcType="VARCHAR"/>
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+        <result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+        <result column="fines" property="fines" jdbcType="DOUBLE"/>
+    </resultMap>
+    
+    <sql id="base_column_list">
+        id,area_id,point_id,check_id,eval_type,employee_id,employee_name,create_at,update_at,fines
+    </sql> 
+    
+    <!-- 根据list集合，批量新增考核责任人记录，2016-11-09 -->
+    <insert id="batchAddCheckDutyByListApp" parameterType="java.util.List">
+	     insert into check_duty 
+	     (
+	     	id, 
+	     	check_id, 
+	     	eval_type, 
+	     	employee_id,
+	     	employee_name, 
+	     	create_at, 
+	     	update_at,
+	     	area_id,
+	     	point_id,
+	     	fines
+	      )
+	    values 
+	    <foreach collection="list" item="checkDutyApp" index="index" separator=",">
+	    (
+	    	#{checkDutyApp.id,jdbcType=INTEGER},
+	    	#{checkDutyApp.checkId,jdbcType=INTEGER},
+	    	#{checkDutyApp.evalType,jdbcType=INTEGER}, 
+	        #{checkDutyApp.employeeId,jdbcType=INTEGER}, 
+	         #{checkDutyApp.employeeName,jdbcType=VARCHAR}, 
+	        #{checkDutyApp.createAt,jdbcType=TIMESTAMP}, 
+	        #{checkDutyApp.updateAt,jdbcType=TIMESTAMP},
+	        #{checkDutyApp.areaId,jdbcType=INTEGER},
+	        #{checkDutyApp.pointId,jdbcType=INTEGER},
+	        #{checkDutyApp.fines,jdbcType=DOUBLE}
+	     )
+	    </foreach>
+    </insert>
+    
+    <!-- 根据主键ID和考核类型ID，删除五分钟考核责任人记录，2016-11-09 -->
+    <delete id="deleteCheckDutyByBeanApp" parameterType="checkDutyApp">
+    delete from check_duty
+    <where>
+    	<if test="checkId != 0">
+    	and check_id = #{checkId}
+    	</if>
+    	<if test="evalType != 0">
+    	and eval_type = #{evalType}
+    	</if>
+    </where>
+    </delete>
+    
+</mapper>

@@ -1,0 +1,621 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="attendanceForPlans">
+    <resultMap id="BaseResultMap" type="attendanceForPlans">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="employeeId" property="employeeId" jdbcType="INTEGER"/>
+        <result column="employeeName" property="employeeName" jdbcType="VARCHAR"/>
+        <result column="duty_area" property="dutyAreaId" jdbcType="INTEGER"/>
+        <result column="dutyAreaName" property="dutyAreaName" jdbcType="VARCHAR"/>
+        <result column="duty_point" property="dutyPointId" jdbcType="INTEGER"/>
+        <result column="dutyPointName" property="dutyPointName" jdbcType="VARCHAR"/>
+        <result column="lastrecordtime" property="lastRecordTime" jdbcType="TIMESTAMP"/>
+        <result column="duty_on_time" property="dutyOnTime" jdbcType="TIMESTAMP"/>
+        <result column="duty_off_time" property="dutyOffTime" jdbcType="TIMESTAMP"/>
+        <result column="get_on_status" property="getOnStatus" jdbcType="VARCHAR"/>
+        <result column="get_off_status" property="getOffStatus" jdbcType="VARCHAR"/>
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+        <result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, employeeId,dutyAreaId,dutyPointId,lastRecordTime,dutyOnTime,dutyOffTime,getOnStatus,getOffStatus,CreateAt,UpdateAt
+    </sql>
+    
+    <!-- <select id="getAttendanceForPlansCount" resultType="int" parameterType="attendanceForPlans">
+    SELECT
+        count(a.id)
+    FROM
+        attendanceforplans a
+    JOIN users b ON a.employeeId = b.employee_id
+    <where>
+        <if test="employeeName != null and employeeName != ''">
+            and b.showname LIKE concat('%',#{employeeName,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="dutyAreaId != 0">
+            AND a.duty_area  = #{dutyAreaId,jdbcType=INTEGER}
+        </if>
+        <if test="dutyPointId != 0">
+            AND a.duty_point = #{dutyPointId,jdbcType=INTEGER}
+        </if>
+        <if test="beginDate != null and endDate != null">
+            AND DATE_FORMAT(a.recorddate,'%Y-%m-%d')  BETWEEN  DATE_FORMAT(#{beginDate,jdbcType=TIMESTAMP},'%Y-%m-%d') and DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP},'%Y-%m-%d')
+        </if>
+    </where>
+    </select> -->
+    
+    <select id="getAttendanceForPlansCount" resultType="int" parameterType="attendanceForPlans">
+    SELECT
+        count(a.id)
+    FROM
+        attendanceforplans a
+    JOIN users b ON a.employeeId = b.employee_id
+    <where>
+        <if test="employeeName != null and employeeName != ''">
+            and b.showname LIKE concat('%',#{employeeName,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="dutyAreaId != 0">
+            AND a.duty_area  = #{dutyAreaId,jdbcType=INTEGER}
+        </if>
+        <!-- <if test="dutyPointId != 0">
+            AND a.duty_point = #{dutyPointId,jdbcType=INTEGER}
+        </if> -->
+        <if test="beginDate != null and endDate != null">
+            AND DATE_FORMAT(a.recorddate,'%Y-%m-%d')  BETWEEN  DATE_FORMAT(#{beginDate,jdbcType=TIMESTAMP},'%Y-%m-%d') and DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP},'%Y-%m-%d')
+        </if>
+    </where>
+    </select>
+    
+    <select id="getAllAttendanceForPlansByBean" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.user.AttendanceForPlans">
+    SELECT
+    a.*, b.showname employeeName,
+    c.area_name dutyAreaName
+    <!-- ,
+    d.point_name dutyPointName -->
+    FROM
+        attendanceforplans a
+    JOIN users b ON a.employeeId = b.employee_id
+    JOIN dutyarea c ON a.duty_area = c.id
+<!--     JOIN dutypoint d ON a.duty_point = d.id -->
+    <where>
+        <if test="id != 0">
+            and a.id = #{id,jdbcType=INTEGER}
+        </if>
+        <if test="employeeId != 0">
+            and a.employeeId = #{employeeId,jdbcType=INTEGER}
+        </if>
+        <!-- <if test="dutyPointId != 0">
+            and a.duty_point = #{dutyPointId,jdbcType=INTEGER}
+        </if> -->
+        <if test="dutyAreaId != 0">
+            and a.duty_area = #{dutyAreaId,jdbcType=INTEGER}
+        </if>
+        <if test="lastRecordTime != null">
+            and a.lastrecordtime = #{lastRecordTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="dutyOnTime != null">
+            and a.duty_on_time = #{dutyOnTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="dutyOffTime != null">
+            and a.duty_off_time = #{dutyOffTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="getOnStatus != null">
+            and a.get_on_status = #{getOnStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="getOffStatus != null">
+            and a.get_off_status = #{getOffStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="createAt != null">
+            and a.create_at= #{createAt,jdbcType=TIMESTAMP}
+        </if>
+        <if test="updateAt != null">
+            and a.update_at = #{updateAt,jdbcType=TIMESTAMP}
+        </if>
+        <if test="employeeName != null and employeeName != ''">
+            and b.showname LIKE concat('%',#{employeeName,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="beginDate != null and endDate != null">
+            AND DATE_FORMAT(a.recorddate,'%Y-%m-%d')  BETWEEN  DATE_FORMAT(#{beginDate,jdbcType=TIMESTAMP},'%Y-%m-%d') and DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP},'%Y-%m-%d')
+        </if>
+    </where>
+    order by a.create_at desc 
+        <if test="row != 0 || rows != 0" >
+          limit #{row},#{rows}
+        </if>
+    </select>
+    
+    <!-- <select id="getAllAttendanceForPlansByBean" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.user.AttendanceForPlans">
+    SELECT
+    a.*, b.showname employeeName,
+    c.area_name dutyAreaName,
+    d.point_name dutyPointName
+    FROM
+        attendanceforplans a
+    JOIN users b ON a.employeeId = b.employee_id
+    JOIN dutyarea c ON a.duty_area = c.id
+    JOIN dutypoint d ON a.duty_point = d.id
+    <where>
+        <if test="id != 0">
+            and a.id = #{id,jdbcType=INTEGER}
+        </if>
+        <if test="employeeId != 0">
+            and a.employeeId = #{employeeId,jdbcType=INTEGER}
+        </if>
+        <if test="dutyPointId != 0">
+            and a.duty_point = #{dutyPointId,jdbcType=INTEGER}
+        </if>
+        <if test="dutyAreaId != 0">
+            and a.duty_area = #{dutyAreaId,jdbcType=INTEGER}
+        </if>
+        <if test="lastRecordTime != null">
+            and a.lastrecordtime = #{lastRecordTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="dutyOnTime != null">
+            and a.duty_on_time = #{dutyOnTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="dutyOffTime != null">
+            and a.duty_off_time = #{dutyOffTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="getOnStatus != null">
+            and a.get_on_status = #{getOnStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="getOffStatus != null">
+            and a.get_off_status = #{getOffStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="createAt != null">
+            and a.create_at= #{createAt,jdbcType=TIMESTAMP}
+        </if>
+        <if test="updateAt != null">
+            and a.update_at = #{updateAt,jdbcType=TIMESTAMP}
+        </if>
+        <if test="employeeName != null and employeeName != ''">
+            and b.showname LIKE concat('%',#{employeeName,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="beginDate != null and endDate != null">
+            AND DATE_FORMAT(a.recorddate,'%Y-%m-%d')  BETWEEN  DATE_FORMAT(#{beginDate,jdbcType=TIMESTAMP},'%Y-%m-%d') and DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP},'%Y-%m-%d')
+        </if>
+    </where>
+    order by a.create_at desc 
+        <if test="row != 0 || rows != 0" >
+          limit #{row},#{rows}
+        </if>
+    </select> -->
+    
+    <!-- 责任点模糊查询 -->
+    <select id="getDutyPointByArea" parameterType="java.util.Map" resultType="java.util.Map">
+        select id,point_name from dutypoint where status=1
+          <if test="q != null and q != ''">
+              and point_name like concat(concat('%',#{q,jdbcType=VARCHAR}),'%')
+          </if>
+          <if test="areaId != 0">
+              and area_id = #{areaId,jdbcType=INTEGER}
+          </if>
+    </select>
+    
+    <!-- 获取一段时间内每个责任区的上班统计对比，2016-09-05 -->
+    <select id="getOnStatusTotalByMap" parameterType="Map" resultType="Map">
+    select DISTINCT tt.area_id,tt.area_name,
+    if(sum(tt.sbnum) is null,0,sum(tt.sbnum)) sbnum,
+            if(sum(tt.wsbnum) is null,0,sum(tt.wsbnum)) wsbnum, 
+            if(sum(tt.cdnum) is null ,0, sum(tt.cdnum)) cdnum 
+     from (
+        select t.duty_area area_id,t1.area_name,
+            if(t.get_on_status='上班',count(1),0) sbnum ,
+            if(t.get_on_status='未上班',count(1),0) wsbnum, 
+            if(t.get_on_status='迟到',count(1),0) cdnum,t.get_on_status
+        from attendanceforplans t
+            join dutyarea t1 on t.duty_area = t1.id and t1.status = 1
+        <where>
+            t.get_on_status is not null
+            <if test="areaId != null and areaId != ''">
+            and t.duty_area = #{areaId}
+            </if>
+            <if test="beginDate != null and beginDate != '' and endDate != null and endDate != ''">
+            and date_format(t.recorddate,'%Y-%m-%d') &gt;= #{beginDate}
+            and date_format(t.recorddate,'%Y-%m-%d') &lt;= #{endDate}
+            </if>
+            <if test="beginDate == null or beginDate == '' or endDate == null or endDate == ''">
+            and date_format(t.recorddate,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d') 
+            </if>
+        </where>
+            group by t.duty_area,t.get_on_status
+        ) tt
+    group by tt.area_id
+    </select>
+    
+    <!-- 以责任区为主表，取所有责任区的上班情况对比，是否要改成这个情况，不确定，暂时不改，2016-09-05 -->
+    <!-- <select id="getOnStatusTotalByMap" parameterType="Map" resultType="Map">
+    select t2.id area_id,t2.area_name,t3.subnum,t3.wsbnum,t3.cdnum from dutyarea t2 join 
+    (select DISTINCT tt.area_id,sum(tt.sbnum) subnum, sum(tt.wsbnum) wsbnum,sum(tt.cdnum) cdnum  from (
+        select t.duty_area area_id,
+            if(t.get_on_status='上班',count(1),0) sbnum ,
+            if(t.get_on_status='未上班',count(1),0) wsbnum, 
+            if(t.get_on_status='迟到',count(1),0) cdnum,t.get_on_status
+        from attendanceforplans t
+        <where>
+            t.get_on_status is not null
+            <if test="areaId != null and areaId != ''">
+            and t.duty_area = #{areaId}
+            </if>
+            <if test="beginDate != null and beginDate != '' and endDate != null and endDate != ''">
+            and date_format(t.recorddate,'%Y-%m-%d') &gt;= #{beginDate}
+            and date_format(t.recorddate,'%Y-%m-%d') &lt;= #{endDate}
+            </if>
+            <if test="beginDate == null or beginDate == '' or endDate == null or endDate == ''">
+            and date_format(t.recorddate,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d') 
+            </if>
+        </where>
+            group by t.duty_area,t.get_on_status
+        ) tt
+    group by tt.area_id) t3 on t2.id = t3.area_id
+    </select> -->
+    
+    <!-- 获取某个时间内考勤统计对比数据，2016-09-05 -->
+    <select id="getOnStatussCompareByMap" parameterType="Map" resultType="Map">
+        select if(sum(tt.sbnum) is null,0,sum(tt.sbnum)) sbnum,
+            if(sum(tt.wsbnum) is null,0,sum(tt.wsbnum)) wsbnum, 
+            if(sum(tt.cdnum) is null ,0, sum(tt.cdnum)) cdnum 
+         from (
+            select 
+                if(t.get_on_status='上班',count(1),0) sbnum ,
+                if(t.get_on_status='未上班',count(1),0) wsbnum, 
+                if(t.get_on_status='迟到',count(1),0) cdnum,t.get_on_status
+            from attendanceforplans t
+            <where>
+                t.get_on_status is not null
+                <if test="areaIdOfCur != null and areaIdOfCur != ''">
+                and t.duty_area = #{areaIdOfCur}
+                </if>
+                <if test="dateStr != null and dateStr != ''">
+                and date_format(t.recorddate,'%Y-%m-%d') = #{dateStr}
+                </if>
+            </where>
+            group by t.get_on_status
+        )tt
+    </select>
+    
+    <!-- 工作抽查 全市当天工作员工考勤状态（领导APP端） -->
+    <select id="getAllCityWorkAttForLeaderApp" resultType="Map">
+        select da.id areaId, da.area_name areaName, ap6.curStatus, count(id) num
+          from dutyarea da 
+          left join (
+                select t.employeeId, t.duty_area, if(count(t5.taskdutypeople) > 0, '任务中', if(count(t6.applyId) > 0,'请假中', t.get_on_status)) curStatus
+                  from attendanceforplans t 
+                  left join(
+                        select a.taskdutypeople from taskinformation a
+                        where date_format(a.taskstart,'%Y-%m-%d') &lt;=  DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+                          and date_format(a.taskend,'%Y-%m-%d') &gt;= DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+                  ) t5 on t5.taskdutypeople like concat('%',concat('工号:',t.employeeId,','),'%') 
+                  left join (
+                        select DISTINCT a.apply_id applyId from leaveinfo a
+                         where a.appr_status = 1
+                           and a.leave_from_time &lt;= SYSDATE()
+                           and a.leave_to_time &gt;= SYSDATE()
+                    ) t6 on t.employeeId = t6.applyId
+                 where t.recorddate = DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+                   and DATE_FORMAT(t.duty_on_time, '%H:%i:%s') &lt;= DATE_FORMAT(SYSDATE(), '%H:%i:%s')
+                   AND DATE_FORMAT(t.duty_off_time, '%H:%i:%s') &gt;=  DATE_FORMAT(SYSDATE(), '%H:%i:%s') 
+                 group by t.employeeId
+                ) ap6 on da.id = ap6.duty_area
+         where da.id = 1 || da.id = 2 || da.id = 3 || da.id = 4 || da.id = 5 || da.id = 6 || da.id = 7
+         group by da.id, ap6.curStatus
+         order by da.id
+    </select>
+    
+    <!-- 工作抽查 当前责任区的所有员工的工作状态（领导APP端） -->
+    <select id="getCurWorkAttForLeaderAppApp" resultType="Map" parameterType="attendanceForPlans">
+        select t.employeeId, t2.showname username, t2.role_id roleId,t3.name roleName, if(count(t5.taskdutypeople) > 0, '任务中', if(count(t6.applyId) > 0,'请假中', t.get_on_status)) status,
+               if(t2.role_id = 2 or t2.role_id= 3, t4.area_name, dp.point_name) pointName
+          from attendanceforplans t 
+          join users t2 on t.employeeId = t2.employee_id and t2.status = 1 
+          join roles t3 on t2.role_id = t3.value and t3.status = 1
+          join dutyarea t4 on t.duty_area = t4.id and t4.status = 1
+          left join(
+                   select a.taskdutypeople from taskinformation a
+                    where date_format(a.taskstart,'%Y-%m-%d') &lt;=  DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+                      and date_format(a.taskend,'%Y-%m-%d') &gt;= DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+                ) t5 on t5.taskdutypeople like concat('%',concat('工号:',t2.employee_id,','),'%') 
+          left join (
+                   select DISTINCT a.apply_id applyId from leaveinfo a
+                    where a.duty_area_id  = #{dutyAreaId}
+                      and a.appr_status = 1
+                      and a.leave_from_time &lt;= SYSDATE()
+                      and a.leave_to_time &gt;= SYSDATE()
+                ) t6 on t.employeeId = t6.applyId          
+          left join dutypoint dp on dp.id = t.duty_point
+         where   t.recorddate = DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+           and DATE_FORMAT(t.duty_on_time, '%H:%i:%s') &lt;= DATE_FORMAT(SYSDATE(), '%H:%i:%s')
+           and DATE_FORMAT(t.duty_off_time, '%H:%i:%s') &gt;=  DATE_FORMAT(SYSDATE(), '%H:%i:%s') 
+           and t.duty_area = #{dutyAreaId}
+         group by t.employeeId order by t2.role_id desc
+         limit #{row},#{rows}
+    </select>   
+    
+    <!--自动生成每天的考勤记录(只生成环卫工和检测员的)，2016-10-28--> 
+    <insert id="batchAddAttendanceForPlans">
+     insert into attendanceforplans (
+				employeeId,
+				duty_area,
+				duty_on_time,
+				duty_off_time,
+				create_at,
+				recorddate,
+				lat,
+				lng,
+				slow_down_num
+			)
+				select 
+			DISTINCT t.employee_id,
+			t.area_id,
+			t0.duty_on_time,
+			t0.duty_off_time,
+			now(),
+			DATE_FORMAT(now(),'%Y-%m-%d'),
+			0,
+			0,
+			0
+		from workplans t
+		join banci t0 on t.banzu_id = t0.banzu_id and t0.status = 1
+		-- join dutypoint t1 on t.point_id = t1.id and t1.status = 1
+		join dutyarea t2 on t.area_id = t2.id and t2.status = 1
+		join users t3 on t.employee_id = t3.employee_id and t3.status = 1 and t3.role_id in (1,2)
+		where 
+		not EXISTS(
+			select 1 from attendanceforplans a
+			where a.recorddate = DATE_FORMAT(now(),'%Y-%m-%d')
+			and a.duty_on_time = t0.duty_on_time
+			and a.duty_off_time = t0.duty_off_time
+		  and a.employeeId = t.employee_id
+			and a.duty_area = t.area_id
+		)
+    </insert>   
+    
+    <!--更新当天的没有手机的员工的上下班状态为正常，2016-10-28-->  
+   <update id="updateNoMobileStatus">
+	update attendanceforplans t 
+	set t.get_on_status = '上班', t.update_at = CONCAT(CURDATE(), ' ',t.duty_on_time), 
+	 t.get_off_status = '下班' ,t.lastrecordtime = CONCAT(CURDATE(),' ',t.duty_off_time)
+	where  t.recorddate = CURDATE()
+	and EXISTS(select 1 from users a where a.status = 1 and a.has_mobile = 2 and a.employee_id = t.employeeId)
+	</update>
+          
+    <!-- 获取出勤信息记录条数，2016-11-15 -->
+    <select id="getAttendanceHistoryCount" resultType="int" parameterType="com.czz.hwy.bean.user.AttendanceForPlans">
+        select count(A.id)
+          from attendanceforplans A
+          join users B on A.employeeId = B.employee_id and B.status = 1
+          join dutyarea C on A.duty_area = C.id
+          left join (select wp.employee_id, wp.area_id, GROUP_CONCAT(CAST(CONCAT(dp.point_name)as CHAR)) pointName,
+                       GROUP_CONCAT(CAST(CONCAT(dp.id)as CHAR)) pointId 
+                  from workplans wp 
+                  join dutypoint dp on wp.point_id = dp.id and wp.area_id = dp.area_id
+                  where dp.status = 1
+                 group by wp.employee_id) D on A.employeeId = D.employee_id and A.duty_area = D.area_id
+        <where>
+           <if test="areaId != 0">
+           and A.duty_area = #{areaId}
+          </if>
+           <if test="pointId != 0">
+           and D.pointId like concat('%', #{pointId}, '%') 
+          </if>          
+          <if test="startTimeStr != null and startTimeStr != ''">
+           and DATE_FORMAT(A.create_at, '%Y-%m-%d') &gt;= STR_TO_DATE(#{startTimeStr},"%Y-%m-%d")
+          </if>                    
+          <if test="endTimeStr != null and endTimeStr != ''">
+           and DATE_FORMAT(A.create_at, '%Y-%m-%d') &lt;= STR_TO_DATE(#{endTimeStr},"%Y-%m-%d")
+          </if>                           
+          <if test="employeeId != 0">
+           and A.employeeId = #{employeeId}
+          </if>                    
+          <if test="dutyPeopleName != null and dutyPeopleName != ''">
+           and B.showname like concat('%', #{dutyPeopleName}, '%') 
+          </if>                    
+          <if test="roleId != 0">
+           and B.role_id = #{roleId}
+          </if>          
+       </where>
+    </select>
+
+    <!-- 获取出勤信息记录，2016-11-15 -->
+    <select id="getAttendanceHistory" resultType="java.util.Map" parameterType="com.czz.hwy.bean.user.AttendanceForPlans">
+        select A.employeeId , B.showname, A.duty_area areaId, C.area_name areaName, ifnull(D.pointName,'') pointName, D.pointId, date_format(A.create_at, '%Y-%m-%d') attendanceTime,
+               date_format(A.duty_on_time, '%H:%i') dutyOnTime, ifnull(A.get_on_status,'') getOnStatus, date_format(A.duty_off_time, '%H:%i') dutyOffTime, ifnull(A.get_off_status,'') getOffStatus
+          from attendanceforplans A
+          join users B on A.employeeId = B.employee_id and B.status = 1
+          join dutyarea C on A.duty_area = C.id
+         join (select ap.employee_id, ap.area_id, ap.duty_on_time, ap.duty_off_time, ap.recorddate, GROUP_CONCAT(CAST(CONCAT(ap.point_name)as CHAR) order by ap.point_id) pointName,
+                      GROUP_CONCAT(CAST(CONCAT(ap.point_id)as CHAR) order by ap.point_id) pointId
+                 from attendanceforpoint ap
+                group by ap.employee_id, ap.duty_on_time, ap.duty_off_time, ap.recorddate
+               ) D on A.employeeId = D.employee_id and A.duty_area = D.area_id and D.recorddate = A.recorddate and A.duty_on_time = D.duty_on_time and A.duty_off_time = D.duty_off_time
+        <where>
+           <if test="areaId != 0">
+           and A.duty_area = #{areaId}
+          </if>
+           <if test="pointId != 0">
+           and D.pointId like concat('%', #{pointId}, '%') 
+          </if>          
+          <if test="startTimeStr != null and startTimeStr != ''">
+           and DATE_FORMAT(A.create_at, '%Y-%m-%d') &gt;= STR_TO_DATE(#{startTimeStr},"%Y-%m-%d")
+          </if>                    
+          <if test="endTimeStr != null and endTimeStr != ''">
+           and DATE_FORMAT(A.create_at, '%Y-%m-%d') &lt;= STR_TO_DATE(#{endTimeStr},"%Y-%m-%d")
+          </if>                           
+          <if test="employeeId != 0">
+           and A.employeeId = #{employeeId}
+          </if>                    
+          <if test="dutyPeopleName != null and dutyPeopleName != ''">
+           and B.showname like concat('%', #{dutyPeopleName}, '%') 
+          </if>          
+          <if test="roleId != 0">
+           and B.role_id = #{roleId}
+          </if>                                       
+       </where>
+         ORDER BY A.create_at DESC
+         limit #{row},#{rows}
+    </select>          
+    
+    <!-- 环卫工出勤率（当前环卫工出勤情况统计） -->
+    <select id="getAllCityWorkAtt" resultType="Map">
+        select da.id areaId, da.area_name areaName, ap6.curStatus, count(da.id) num
+          from dutyarea da 
+          left join (
+                select t.employeeId, t.duty_area, if(count(t5.taskdutypeople) > 0, '任务中', if(count(t6.applyId) > 0,'请假中', t.get_on_status)) curStatus
+                  from attendanceforplans t 
+                  left join(
+                        select a.taskdutypeople from taskinformation a
+                        where date_format(a.taskstart,'%Y-%m-%d') &lt;=  DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+                          and date_format(a.taskend,'%Y-%m-%d') &gt;= DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+                  ) t5 on t5.taskdutypeople like concat('%',concat('工号:',t.employeeId,','),'%') 
+                  left join (
+                        select DISTINCT a.apply_id applyId from leaveinfo a
+                         where a.appr_status = 1
+                           and a.leave_from_time &lt;= SYSDATE()
+                           and a.leave_to_time &gt;= SYSDATE()
+                    ) t6 on t.employeeId = t6.applyId
+                 where t.recorddate = DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+                   and DATE_FORMAT(t.duty_on_time, '%H:%i:%s') &lt;= DATE_FORMAT(SYSDATE(), '%H:%i:%s')
+                   AND DATE_FORMAT(t.duty_off_time, '%H:%i:%s') &gt;=  DATE_FORMAT(SYSDATE(), '%H:%i:%s') 
+                 group by t.employeeId
+                ) ap6 on da.id = ap6.duty_area
+         where da.status = 1     
+         group by da.id, ap6.curStatus
+         order by da.id
+    </select>
+    
+    <!-- 考勤统计信息-->
+    <select id="attendanceCountInfo" resultType="Map" parameterType="Map">
+        select 	count(1)/2 total,
+				(count(1) - sum(if(t.get_on_status='休息',t.get_on_status='休息',0)) - sum(if(t.get_on_status='请假',t.get_on_status='请假',0)) - sum(if(t.get_on_status='未上班',t.get_on_status='未上班',0)))/2-#{jiaban} zhengchang,
+				#{jiaban} jiaban,
+				sum(if(t.get_on_status='任务',t.get_on_status='任务',0))/2 renwu,
+				sum(if(t.get_on_status='迟到',t.get_on_status='迟到',0)) chidao,
+				sum(if(t.get_on_status='休息',t.get_on_status='休息',0))/2 xiuxi,
+				sum(if(t.get_on_status='请假',t.get_on_status='请假',0))/2 qingjia,
+				sum(if(t.get_on_status='未上班',t.get_on_status='未上班',0))/2 kuanggong,
+				sum(if(t.get_off_status='早退',t.get_off_status='早退',0)) zaotui,
+				t2.area_name,t.duty_area,t.employeeId ,u.showname,t1.point_name
+		from attendanceforplans t  
+		join (select t.employeeId employee_id,GROUP_CONCAT(DISTINCT t2.point_name) point_name,GROUP_CONCAT(DISTINCT t1.point_id) point_id from attendanceforplans t join workplans t1 on t.employeeId=t1.employee_id join dutypoint t2 on t1.point_id=t2.id group by t.employeeId, t1.area_id) t1 on t.employeeId=t1.employee_id
+		join users u on t.employeeId=u.employee_id 
+		join dutyarea t2 on t.duty_area = t2.id
+		<where>
+			<if test="recordDate != '' and recordDate != null">
+				and t.recorddate like concat('%', #{recordDate}, '%') 
+			</if>
+			<if test="employeeId != '' and employeeId != null">
+				and t.employeeId like concat('%', #{employeeId}, '%') 
+			</if>
+			<if test="showName != '' and showName != null">
+				and u.showname like concat('%', #{showName}, '%')
+			</if>
+			<if test="areaId != '' and areaId != null">
+				and t.duty_area = #{areaId}
+			</if>
+			<if test="pointId != '' and pointId != null">
+				and t1.point_id like concat('%', #{pointId}, '%')
+			</if>
+		</where>
+			group by t.employeeId limit #{row},10
+	</select>
+	
+	<!-- 考勤统计总数-->
+    <select id="attendanceCountTotal" resultType="Integer" parameterType="Map">
+		select count(1) from
+	        (select count(1)/2 total,
+				(count(1) - sum(if(t.get_on_status='休息',t.get_on_status='休息',0)) - sum(if(t.get_on_status='请假',t.get_on_status='请假',0)) - sum(if(t.get_on_status='未上班',t.get_on_status='未上班',0)))/2-#{jiaban} zhengchang,
+				#{jiaban} jiaban,
+				sum(if(t.get_on_status='任务',t.get_on_status='任务',0))/2 renwu,
+				sum(if(t.get_on_status='迟到',t.get_on_status='迟到',0)) chidao,
+				sum(if(t.get_on_status='休息',t.get_on_status='休息',0))/2 xiuxi,
+				sum(if(t.get_on_status='请假',t.get_on_status='请假',0))/2 qingjia,
+				sum(if(t.get_on_status='未上班',t.get_on_status='未上班',0))/2 kuanggong,
+				sum(if(t.get_off_status='早退',t.get_off_status='早退',0)) zaotui,
+				t2.area_name,t.duty_area,t.employeeId ,u.showname,t1.point_name
+			from attendanceforplans t  
+			join (select t.employeeId employee_id,GROUP_CONCAT(DISTINCT t2.point_name) point_name,GROUP_CONCAT(DISTINCT t1.point_id) point_id from attendanceforplans t join workplans t1 on t.employeeId=t1.employee_id join dutypoint t2 on t1.point_id=t2.id group by t.employeeId, t1.area_id) t1 on t.employeeId=t1.employee_id
+			join users u on t.employeeId=u.employee_id 
+			join dutyarea t2 on t.duty_area = t2.id
+			<where>
+				<if test="recordDate != '' and recordDate != null">
+					and t.recorddate like concat('%', #{recordDate}, '%') 
+				</if>
+				<if test="employeeId != '' and employeeId != null">
+					and t.employeeId like concat('%', #{employeeId}, '%') 
+				</if>
+				<if test="showName != '' and showName != null">
+					and u.showname like concat('%', #{showName}, '%')
+				</if>
+				<if test="areaId != '' and areaId != null">
+					and t.duty_area = #{areaId}
+				</if>
+				<if test="pointId != '' and pointId != null">
+					and t1.point_id like concat('%', #{pointId}, '%')
+				</if>
+			</where>
+				group by t.employeeId) t
+	</select>
+	
+	<!-- 考勤详细查询-->
+    <select id="attendanceInfo" resultType="Map" parameterType="com.czz.hwy.bean.user.AttendanceForPlans">
+		select id,employeeId,duty_area,duty_point,lastrecordtime,lat,lng,duty_on_time,duty_off_time,IFNULL(get_on_status,'') get_on_status,IFNULL(get_off_status,'') get_off_status,create_at,update_at,recorddate,slow_down_num,reason,is_coverwork 
+		from attendanceforplans t where t.recorddate like concat('%', #{recoreDateS}, '%') and t.employeeId=#{employeeId}
+	</select>
+	
+	<!-- 考勤详细查询导出专用-->
+    <select id="attendanceInfoExport" resultType="Map" parameterType="com.czz.hwy.bean.user.AttendanceForPlans">
+		select t.employeeId,u.showname,t.duty_area,t1.area_name,
+			IFNULL(t.get_on_status,'') get_on_status,
+			IFNULL(t.get_off_status,'') get_off_status,
+			date_format(t.recorddate, '%Y-%m-%d') recorddate,
+			date_format(t.duty_on_time, '%H:%i:%s') duty_on_time
+		from attendanceforplans t 
+		join users u on t.employeeId = u.employee_id
+		join dutyarea t1 on t.duty_area = t1.id
+		where t.recorddate=#{recoreDateS} and t.employeeId=#{employeeId} and t.duty_area=#{areaId} and u.role_id=1
+		order by t.employeeId,t.recorddate
+	</select>
+	
+	<!-- 考勤详细查询导出专用-->
+    <select id="getEmployeeId" resultType="Map" parameterType="com.czz.hwy.bean.user.AttendanceForPlans">
+		select DISTINCT t.employeeId from attendanceforplans t join users u on t.employeeId = u.employee_id where t.recorddate like concat('%', #{recoreDateS}, '%') and t.duty_area=#{areaId} and u.role_id=1
+	</select>
+	
+	<!-- 考勤统计信息导出专用-->
+    <select id="attendanceCountInfoExport" resultType="Map" parameterType="Map">
+        select 	IFNULL(count(1),0)/2 total,
+				IFNULL((count(1) - sum(if(t.get_on_status='休息',t.get_on_status='休息',0)) - sum(if(t.get_on_status='请假',t.get_on_status='请假',0)) - sum(if(t.get_on_status='未上班',t.get_on_status='未上班',0))),0)/2-4 zhengchang,
+				4 jiaban,
+				IFNULL(sum(if(t.get_on_status='任务',t.get_on_status='任务',0)),0)/2 renwu,
+				IFNULL(sum(if(t.get_on_status='迟到',t.get_on_status='迟到',0)),0) chidao,
+				IFNULL(sum(if(t.get_on_status='休息',t.get_on_status='休息',0)),0)/2 xiuxi,
+				IFNULL(sum(if(t.get_on_status='请假',t.get_on_status='请假',0)),0)/2 qingjia,
+				IFNULL(sum(if(t.get_on_status='未上班',t.get_on_status='未上班',0)),0)/2 kuanggong,
+				IFNULL(sum(if(t.get_off_status='早退',t.get_off_status='早退',0)),0) zaotui,
+				t2.area_name,t.duty_area,t.employeeId ,u.showname,t1.point_name
+		from attendanceforplans t  
+		join (select t.employeeId employee_id,GROUP_CONCAT(DISTINCT t2.point_name) point_name,GROUP_CONCAT(DISTINCT t1.point_id) point_id from attendanceforplans t join workplans t1 on t.employeeId=t1.employee_id join dutypoint t2 on t1.point_id=t2.id group by t.employeeId, t1.area_id) t1 on t.employeeId=t1.employee_id
+		join users u on t.employeeId=u.employee_id 
+		join dutyarea t2 on t.duty_area = t2.id
+		<where>
+			<if test="recordDate != '' and recordDate != null">
+				and t.recorddate like concat('%', #{recordDate}, '%') 
+			</if>
+			<if test="employeeId != '' and employeeId != null">
+				and t.employeeId = #{employeeId}
+			</if>
+			<if test="areaId != '' and areaId != null">
+				and t.duty_area = #{areaId}
+			</if>
+			and u.role_id=1
+		</where>
+	</select>
+	
+	<!-- 查询员工当月当天最多出勤次数导出用-->
+    <select id="attendanceMaxBanci" resultType="Map" parameterType="com.czz.hwy.bean.user.AttendanceForPlans">
+		select max(t2.shu) banci from(
+			select count(t.recorddate) shu from attendanceforplans t 
+			join users u on t.employeeId=u.employee_id 
+			where t.recorddate like concat('%', #{recoreDateS}, '%')  and t.duty_area = #{areaId} and t.employeeId = #{employeeId} and u.role_id=1 group by t.employeeId,t.recorddate 
+		) t2
+	</select>
+</mapper>

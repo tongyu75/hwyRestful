@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.StandardFines" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.StandardFines" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="roles_id" property="rolesId" jdbcType="INTEGER" />
+    <result column="eval_id" property="evalId" jdbcType="INTEGER" />
+    <result column="area_id" property="areaId" jdbcType="INTEGER" />
+    <result column="amount" property="amount" jdbcType="DOUBLE" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, roles_id, eval_id, area_id, amount, create_at, update_at
+  </sql>
+  <select id="getStandardFinesById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from standardfines
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteStandardFines" parameterType="java.lang.Integer" >
+    delete from standardfines
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertStandardFines" parameterType="com.czz.hwy.bean.manager.StandardFines" >
+    insert into standardfines (id, roles_id, eval_id, 
+      area_id, amount, create_at, 
+      update_at)
+    values (#{id,jdbcType=INTEGER}, #{rolesId,jdbcType=INTEGER}, #{evalId,jdbcType=INTEGER}, 
+      #{areaId,jdbcType=INTEGER}, #{amount,jdbcType=DOUBLE}, #{createAt,jdbcType=TIMESTAMP}, 
+      #{updateAt,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.czz.hwy.bean.manager.StandardFines" >
+    insert into standardfines
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="rolesId != null" >
+        roles_id,
+      </if>
+      <if test="evalId != null" >
+        eval_id,
+      </if>
+      <if test="areaId != null" >
+        area_id,
+      </if>
+      <if test="amount != null" >
+        amount,
+      </if>
+      <if test="createAt != null" >
+        create_at,
+      </if>
+      <if test="updateAt != null" >
+        update_at,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="rolesId != null" >
+        #{rolesId,jdbcType=INTEGER},
+      </if>
+      <if test="evalId != null" >
+        #{evalId,jdbcType=INTEGER},
+      </if>
+      <if test="areaId != null" >
+        #{areaId,jdbcType=INTEGER},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=DOUBLE},
+      </if>
+      <if test="createAt != null" >
+        #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateStandardFines" parameterType="com.czz.hwy.bean.manager.StandardFines" >
+    update standardfines
+    <set >
+      <if test="rolesId != null" >
+        roles_id = #{rolesId,jdbcType=INTEGER},
+      </if>
+      <if test="evalId != null" >
+        eval_id = #{evalId,jdbcType=INTEGER},
+      </if>
+      <if test="areaId != null" >
+        area_id = #{areaId,jdbcType=INTEGER},
+      </if>
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=DOUBLE},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.manager.StandardFines" >
+    update standardfines
+    set roles_id = #{rolesId,jdbcType=INTEGER},
+      eval_id = #{evalId,jdbcType=INTEGER},
+      area_id = #{areaId,jdbcType=INTEGER},
+      amount = #{amount,jdbcType=DOUBLE},
+      create_at = #{createAt,jdbcType=TIMESTAMP},
+      update_at = #{updateAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.CheckImage" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.mission.CheckImage" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="check_id" property="checkId" jdbcType="INTEGER" />
+    <result column="eval_id" property="evalId" jdbcType="INTEGER" />
+    <result column="image_file_name" property="imageFileName" jdbcType="VARCHAR" />
+    <result column="image_content_type" property="imageContentType" jdbcType="VARCHAR" />
+    <result column="image_file_size" property="imageFileSize" jdbcType="VARCHAR" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, check_id, eval_id, image_file_name, image_content_type, image_file_size, create_at, 
+    update_at
+  </sql>
+  <select id="getCheckImageById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from checkimage
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteCheckImage" parameterType="java.lang.Integer" >
+    delete from checkimage
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertCheckImage" parameterType="com.czz.hwy.bean.mission.CheckImage" >
+    insert into checkimage (id, check_id, eval_id, 
+      image_file_name, image_content_type, image_file_size, 
+      create_at, update_at)
+    values (#{id,jdbcType=INTEGER}, #{checkId,jdbcType=INTEGER}, #{evalId,jdbcType=INTEGER}, 
+      #{imageFileName,jdbcType=VARCHAR}, #{imageContentType,jdbcType=VARCHAR}, #{imageFileSize,jdbcType=VARCHAR}, 
+      #{createAt,jdbcType=TIMESTAMP}, #{updateAt,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.czz.hwy.bean.mission.CheckImage" >
+    insert into checkimage
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="checkId != null" >
+        check_id,
+      </if>
+      <if test="evalId != null" >
+        eval_id,
+      </if>
+      <if test="imageFileName != null" >
+        image_file_name,
+      </if>
+      <if test="imageContentType != null" >
+        image_content_type,
+      </if>
+      <if test="imageFileSize != null" >
+        image_file_size,
+      </if>
+      <if test="createAt != null" >
+        create_at,
+      </if>
+      <if test="updateAt != null" >
+        update_at,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="checkId != null" >
+        #{checkId,jdbcType=INTEGER},
+      </if>
+      <if test="evalId != null" >
+        #{evalId,jdbcType=INTEGER},
+      </if>
+      <if test="imageFileName != null" >
+        #{imageFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="imageContentType != null" >
+        #{imageContentType,jdbcType=VARCHAR},
+      </if>
+      <if test="imageFileSize != null" >
+        #{imageFileSize,jdbcType=VARCHAR},
+      </if>
+      <if test="createAt != null" >
+        #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateCheckImage" parameterType="com.czz.hwy.bean.mission.CheckImage" >
+    update checkimage
+    <set >
+      <if test="checkId != null" >
+        check_id = #{checkId,jdbcType=INTEGER},
+      </if>
+      <if test="evalId != null" >
+        eval_id = #{evalId,jdbcType=INTEGER},
+      </if>
+      <if test="imageFileName != null" >
+        image_file_name = #{imageFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="imageContentType != null" >
+        image_content_type = #{imageContentType,jdbcType=VARCHAR},
+      </if>
+      <if test="imageFileSize != null" >
+        image_file_size = #{imageFileSize,jdbcType=VARCHAR},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.mission.CheckImage" >
+    update checkimage
+    set check_id = #{checkId,jdbcType=INTEGER},
+      eval_id = #{evalId,jdbcType=INTEGER},
+      image_file_name = #{imageFileName,jdbcType=VARCHAR},
+      image_content_type = #{imageContentType,jdbcType=VARCHAR},
+      image_file_size = #{imageFileSize,jdbcType=VARCHAR},
+      create_at = #{createAt,jdbcType=TIMESTAMP},
+      update_at = #{updateAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+</mapper>

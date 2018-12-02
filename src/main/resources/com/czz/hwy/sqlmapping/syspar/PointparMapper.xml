@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.syspar.Pointpar">
+	<resultMap id="PointparResultMap" type="com.czz.hwy.bean.syspar.Pointpar">
+		<id property="id" column="id" jdbcType="INTEGER" />
+		<result property="areaid" column="area_id" jdbcType="INTEGER" />
+		<result property="pointid" column="point_id" jdbcType="INTEGER" />
+		<result property="colrate" column="col_rate" jdbcType="INTEGER" />
+		<result property="reportrate" column="report_rate" jdbcType="INTEGER" />
+		<result property="staytime" column="stay_time" jdbcType="INTEGER" />
+		<result property="creatAt" column="create_at" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+
+	<select id="getAllPointpar" resultMap="PointparResultMap" parameterType="com.czz.hwy.bean.syspar.Pointpar">
+	select pp.id, pp.area_id, pp.point_id,
+	col_rate,pp.create_at,report_rate,stay_time
+	,d.area_name as areaname,dp.point_name as pointname
+	from 	
+	point_parameter pp
+	left join dutyarea d on pp.area_id = d.id
+	left join dutypoint dp on pp.point_id = dp.id
+	<where>
+		<if test="areaid!=0 ">
+		and  pp.area_id=#{areaid}
+		</if>
+		
+		<if test="pointid!=0 ">
+		and  pp.point_id=#{pointid}
+		</if>
+	</where>		
+		limit #{row},#{rows}
+	</select>
+	
+	
+	
+	<select id="getPointparCount"  resultType="java.lang.Integer"   parameterType="com.czz.hwy.bean.syspar.Pointpar">
+	select  count(pp.id) from point_parameter pp 
+	<where>
+		<if test="areaid!=0 ">
+		and  pp.area_id=#{areaid}
+		</if>
+		
+		<if test="pointid!=0 ">
+		and  pp.point_id=#{pointid}
+		</if>
+	</where>
+	</select>
+	
+	
+	
+	<update id="updatePointpar"  parameterType="com.czz.hwy.bean.syspar.Pointpar">
+	
+	update  point_parameter  set  col_rate=#{colrate},report_rate=#{reportrate} ,stay_time=#{staytime}  where id=#{id}
+	
+	</update>
+	
+	
+	<delete id="deletePointpar"  parameterType="com.czz.hwy.bean.syspar.Pointpar">
+	
+	delete   from  point_parameter   where  id=#{id}
+	
+	
+	</delete>
+	
+	<insert id="insertPointpar"  parameterType="com.czz.hwy.bean.syspar.Pointpar">
+	
+	insert  into  point_parameter (id,area_id,point_id,col_rate,report_rate,stay_time) values (#{id},#{areaid},#{pointid},#{colrate},#{reportrate},#{staytime})
+	
+	</insert>
+	
+	<select id="getPointparCountByBean"  resultType="java.lang.Integer"   parameterType="com.czz.hwy.bean.syspar.Pointpar">
+	select  count(pp.id) from point_parameter pp 
+	where pp.area_id=#{areaid}
+	  and pp.point_id=#{pointid}
+	</select>
+
+</mapper>

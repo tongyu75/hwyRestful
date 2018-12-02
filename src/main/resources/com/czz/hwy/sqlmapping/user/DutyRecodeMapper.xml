@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.user.DutyRecode">
+	<resultMap id="BaseResultMap" type="com.czz.hwy.bean.user.DutyRecode">
+		<result column="record_time" property="recordTime" jdbcType="TIMESTAMP" />
+		<result column="showname" property="username" jdbcType="VARCHAR" />
+		<result column="area_name" property="areaName" jdbcType="VARCHAR" />
+		<result column="point_name" property="pointName" jdbcType="VARCHAR" />
+		<result column="roleName" property="roleName" jdbcType="VARCHAR" />
+
+	</resultMap>
+	<select id="selectDutyRecode" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.user.DutyRecode">
+		
+		SELECT
+	A.*, att.record_time
+FROM
+	(
+		SELECT
+			point.point_name point_name,
+			area.area_name area_name,
+			users.showname showname,
+			roles. NAME roleName,
+			users.employee_id
+		FROM
+			roles,
+			dutypoint point,
+			dutyarea area,
+			dutyplans plans,
+			users
+		WHERE
+			roles.
+		VALUE
+			= users.role_id
+		AND plans.duty_area_id = point.area_id
+		AND plans.duty_point_id = point.id
+		AND plans.duty_area_id = area.id
+		AND plans.employee_id = users.employee_id
+		AND plans.duty_area_id =#{areaId}
+		AND plans.duty_point_id =#{point}
+		AND plans.employee_id = #{employeeId}
+        <foreach collection="rolesList" item="roleId" index="index"
+            open="AND users.role_id IN (" close=")" separator=",">
+            #{roleId}
+        </foreach>
+	) A
+LEFT JOIN attendances att ON A.employee_id = att.employee_id
+AND DATE_FORMAT(att.record_time, '%Y-%m-%d') = DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+	
+       
+	</select>
+
+
+</mapper>

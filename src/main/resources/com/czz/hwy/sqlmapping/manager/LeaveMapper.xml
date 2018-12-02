@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.Leave" >
+	<resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.Leave" >
+	    <id column="id" property="id" jdbcType="INTEGER" />
+	    <result column="apply_id" property="applyId" jdbcType="INTEGER" />
+	    <result column="apply_name" property="applyName" jdbcType="VARCHAR" />
+	    <result column="leave_content" property="leaveContent" jdbcType="VARCHAR" />
+	    <result column="leave_number" property="leaveNumber" jdbcType="INTEGER" />
+	    <result column="leave_from_time" property="leaveFromTime" jdbcType="TIMESTAMP" />
+	    <result column="leave_to_time" property="leaveToTime" jdbcType="TIMESTAMP" />
+	    <result column="leave_appl_time" property="leaveApplTime" jdbcType="TIMESTAMP" />
+	    <result column="leave_appr_id" property="leaveApprId" jdbcType="INTEGER" />
+	    <result column="leave_appr_name" property="leaveApprName" jdbcType="VARCHAR" />
+	    <result column="leave_appr_content" property="leaveApprContent" jdbcType="VARCHAR" />
+	    <result column="apply_role" property="applyRole" jdbcType="INTEGER" />
+	    <result column="appr_role" property="apprRole" jdbcType="INTEGER" />
+	    <result column="appr_content" property="apprContent" jdbcType="VARCHAR" />
+	    <result column="appr_time" property="apprTime" jdbcType="TIMESTAMP" />
+	    <result column="appr_status" property="apprStatus" jdbcType="INTEGER" />
+	    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+	    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+	    <result column="duty_area_id" property="dutyAreaId" jdbcType="INTEGER" />
+	    <result column="duty_point_id" property="dutyPointId" jdbcType="INTEGER" />
+	    <result column="appr_two_status" property="apprTwoStatus" jdbcType="INTEGER" />    
+	    <result column="appr_three_status" property="apprThreeStatus" jdbcType="INTEGER" />    
+	    <result column="appr_four_status" property="apprFourStatus" jdbcType="INTEGER" />  
+	    <result column="relay_id" property="relayId" jdbcType="INTEGER" />
+	    <result column="relayName" property="relayName" jdbcType="VARCHAR" /> 
+	    <result column="first_appr_roleId" property="firstApprRoleId" jdbcType="INTEGER" /> 
+        <result column="leave_time_number" property="leaveTimeNumber" jdbcType="INTEGER" /> 
+	</resultMap>
+    <sql id="Base_Column_List" >
+	    id, apply_id, apply_name, leave_content, leave_number, leave_from_time, leave_to_time, leave_appl_time,
+	    leave_appr_id, leave_appr_name, leave_appr_content, apply_role, appr_role, appr_content, appr_time, appr_status,
+	    create_at, update_at, duty_area_id, duty_point_id, appr_two_status, appr_three_status, appr_four_status,relay_id,first_appr_roleId
+    </sql>
+  
+  	<!-- 查询请假信息记录总条数，2016-11-14 -->
+	<select id="getLeaveCount" parameterType="leave" resultType="int">
+	select count(1)
+	from leaveinfo t 
+	<where>
+		<if test="applyName != null and applyName != ''">
+		and t.apply_name like concat('%', #{applyName}, '%')
+		</if>
+		
+		<!-- 凡是请假开始时间到结束时间段之间被条件中的开始时间到结束时间包括的都应被查到 -->
+		<if test="leaveFromTime != null and leaveToTime != null">
+		and (	( DATE_FORMAT(t.leave_from_time, '%Y-%m-%d') &gt;= DATE_FORMAT(#{leaveFromTime},'%Y-%m-%d')
+				  and  
+				  DATE_FORMAT(t.leave_from_time, '%Y-%m-%d') &lt;= DATE_FORMAT(#{leaveToTime},'%Y-%m-%d')
+				 )
+				or 
+				(
+					DATE_FORMAT(t.leave_to_time, '%Y-%m-%d') &gt;= DATE_FORMAT(#{leaveFromTime},'%Y-%m-%d')
+					and DATE_FORMAT(t.leave_to_time, '%Y-%m-%d') &lt;= DATE_FORMAT(#{leaveToTime},'%Y-%m-%d')	
+				)
+		)
+		</if>
+		
+		<!-- 条件中只有开始时间的，视为从此时间以后所有 -->
+		<if test="leaveFromTime != null and leaveToTime == null">
+		and DATE_FORMAT(t.leave_from_time, '%Y-%m-%d') &gt;= DATE_FORMAT(#{leaveFromTime},'%Y-%m-%d')
+		</if>
+		
+		<!-- 条件中只有结束时间的，视为从此时间之前所有 -->
+		<if test="leaveToTime != null and leaveFromTime == null">
+		and DATE_FORMAT(t.leave_to_time, '%Y-%m-%d') &lt;= DATE_FORMAT(#{leaveToTime},'%Y-%m-%d')
+		</if>
+		
+		<!-- 审核通过 -->
+ 		<if test="apprStatus == 1">
+	    and t.appr_status = 1
+	    </if>
+		<!-- 审核中,已有人审核，还有人未审核 -->
+	    <if test="apprStatus == 2">
+	    and t.appr_status = 2 and (jcy_appr_id is not null or khy_appr_id is not null or dcy_appr_id is not null)
+	    </if>
+		<!-- 审核拒绝 -->
+	    <if test="apprStatus == 3">
+	    and t.appr_status = 3
+	    </if>
+	    <!-- 未审核，没有一个人审核 -->
+	    <if test="apprStatus == 4">
+	    and t.appr_status = 2 and (jcy_appr_id is null and khy_appr_id is null and dcy_appr_id is null)
+	    </if>
+		
+	</where>
+	</select>
+	
+	<!-- 查询请假信息记录集合，2016-11-14，分页 -->
+	<select id="getLeaveList" parameterType="leave" resultMap="BaseResultMap">
+	select 
+	   t.id,
+	   t.duty_area_id,t.duty_point_id,
+	   t.apply_id,t.apply_name,t.relay_id,
+	   t.leave_number,t.leave_time_number,t.leave_content,
+	   t.leave_from_time,t.leave_to_time,t.leave_appl_time,
+	   t.apply_role,t.appr_role,
+	   if(t.appr_status = 2 and t.jcy_appr_id is null and t.khy_appr_id is null and t.dcy_appr_id is null, 4, t.appr_status) appr_status,
+	   t.create_at,t.update_at
+	from leaveinfo t 
+	<where>
+	
+		<if test="applyName != null and applyName != ''">
+		and t.apply_name like concat('%', #{applyName}, '%')
+		</if>
+		
+		<!-- 凡是请假开始时间到结束时间段之间被条件中的开始时间到结束时间包括的都应被查到 -->
+		<if test="leaveFromTime != null and leaveToTime != null">
+		and (	( DATE_FORMAT(t.leave_from_time, '%Y-%m-%d') &gt;= DATE_FORMAT(#{leaveFromTime},'%Y-%m-%d')
+				  and  
+				  DATE_FORMAT(t.leave_from_time, '%Y-%m-%d') &lt;= DATE_FORMAT(#{leaveToTime},'%Y-%m-%d')
+				 )
+				or 
+				(
+					DATE_FORMAT(t.leave_to_time, '%Y-%m-%d') &gt;= DATE_FORMAT(#{leaveFromTime},'%Y-%m-%d')
+					and DATE_FORMAT(t.leave_to_time, '%Y-%m-%d') &lt;= DATE_FORMAT(#{leaveToTime},'%Y-%m-%d')	
+				)
+		)
+		</if>
+		
+		<!-- 条件中只有开始时间的，视为从此时间以后所有 -->
+		<if test="leaveFromTime != null and leaveToTime == null">
+		and DATE_FORMAT(t.leave_from_time, '%Y-%m-%d') &gt;= DATE_FORMAT(#{leaveFromTime},'%Y-%m-%d')
+		</if>
+		
+		<!-- 条件中只有结束时间的，视为从此时间之前所有 -->
+		<if test="leaveToTime != null and leaveFromTime == null">
+		and DATE_FORMAT(t.leave_to_time, '%Y-%m-%d') &lt;= DATE_FORMAT(#{leaveToTime},'%Y-%m-%d')
+		</if>
+		
+		<!-- 审核通过 -->
+ 		<if test="apprStatus == 1">
+	    and t.appr_status = 1
+	    </if>
+		<!-- 审核中,已有人审核，还有人未审核 -->
+	    <if test="apprStatus == 2">
+	    and t.appr_status = 2 and (jcy_appr_id is not null or khy_appr_id is not null or dcy_appr_id is not null)
+	    </if>
+		<!-- 审核拒绝 -->
+	    <if test="apprStatus == 3">
+	    and t.appr_status = 3
+	    </if>
+	    <!-- 未审核，没有一个人审核 -->
+	    <if test="apprStatus == 4">
+	    and t.appr_status = 2 and (jcy_appr_id is null and khy_appr_id is null and dcy_appr_id is null)
+	    </if>
+	</where>
+	order by t.create_at desc
+	limit #{row},#{rows}
+	</select>
+  
+</mapper>

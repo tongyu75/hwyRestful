@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.EvalTypes" >
+<resultMap type="com.czz.hwy.bean.manager.EvalTypes" id="evalTypeMap">
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="eval_value" property="evalValue" jdbcType="INTEGER" />
+    <result column="eval_name" property="evalName" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="role1" property="role1" jdbcType="INTEGER" />
+    <result column="role2" property="role2" jdbcType="INTEGER" />
+    <result column="role3" property="role3" jdbcType="INTEGER" />
+    <result column="role4" property="role4" jdbcType="INTEGER" />
+    <result column="ishwg" property="ishwg" jdbcType="INTEGER" />
+    <result column="isjcy" property="isjcy" jdbcType="INTEGER" />
+    <result column="iskhy" property="iskhy" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER"/>
+</resultMap>
+  <sql id="Base_Column_List" >
+    id, eval_value, eval_name, remark, create_at, update_at,role1, role2, role3, role4, ishwg, isjcy, iskhy, type
+  </sql>
+
+<select id="selectAllEvalType" resultMap="evalTypeMap">
+    select <include refid="Base_Column_List" />
+     from evaltype where isreport=1 or isjiancha=1
+</select>
+
+<select id="selectMaxEvalValue" resultType="java.lang.Integer">
+    select case when max(eval_value) is null then 0 else max(eval_value) end eval_value from evaltype 
+</select>
+
+  <insert id="insertEvalType" parameterType="com.czz.hwy.bean.manager.EvalTypes" >
+    insert into evaltype (id, eval_value, eval_name, remark, create_at, update_at,role1, role2, role3, role4, ishwg, isjcy, iskhy, type)
+    values (#{id,jdbcType=INTEGER}, #{evalValue,jdbcType=INTEGER}, #{evalName,jdbcType=VARCHAR}, 
+      #{remark,jdbcType=VARCHAR},#{createAt,jdbcType=TIMESTAMP}, 
+      #{updateAt,jdbcType=TIMESTAMP}, #{role1,jdbcType=INTEGER}, #{role2,jdbcType=INTEGER}, #{role3,jdbcType=INTEGER}, #{role4,jdbcType=INTEGER},
+      #{ishwg,jdbcType=INTEGER}, #{isjcy,jdbcType=INTEGER}, #{iskhy,jdbcType=INTEGER}, #{type,jdbcType=INTEGER})
+  </insert>
+  
+    <delete id="deleteEvalTypeById" parameterType="java.lang.Integer" >
+    delete from evaltype
+    where id = #{_parameter}
+  </delete>
+  
+  <update id="updateEvalType" parameterType="com.czz.hwy.bean.manager.EvalTypes" >
+    update evaltype
+    <set >
+      <if test="evalValue != null" >
+        eval_value = #{evalValue,jdbcType=INTEGER},
+      </if>
+      <if test="evalName != null" >
+        eval_name = #{evalName,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="role1 != null" >
+        role1 = #{role1,jdbcType=INTEGER},
+      </if>
+      <if test="role2 != null" >
+        role2 = #{role2,jdbcType=INTEGER},
+      </if>
+      <if test="role3 != null" >
+        role3 = #{role3,jdbcType=INTEGER},
+      </if>
+      <if test="role4 != null" >
+        role4 = #{role4,jdbcType=INTEGER},
+      </if>
+      <if test="ishwg != null" >
+        ishwg = #{ishwg,jdbcType=INTEGER},
+      </if>
+      <if test="isjcy != null" >
+        isjcy = #{isjcy,jdbcType=INTEGER},
+      </if>
+      <if test="iskhy != null" >
+        iskhy = #{iskhy,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+<select id="selectEvalType" resultMap="evalTypeMap">
+    select <include refid="Base_Column_List" />
+    from evaltype
+</select>
+
+<select id="selectEvalTypeById" resultMap="evalTypeMap" parameterType="java.lang.Integer">
+    select <include refid="Base_Column_List" />
+    from evaltype where id = #{_parameter}
+</select>
+
+<!-- 对应角色类型查找考核类型 -->
+<select id="selectAllEvalTypeByOptions" parameterType="java.lang.String" resultMap="evalTypeMap">
+    select * from evaltype where  ${_parameter} order by eval_value asc
+    <!-- <where>
+        <if test="_parameter!=null and _parameter!=''">
+             ${_parameter}
+        </if>
+    </where>
+    order by eval_value asc -->
+</select>
+
+<select id="selectAllEvalTypeByRole1" resultMap="evalTypeMap">
+    select * from evaltype where role1=1
+</select>
+<select id="selectAllEvalTypeByRole2" resultMap="evalTypeMap">
+    select * from evaltype where role2=1
+</select>
+<select id="selectAllEvalTypeByRole3" resultMap="evalTypeMap">
+    select * from evaltype where role3=1
+</select>
+<select id="selectAllEvalTypeByRole4" resultMap="evalTypeMap">
+    select * from evaltype where role4=1
+</select>
+<select id="getEvalTypeInfo" parameterType="com.czz.hwy.bean.manager.EvalTypes" resultMap="evalTypeMap">
+select * from evaltype where eval_value =#{evalType}
+</select>
+    <!-- 查询所有的考核项目用于下拉列表的显示 -->
+    <select id="getAllEvalTypeForDic" resultMap="evalTypeMap" parameterType="java.lang.Integer">
+        select <include refid="Base_Column_List" />
+          from evaltype
+        <where>
+            <if test='_parameter != null'>
+                type = #{_parameter}
+            </if>
+        </where>
+    </select>
+</mapper>

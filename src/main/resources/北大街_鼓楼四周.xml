@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<area id="1" name ="北大街">
+<point id ="2" name="鼓楼四周" >
+	<areaPoint >
+		<lat>39.4561212</lat>
+		<lng>112.1325</lng>
+		<name>鼓楼大街</name>
+	</areaPoint>
+</point>
+</area>

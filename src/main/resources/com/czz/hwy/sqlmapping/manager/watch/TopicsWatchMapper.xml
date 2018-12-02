@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.watch.Topics" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.watch.Topics" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="publish_time" property="publishTime" jdbcType="TIMESTAMP" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <resultMap type="com.czz.hwy.bean.manager.watch.TopicsVo" id="topicsVoMap">
+     <result property="content" column="content" typeHandler="com.czz.hwy.utils.ConvertBlobTypeHandler"/>
+     <result property="title" column="title" typeHandler="com.czz.hwy.utils.ConvertBlobTypeHandler"/>
+     <result property="createA" column="createA" jdbcType="TIMESTAMP" />
+     <result property="type" column="type" jdbcType="VARCHAR" />
+     <result property="employeeId" column="employeeId" jdbcType="INTEGER"/> 
+     <result property="vsrsionCode" column="vsrsionCode" jdbcType="INTEGER"/> 
+     <result property="appealStatus" column="appealStatus" jdbcType="INTEGER"/>
+     <result property="id" column="id" jdbcType="INTEGER"/>
+     <result property="appealResult" column="appealResult" jdbcType="INTEGER"/>
+  </resultMap>
+  
+  
+  <sql id="Base_Column_List" >
+    id, title, content, publish_time, employee_id, create_at, update_at
+  </sql>
+  
+  <select id="getTopicsInfoWatch" resultType="java.util.Map" parameterType="java.util.Map">
+      select '本月罚款总计情况' title,   CAST(CONCAT('本月罚款总金额：',amount,'元','，罚款总次数：',count,'次') AS CHAR) content,id id,create_at  createA ,0 appealStatus,3 appealResult, '4' type 
+        from finescount where employee_id =#{employeeId} and DATE_FORMAT(`month`,'%Y-%m')=DATE_FORMAT(SYSDATE(),'%Y-%m') 
+       UNION ALL
+      select CAST(CONCAT('绩效考核不合格罚款',finesdetail.amount,'元') AS CHAR) title,CAST(remark AS CHAR) content,finesdetail.id id,finesdetail.create_at  createA ,standardfines.appeal_status appealStatus,appealfines.`status` appealResult,'1' type  
+        from finesdetail 
+        LEFT JOIN standardfines ON standardfines.id = finesdetail.stand_id
+        LEFT JOIN appealfines ON finesdetail.id = appealfines.fines_id
+       where finesdetail.employee_id =#{employeeId} and check_time &lt; CURRENT_TIMESTAMP() and datediff(DATE_FORMAT(SYSDATE(),'%Y-%m-%d'), DATE_FORMAT(`check_time`,'%Y-%m-%d')) &lt;= 3 
+       UNION ALL
+      select '您有新版本，可以升级了！' title, CAST(CONCAT(apk_desc) AS CHAR) content ,id id,create_at createA ,0 appealStatus,3 appealResult, '2' type 
+        from app where version_code = (select max(version_code) from app) and version_code &gt; #{vsrsionCode}
+       UNION ALL
+      select CAST(title AS CHAR) , CAST(content AS CHAR) ,id id, create_at createA ,0 appealStatus,3 appealResult, '3' type 
+        from topics where employee_id =#{employeeId} and datediff(DATE_FORMAT(SYSDATE(),'%Y-%m-%d'), DATE_FORMAT(`create_at`,'%Y-%m-%d')) &lt;= 3
+       ORDER BY createA desc
+  </select>
+</mapper>

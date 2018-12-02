@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.area.DutyPointGather">
+    <resultMap type="com.czz.hwy.bean.area.DutyPointGather" id="BaseResultMap">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="area_id" property="areaId" jdbcType="INTEGER" />
+        <result column="point_id" property="pointId" jdbcType="INTEGER" />
+        <result column="borderpoint_name" property="borderpointName"
+            jdbcType="VARCHAR" />
+        <result column="borderpoint_address" property="borderpointAddress"
+            jdbcType="VARCHAR" />
+        <result column="borderpoint_lat" property="borderpointLat"
+            jdbcType="DOUBLE" />
+        <result column="borderpoint_lng" property="borderpointLng"
+            jdbcType="DOUBLE" />
+        <result column="offset" property="offset" jdbcType="DOUBLE" />
+        <result column="borderpoint_order" property="borderpointOrder"
+            jdbcType="INTEGER" />
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+        <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+        <result column="create_id" property="createId" jdbcType="INTEGER" />
+        <result column="update_id" property="updateId" jdbcType="INTEGER" />
+        <result column="status" property="status" jdbcType="INTEGER" />
+        <result column="file_id" property="file_id" jdbcType="INTEGER" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        area_id,point_id,borderpoint_name,borderpoint_address,borderpoint_lat,
+        borderpoint_lng,offset,borderpoint_order,create_at,update_at,create_id,
+        update_id,status,file_id
+    </sql>
+    <insert id="insertDutyPointGather"  parameterType="List">
+        insert into dutypoint_gather (
+	        area_id,point_id,borderpoint_name,borderpoint_address,borderpoint_lat,
+	        borderpoint_lng,offset,borderpoint_order,create_at,update_at,create_id,
+	        update_id,status,file_id)
+        values 
+      <foreach collection="list" item="item" index="index" separator=",">
+        (
+            #{item.areaId},#{item.pointId},#{item.borderpointName},#{item.borderpointAddress},#{item.borderpointLat},#{item.borderpointLng},
+            #{item.offset},#{item.borderpointOrder},#{item.createAt},#{item.updateAt},#{item.createId},#{item.updateId},#{item.status},#{item.file_id}
+        )
+     </foreach>
+    </insert>
+    <select id="getDutyPointGatherByBean" resultMap="BaseResultMap" parameterType="dutyPointGather">
+        select * 
+          from dutypoint_gather 
+       <where>
+           <if test="areaId != 0">
+               and area_id =#{areaId,jdbcType=INTEGER}
+           </if>
+           <if test="pointId != 0">
+               and point_id =#{pointId,jdbcType=INTEGER}
+           </if>           
+           <if test="file_id != 0">
+               and file_id =#{file_id,jdbcType=INTEGER}
+           </if>                      
+               and status=1
+      </where>
+          order by borderpoint_order asc
+    </select>
+    <update id="updateDutyPointGather" parameterType="dutyPointGather">
+        update dutypoint_gather set status=#{status} , update_id=#{updateId} ,update_at=#{updateAt}
+       <where>
+           <if test="areaId != 0">
+               and area_id =#{areaId,jdbcType=INTEGER}
+           </if>
+           <if test="pointId != 0">
+               and point_id =#{pointId,jdbcType=INTEGER}
+           </if>           
+           <if test="file_id != 0">
+               and file_id =#{file_id,jdbcType=INTEGER}
+           </if>                                 
+      </where>
+    </update>
+</mapper>

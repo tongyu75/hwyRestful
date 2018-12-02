@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=MXDf0gIa6ce8G7anDfMCkyWxb21Tkj4Q"></script>
+<script type="text/javascript" src="../jquery-1.7.2.min.js"></script>
+<title>测试接口</title>
+</head>
+<body>
+	<div id="allmap"></div>
+</body>
+<script type="text/javascript">
+	//banzhuId ,banzhuName,createUserId,createAt,updateUserid,updateAt
+	$(function() {
+		
+		//提交五分钟考核
+		$.ajax({
+			url :'http://192.168.1.5:8080/hwyRestful/workCheckAppController/checkTime',
+			async : true,
+			type : 'post',
+			data : {
+				acceptContent:
+					JSON.stringify(
+						{
+							"areaId" : 7,//责任区ID
+							"pointId": 178,  //责任点ID
+							"evalType" : 3,
+							"employeeId" : 7001,
+							"employeeName" : "刘学霞",
+				            "roleId" : 2,
+							"checkAddress" : "测试地址",
+				            "checkTime" : "2016-12-21 14:50:23",
+							"checkLat" : "37.802602",
+							"checkLng" : "108.121212",
+							"fines" : 10,
+							"otherReason" :　"",
+							"dutyPeopleList" : 
+									[
+			            				{
+			            					"employeeId" : 184, "employeeName" : "杨淑兰",
+			            				},
+				            			{
+				            				"employeeId" : 268, "employeeName" : "王晓凤",
+
+				            			}
+							       ]
+
+						}
+
+					)
+			} ,
+			dataType : "json",
+			//contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		});  
+
+		//查询没有替班的本责任区的所有员工信息
+		/* $.ajax({
+           url :'http://192.168.1.5:8080/hwyRestful/workCheckAppController/checkTime',
+			async : true,
+			type : 'get', 
+			dataType : "json",
+			data : {
+				acceptContent : 
+					JSON.stringify(
+						{
+							areaId : 7,
+							beginDate : "2016-12-21",
+							endDate : "2016-12-22"
+						}
+					)
+			}, 
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			success : function(data) {
+				console.log(data);
+			}
+		}); */
+
+	}); 
+</script>
+
+

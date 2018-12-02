@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.syspar.CheckStandard">
+	<resultMap id="CheckStandardResultMap" type="com.czz.hwy.bean.syspar.CheckStandard">
+		<id property="id" column="id" jdbcType="INTEGER" />
+		<result property="areaid" column="area_id" jdbcType="INTEGER" />
+		<result property="pointid" column="point_id" jdbcType="INTEGER" />
+		<result property="worktype" column="work_type" jdbcType="INTEGER" />
+		<result property="evaltype" column="eval_type" jdbcType="INTEGER" />
+		<result property="updateAt" column="update_at" jdbcType="TIMESTAMP" />
+		<result property="evalname" column="eval_name" jdbcType="VARCHAR" />
+		<result property="evaldesc" column="eval_desc" jdbcType="VARCHAR" />
+		<result property="standardvalue" column="standard_value" jdbcType="DOUBLE" />
+		<result property="standardunit" column="standard_unit" jdbcType="VARCHAR" />
+		<result property="limitvalue" column="limit_value" jdbcType="VARCHAR" />
+		<result property="limitunit" column="limit_unit" jdbcType="VARCHAR" />
+		<result property="createAt" column="create_at" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+
+	<select id="getAllCheckStandard" resultType="com.czz.hwy.bean.syspar.CheckStandard" parameterType="com.czz.hwy.bean.syspar.CheckStandard">
+
+		select  e.id, e.area_id  ,d.area_name as areaname ,e.point_id,p.point_name as pointname,e.eval_name as evalname, e.eval_type ,e.limit_value as limitvalue,e.limit_unit as limitunit,e.create_at  ,e.update_at  from  evaluations e ,dutyarea d  ,dutypoint  p   where e.area_id=d.id    and  e.point_id=p.id      
+		
+		<if test="areaid!=0 ">
+		and  e.area_id=#{areaid}
+		</if>
+		
+		<if test="pointid!=0 ">
+		and  e.point_id=#{pointid}
+		</if>
+		<if test="evaltype!=0">
+		and  e.eval_type=#{evaltype}
+		</if>
+		order by e.create_at desc
+		
+		limit #{row},#{rows}
+		
+	</select>
+	
+	<select id="getCheckStandardCount" resultType="java.lang.Integer"       parameterType="com.czz.hwy.bean.syspar.CheckStandard">
+	select    count(e.id)  from  evaluations e      
+		<where>
+		<if test="areaid!=0 ">
+		and  e.area_id=#{areaid}
+		</if>
+		
+		<if test="pointid!=0 ">
+		and  e.point_id=#{pointid}
+		</if>
+		<if test="evaltype!=0">
+		and  e.eval_type=#{evaltype}
+		</if>
+	
+	</where>
+</select>
+	<update id="updateCheckStandard"  parameterType="com.czz.hwy.bean.syspar.CheckStandard">
+	
+	update  evaluations  set  limit_value=#{limitvalue},limit_unit=#{limitunit}   where id=#{id}
+	
+	</update>
+	
+	
+	<delete id="deleteCheckStandard"  parameterType="com.czz.hwy.bean.syspar.CheckStandard">
+	
+	delete   from  evaluations   where  id=#{id}
+	
+	
+	</delete>
+	
+	<insert id="insertCheckStandard"  parameterType="com.czz.hwy.bean.syspar.CheckStandard">
+	
+	insert  into  evaluations (id,area_id,point_id,eval_type,limit_value,limit_unit,create_at,update_at,eval_name) values (#{id},
+	
+	#{areaid},#{pointid},#{evaltype},#{limitvalue},#{limitunit},#{createAt},#{updateAt},#{evalname})
+	
+	</insert>
+	
+	<select id="selectCheckStandard" parameterType="com.czz.hwy.bean.syspar.CheckStandard" resultType="com.czz.hwy.bean.syspar.CheckStandard">
+		select * from evaluations where area_id = #{areaid} and point_id = #{pointid} and eval_type = #{evaltype}
+	</select>
+	
+
+</mapper>

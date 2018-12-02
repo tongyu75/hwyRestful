@@ -1,0 +1,1086 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.CheckGram">
+    <resultMap id="BaseResultMap" type="com.czz.hwy.bean.mission.CheckGram">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="eval_Type" property="evalType" jdbcType="INTEGER" />
+        <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+        <result column="check_address" property="checkAddress"
+            jdbcType="VARCHAR" />
+        <result column="check_time" property="checkTime" jdbcType="TIMESTAMP" />
+        <result column="check_lat" property="checkLat" jdbcType="DOUBLE" />
+        <result column="check_lng" property="checkLng" jdbcType="DOUBLE" />
+        <result column="check_value" property="checkValue" jdbcType="DOUBLE" />
+        <result column="publish_time" property="publishTime" jdbcType="TIMESTAMP" />
+        <result column="check_status" property="checkStatus" jdbcType="INTEGER" />
+    </resultMap>
+    <resultMap id="KindInfoMap" type="com.czz.hwy.bean.mission.KindInfo">
+        <result column="eval_type" property="evalType" jdbcType="INTEGER" />
+        <result column="eval_name" property="evalName" jdbcType="VARCHAR" />
+        <result column="testNum" property="testNum" jdbcType="INTEGER" />
+        <result column="successNum" property="successNum" jdbcType="INTEGER" />
+        <result column="failNum" property="failNum" jdbcType="INTEGER" />
+        <result column="status" property="status" jdbcType="INTEGER" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, eval_Type, employee_id, check_address, check_time,
+        check_lat,
+        check_lng, check_value,
+        publish_time, check_status
+    </sql>
+    <select id="getCheckGramById" resultMap="BaseResultMap"
+        parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List" />
+        from checkgram
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="getCheckGramFailPeoNum" resultType="java.lang.Integer">
+        select
+        count(DISTINCT employee_id) from check_duty where eval_type=1 and
+        check_id in(select id from checkgram where check_status=2 and
+        DATE_FORMAT(check_time,'%Y-%m-%d')=DATE_FORMAT(CURDATE(),'%Y-%m-%d'))
+    </select>
+    <select id="getCheckGramFailCouNum" resultType="java.lang.Integer">
+        select count(id)
+        from checkgram where check_status=2 and
+        DATE_FORMAT(check_time,'%Y-%m-%d')=DATE_FORMAT(CURDATE(),'%Y-%m-%d')
+    </select>
+    <select id="getCheckGramFailPeoMon" resultType="java.util.Map">
+        select
+        DATE_FORMAT(A.check_time,'%Y-%m-%d') as 'date',count(DISTINCT
+        B.employee_id) as 'peoNum' from check_duty B,(select * from checkgram
+        where check_status =2 GROUP BY DATE_FORMAT(check_time,'%Y-%m-%d')) A
+        where A.id = B.check_id GROUP BY DATE_FORMAT(A.check_time,'%Y-%m-%d')
+    </select>
+    <select id="getCheckGramFailCouMon" resultType="java.util.Map">
+        select
+        DATE_FORMAT(A.check_time,'%Y-%m-%d') as 'date' ,count(A.id) as
+        'couNum' from check_duty B,(select * from checkgram where check_status
+        =2 GROUP BY DATE_FORMAT(check_time,'%Y-%m-%d')) A where A.id =
+        B.check_id GROUP BY DATE_FORMAT(A.check_time,'%Y-%m-%d')
+    </select>
+    <select id="getCheckGramAllDays" resultType="java.lang.Integer">
+        select
+        count(DISTINCT DATE_FORMAT(check_time,'%Y-%m-%d')) from checkgram
+        where DATE_FORMAT(check_time,'%Y-%m')=DATE_FORMAT(CURDATE(),'%Y-%m')
+    </select>
+
+    <delete id="deleteCheckGram" parameterType="java.lang.Integer">
+        delete from checkgram
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insertCheckGram" parameterType="com.czz.hwy.bean.mission.CheckGram">
+        <selectKey resultType="java.lang.Integer" order="AFTER"
+            keyProperty="id">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+        insert into checkgram (id, eval_Type, employee_id,
+        check_address,
+        check_time, check_lat,
+        check_lng, check_value, publish_time,
+        check_status)
+        values (#{id,jdbcType=INTEGER},
+        #{evalType,jdbcType=INTEGER},
+        #{employeeId,jdbcType=INTEGER},
+        #{checkAddress,jdbcType=VARCHAR}, #{checkTime,jdbcType=TIMESTAMP},
+        #{checkLat,jdbcType=DOUBLE},
+        #{checkLng,jdbcType=DOUBLE},
+        #{checkValue,jdbcType=DOUBLE},
+        #{publishTime,jdbcType=TIMESTAMP},
+        #{checkStatus,jdbcType=INTEGER})
+    </insert>
+    <insert id="insertSelective" parameterType="com.czz.hwy.bean.mission.CheckGram">
+        <selectKey resultType="java.lang.Integer" order="AFTER"
+            keyProperty="id">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+        insert into checkgram
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="evalType != null">
+                eval_Type,
+            </if>
+            <if test="employeeId != null">
+                employee_id,
+            </if>
+            <if test="checkAddress != null">
+                check_address,
+            </if>
+            <if test="checkTime != null">
+                check_time,
+            </if>
+            <if test="checkLat != null">
+                check_lat,
+            </if>
+            <if test="checkLng != null">
+                check_lng,
+            </if>
+            <if test="checkValue != null">
+                check_value,
+            </if>
+            <if test="publishTime != null">
+                publish_time,
+            </if>
+            <if test="checkStatus != null">
+                check_status,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="evalType != null">
+                #{evalType,jdbcType=INTEGER},
+            </if>
+            <if test="employeeId != null">
+                #{employeeId,jdbcType=INTEGER},
+            </if>
+            <if test="checkAddress != null">
+                #{checkAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="checkTime != null">
+                #{checkTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="checkLat != null">
+                #{checkLat,jdbcType=DOUBLE},
+            </if>
+            <if test="checkLng != null">
+                #{checkLng,jdbcType=DOUBLE},
+            </if>
+            <if test="checkValue != null">
+                #{checkValue,jdbcType=DOUBLE},
+            </if>
+            <if test="publishTime != null">
+                #{publishTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="checkStatus != null">
+                #{checkStatus,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateCheckGram" parameterType="com.czz.hwy.bean.mission.CheckGram">
+        update checkgram
+        <set>
+            <if test="evalType != null">
+                eval_Type = #{evalType,jdbcType=INTEGER},
+            </if>
+            <if test="employeeId != null">
+                employee_id = #{employeeId,jdbcType=INTEGER},
+            </if>
+            <if test="checkAddress != null">
+                check_address = #{checkAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="checkTime != null">
+                check_time = #{checkTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="checkLat != null">
+                check_lat = #{checkLat,jdbcType=DOUBLE},
+            </if>
+            <if test="checkLng != null">
+                check_lng = #{checkLng,jdbcType=DOUBLE},
+            </if>
+            <if test="checkValue != null">
+                check_value = #{checkValue,jdbcType=DOUBLE},
+            </if>
+            <if test="publishTime != null">
+                publish_time = #{publishTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="checkStatus != null">
+                check_status = #{checkStatus,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.mission.CheckGram">
+        update checkgram
+        set eval_Type = #{evalType,jdbcType=INTEGER},
+        employee_id =
+        #{employeeId,jdbcType=INTEGER},
+        check_address =
+        #{checkAddress,jdbcType=VARCHAR},
+        check_time =
+        #{checkTime,jdbcType=TIMESTAMP},
+        check_lat =
+        #{checkLat,jdbcType=DOUBLE},
+        check_lng = #{checkLng,jdbcType=DOUBLE},
+        check_value = #{checkValue,jdbcType=DOUBLE},
+        publish_time =
+        #{publishTime,jdbcType=TIMESTAMP},
+        check_status =
+        #{checkStatus,jdbcType=INTEGER}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <select id="getCheckGramForSelf" parameterType="com.czz.hwy.bean.mission.CheckGram"
+        resultMap="BaseResultMap">
+        select B.* from check_duty A ,checkgram B
+        where a.check_id = B.id
+        and A.employee_id=#{employeeId}
+        and A.eval_type = B.eval_type
+        and DATE_FORMAT(b.check_time,'%Y-%m-%d') =
+        DATE_FORMAT(#{checkTime},'%Y-%m-%d')
+    </select>
+    <select id="getCheckGramInfoByBean" parameterType="com.czz.hwy.bean.mission.CheckGram"
+        resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from checkgram
+        <where>
+            <if test="id != 0">
+                and id = #{id,jdbcType=INTEGER}
+            </if>
+            <if test="evalType != 0">
+                and eval_Type = #{evalType,jdbcType=INTEGER}
+            </if>
+            <if test="employeeId != 0">
+                and employee_id = #{employeeId,jdbcType=INTEGER}
+            </if>
+            <if test="checkAddress != null">
+                and check_address = #{checkAddress,jdbcType=VARCHAR}
+            </if>
+            <if test="checkTime != null">
+                and DATE_FORMAT(check_time,'%Y-%m-%d') =
+                DATE_FORMAT(#{checkTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+            </if>
+            <if test="checkLat != 0.0">
+                and check_lat = #{checkLat,jdbcType=DOUBLE}
+            </if>
+            <if test="checkLng != 0.0">
+                and check_lng = #{checkLng,jdbcType=DOUBLE}
+            </if>
+            <if test="checkValue != 0.0">
+                and check_value = #{checkValue,jdbcType=DOUBLE}
+            </if>
+            <if test="publishTime != null">
+                and publish_time = #{publishTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="checkStatus != 0">
+                and check_status = #{checkStatus,jdbcType=INTEGER}
+            </if>
+        </where>
+    </select>
+    <select id="getCheckExitsGramInfoByBean" resultMap="BaseResultMap"
+        parameterType="checkGram">
+        SELECT
+        <include refid="Base_Column_List" />
+        from checkgram
+        where TIMESTAMPDIFF(MINUTE,#{checkTime},check_time) &lt;
+        30
+        and TIMESTAMPDIFF(MINUTE,#{checkTime},check_time) &gt; 0
+    </select>
+    <select id="getcheckGramTypeInfo" resultMap="KindInfoMap"
+        parameterType="com.czz.hwy.bean.mission.CheckTime">
+
+        SELECT
+        COUNT(d.id) sum,
+        e.eval_name,
+        e.eval_type,
+        d.status status
+        FROM
+        (
+        SELECT
+        gg. STATUS,
+        gg.eid,
+        gg.id,
+        dp.duty_area_id,
+        dp.duty_point_id
+        FROM
+        (
+        SELECT
+        g.check_status STATUS,
+        a.employee_id eid,
+        g.id
+        FROM
+        check_duty a,
+        checkgram g
+        WHERE
+        a.employee_id = #{employeeId}
+        AND a.check_id = g.id
+        AND a.eval_type = g.eval_type
+        AND    DATE_FORMAT(g.check_time, '%Y-%m-%d') = DATE_FORMAT(#{checkTime},'%Y-%m-%d')
+        ) gg,
+        dutyplans dp
+        WHERE
+        gg.eid = dp.employee_id
+        ) D
+        LEFT JOIN evaluations e ON e.area_id = D.duty_area_id
+        AND e.point_id = D.duty_point_id
+        GROUP BY
+        D.status
+    </select>
+    <!-- 五克任务统计数据，五克任务合格与不合格人数和次数的统计 -->
+    <select id="checkGramCensus" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+            d1.area_id,
+            da.area_name as area_name,
+            d1.point_id,
+            dp.point_name as point_name,
+            IFNULL(e1.passnum,0) passnum,
+            IFNULL(e1.passpeople,0) passpeople,
+            IFNULL(c1.ts,0) ts,
+            date_format(d1.check_time, '%Y-%m-%d') as check_time,
+            IFNULL(c1.ps,0) ps
+        FROM
+            (select distinct  <!-- 五克任务根据每个责任区责任点每天显示全部数据 -->
+                    cd.area_id as area_id,
+                    cd.point_id as point_id,
+                    date_format(ct.check_time,'%Y%m%d') as check_time
+                from (SELECT * FROM checkgram 
+                    <where>
+                        <if test="firstDate!=null and firstDate!=''">
+                            <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                        </if>
+                    </where>) ct 
+                join check_duty cd on ct.id = cd.check_id  and ct.eval_type = 1) d1
+
+            left join 
+            (select a1.area_id,a1.point_id,a1.check_time,a1.passnum,b1.passpeople from(
+                (<!-- 五克任务合格次数 -->
+                    SELECT DISTINCT
+                        t.area_id,
+                        t.point_id,
+                        date_format(t.check_time, '%Y%m%d') AS check_time,
+                        count(1) passnum
+                    FROM
+                        (
+                            SELECT 
+                                cd.area_id AS area_id,
+                                cd.point_id AS point_id,
+                                ct.check_time<!-- 次数时间要精确到秒 再去重 -->
+                            FROM
+                                (SELECT * FROM checkgram
+                                <where>
+                                    <if test="firstDate!=null and firstDate!=''">
+                                        <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                                    </if>
+                                </where>
+                                ) ct
+                            JOIN check_duty cd ON ct.id = cd.check_id
+                            AND ct.eval_type = 1
+                            WHERE
+                                ct.check_status = 1
+                                <if test="areaId!=null and areaId!=''">
+                                    and cd.area_id=#{areaId}
+                                </if>
+                                <if test="pointId!=null and pointId!=''">
+                                    and cd.point_id=#{pointId}
+                                </if>
+                        ) t
+                    group by t.area_id,t.point_id,date_format(t.check_time, '%Y%m%d')
+                    ORDER BY check_time DESC
+                ) a1
+                JOIN (<!-- 五克任务合格人数 -->
+                    SELECT
+                        count(*) passpeople,
+                        t.area_id,
+                        t.point_id,
+                        t.check_time
+                    FROM
+                        (
+                            SELECT DISTINCT
+                                cd.area_id AS area_id,
+                                cd.point_id AS point_id,
+                                date_format(ct.check_time, '%Y%m%d') AS check_time,<!-- 人数时间精确到天 再去重 -->
+                                cd.employee_id AS employee_id
+                            FROM
+                                (SELECT * FROM checkgram
+                                <where>
+                                    <if test="firstDate!=null and firstDate!=''">
+                                            <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                                    </if>
+                                </where>
+                                            
+                                ) ct
+                            JOIN check_duty cd ON ct.id = cd.check_id
+                            AND ct.eval_type = 1
+                            WHERE
+                                ct.check_status = 1
+                                <if test="areaId!=null and areaId!=''">
+                                    and cd.area_id=#{areaId}
+                                </if>
+                                <if test="pointId!=null and pointId!=''">
+                                    and cd.point_id=#{pointId}
+                                </if>
+                        ) t
+                    GROUP BY
+                        area_id,
+                        point_id,
+                        check_time
+                    ORDER BY
+                        check_time DESC
+                ) b1 on a1.area_id = b1.area_id and a1.point_id = b1.point_id and a1.check_time = b1.check_time
+            )) e1 on e1.area_id = d1.area_id and e1.point_id = d1.point_id and e1.check_time = d1.check_time
+            
+
+            left join 
+            (select a.area_id,a.point_id,a.check_time,a.ts,b.ps from (
+                    (<!-- 五克任务不合格次数 -->
+                    SELECT DISTINCT
+                        t.area_id,
+                        t.point_id,
+                        date_format(t.check_time, '%Y%m%d') AS check_time,
+                        count(1) ts
+                    FROM
+                        (
+                            SELECT 
+                                cd.area_id AS area_id,
+                                cd.point_id AS point_id,
+                                ct.check_time<!-- 次数时间要精确到秒 再去重 -->
+                            FROM
+                                (SELECT * FROM checkgram
+                                <where>
+                                    <if test="firstDate!=null and firstDate!=''">
+                                        <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                                    </if>
+                                </where>
+                                ) ct
+                            JOIN check_duty cd ON ct.id = cd.check_id
+                            AND ct.eval_type = 1
+                            WHERE
+                                ct.check_status = 2
+                                <if test="areaId!=null and areaId!=''">
+                                    and cd.area_id=#{areaId}
+                                </if>
+                                <if test="pointId!=null and pointId!=''">
+                                    and cd.point_id=#{pointId}
+                                </if>
+                        ) t
+                    group by t.area_id,t.point_id,date_format(t.check_time, '%Y%m%d')
+                    ORDER BY check_time DESC
+                ) a
+                JOIN (<!-- 五克任务不合格人数 -->
+                    SELECT
+                        count(*) ps,
+                        t.area_id,
+                        t.point_id,
+                        t.check_time
+                    FROM
+                        (
+                            SELECT DISTINCT
+                                cd.area_id AS area_id,
+                                cd.point_id AS point_id,
+                                date_format(ct.check_time, '%Y%m%d') AS check_time,<!-- 人数时间精确到天 再去重 -->
+                                cd.employee_id AS employee_id
+                            FROM
+                                (SELECT * FROM checkgram
+                                <where>
+                                    <if test="firstDate!=null and firstDate!=''">
+                                            <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                                    </if>
+                                </where>
+                                            
+                                ) ct
+                            JOIN check_duty cd ON ct.id = cd.check_id
+                            AND ct.eval_type = 1
+                            WHERE
+                                ct.check_status = 2
+                                <if test="areaId!=null and areaId!=''">
+                                    and cd.area_id=#{areaId}
+                                </if>
+                                <if test="pointId!=null and pointId!=''">
+                                    and cd.point_id=#{pointId}
+                                </if>
+                        ) t
+                    GROUP BY
+                        area_id,
+                        point_id,
+                        check_time
+                    ORDER BY
+                        check_time DESC
+                ) b ON a.area_id = b.area_id
+                AND a.point_id = b.point_id
+                AND a.check_time = b.check_time
+            )) c1 on d1.area_id = c1.area_id and d1.point_id = c1.point_id and d1.check_time = c1.check_time
+            
+        left outer join dutyarea da on d1.area_id = da.id
+        left outer join dutypoint dp on d1.point_id = dp.id
+
+        where ((e1.passnum is not null and e1.passpeople is not null) or (c1.ts is not null and c1.ps is not null))
+        <if test="rows!=0">
+            limit #{row},#{rows}
+        </if>
+    </select>
+    <!-- 五克任务统计总数据 ，五克任务合格与不合格人数和次数的统计-->
+    <select id="checkGramCensusCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT
+            count(1)
+        FROM
+            (select distinct  <!-- 五克任务根据每个责任区责任点每天显示全部数据 -->
+                    cd.area_id as area_id,
+                    cd.point_id as point_id,
+                    date_format(ct.check_time,'%Y%m%d') as check_time
+            from (SELECT * FROM checkgram 
+                                    <where>
+                                        <if test="firstDate!=null and firstDate!=''">
+                                            <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                                        </if>
+                                    </where>) ct 
+                        join check_duty cd on ct.id = cd.check_id  and ct.eval_type = 1) d1
+
+            left join 
+            (select a1.area_id,a1.point_id,a1.check_time,a1.passnum,b1.passpeople from(
+                (<!-- 五克任务合格次数 -->
+                    SELECT DISTINCT
+                            t.area_id,
+                            t.point_id,
+                            date_format(t.check_time, '%Y%m%d') AS check_time,
+                            count(1) passnum
+                        FROM
+                            (
+                                SELECT 
+                                    cd.area_id AS area_id,
+                                    cd.point_id AS point_id,
+                                    ct.check_time<!-- 次数时间要精确到秒 再去重 -->
+                                FROM
+                                    (SELECT * FROM checkgram
+                                    <where>
+                                        <if test="firstDate!=null and firstDate!=''">
+                                            <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                                        </if>
+                                    </where>
+                                    ) ct
+                                JOIN check_duty cd ON ct.id = cd.check_id
+                                AND ct.eval_type = 1
+                                WHERE
+                                    ct.check_status = 1
+                                    <if test="areaId!=null and areaId!=''">
+                                        and cd.area_id=#{areaId}
+                                    </if>
+                                    <if test="pointId!=null and pointId!=''">
+                                        and cd.point_id=#{pointId}
+                                    </if>
+                    ) t
+                    group by t.area_id,t.point_id,date_format(t.check_time, '%Y%m%d')
+                    ORDER BY check_time DESC
+                ) a1
+                JOIN (<!-- 五克任务合格人数 -->
+                    SELECT
+                        count(*) passpeople,
+                        t.area_id,
+                        t.point_id,
+                        t.check_time
+                    FROM
+                        (
+                            SELECT DISTINCT
+                                cd.area_id AS area_id,
+                                cd.point_id AS point_id,
+                                date_format(ct.check_time, '%Y%m%d') AS check_time,<!-- 人数时间精确到天 再去重 -->
+                                cd.employee_id AS employee_id
+                            FROM
+                                (SELECT * FROM checkgram
+                                <where>
+                                    <if test="firstDate!=null and firstDate!=''">
+                                            <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                                    </if>
+                                </where>
+                                            
+                                ) ct
+                            JOIN check_duty cd ON ct.id = cd.check_id
+                            AND ct.eval_type = 1
+                            WHERE
+                                ct.check_status = 1
+                                <if test="areaId!=null and areaId!=''">
+                                    and cd.area_id=#{areaId}
+                                </if>
+                                <if test="pointId!=null and pointId!=''">
+                                    and cd.point_id=#{pointId}
+                                </if>
+                        ) t
+                    GROUP BY
+                        area_id,
+                        point_id,
+                        check_time
+                    ORDER BY
+                        check_time DESC
+                ) b1 on a1.area_id = b1.area_id and a1.point_id = b1.point_id and a1.check_time = b1.check_time
+            )) e1 on e1.area_id = d1.area_id and e1.point_id = d1.point_id and e1.check_time = d1.check_time
+            
+
+            left join 
+            (select a.area_id,a.point_id,a.check_time,a.ts,b.ps from (
+                (<!-- 五克任务不合格次数 -->
+                    SELECT DISTINCT
+                        t.area_id,
+                        t.point_id,
+                        date_format(t.check_time, '%Y%m%d') AS check_time,
+                        count(1) ts
+                    FROM
+                        (
+                            SELECT 
+                                cd.area_id AS area_id,
+                                cd.point_id AS point_id,
+                                ct.check_time<!-- 次数时间要精确到秒 再去重 -->
+                            FROM
+                                (SELECT * FROM checkgram
+                                <where>
+                                    <if test="firstDate!=null and firstDate!=''">
+                                        <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                                    </if>
+                                </where>
+                                ) ct
+                            JOIN check_duty cd ON ct.id = cd.check_id
+                            AND ct.eval_type = 1
+                            WHERE
+                                ct.check_status = 2
+                                <if test="areaId!=null and areaId!=''">
+                                    and cd.area_id=#{areaId}
+                                </if>
+                                <if test="pointId!=null and pointId!=''">
+                                    and cd.point_id=#{pointId}
+                                </if>
+                        ) t
+                    group by t.area_id,t.point_id,date_format(t.check_time, '%Y%m%d')
+                    ORDER BY check_time DESC
+                ) a
+                JOIN (<!-- 五克任务不合格人数 -->
+                    SELECT
+                        count(*) ps,
+                        t.area_id,
+                        t.point_id,
+                        t.check_time
+                    FROM
+                        (
+                            SELECT DISTINCT
+                                cd.area_id AS area_id,
+                                cd.point_id AS point_id,
+                                date_format(ct.check_time, '%Y%m%d') AS check_time,<!-- 人数时间精确到天 再去重 -->
+                                cd.employee_id AS employee_id
+                            FROM
+                                (SELECT * FROM checkgram
+                                <where>
+                                    <if test="firstDate!=null and firstDate!=''">
+                                            <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                                    </if>
+                                </where>
+                                            
+                                ) ct
+                            JOIN check_duty cd ON ct.id = cd.check_id
+                            AND ct.eval_type = 1
+                            WHERE
+                                ct.check_status = 2
+                                <if test="areaId!=null and areaId!=''">
+                                    and cd.area_id=#{areaId}
+                                </if>
+                                <if test="pointId!=null and pointId!=''">
+                                    and cd.point_id=#{pointId}
+                                </if>
+                        ) t
+                    GROUP BY
+                        area_id,
+                        point_id,
+                        check_time
+                    ORDER BY
+                        check_time DESC
+                ) b ON a.area_id = b.area_id
+                AND a.point_id = b.point_id
+                AND a.check_time = b.check_time
+            )) c1 on d1.area_id = c1.area_id and d1.point_id = c1.point_id and d1.check_time = c1.check_time
+            
+        where ((e1.passnum is not null and e1.passpeople is not null) or (c1.ts is not null and c1.ps is not null))
+    </select>
+    <!-- 五克任务折线图次数 ，按天统计所有责任点的不合格总次数-->
+    <select id="checkGramsTsCensus" parameterType="java.util.Map" resultType="java.util.Map">
+    SELECT DISTINCT
+        date_format(t.check_time, '%Y/%m/%d') AS check_time,
+        count(1) ts
+    FROM
+        (
+            SELECT 
+                cd.area_id AS area_id,
+                cd.point_id AS point_id,
+                ct.check_time
+            FROM
+                (SELECT * FROM checkgram
+                <where>
+                    <if test="firstDate!=null and firstDate!=''">
+                        <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                    </if>
+                </where>
+                ) ct
+            JOIN check_duty cd ON ct.id = cd.check_id
+            AND ct.eval_type = 1
+            WHERE
+                ct.check_status = 2
+                <if test="areaId!=null and areaId!=''">
+                    and cd.area_id=#{areaId}
+                </if>
+                <if test="pointId!=null and pointId!=''">
+                    and cd.point_id=#{pointId}
+                </if>
+        ) t
+        GROUP By date_format(t.check_time, '%Y/%m/%d')
+        ORDER BY check_time 
+    </select>
+    <!-- 五克任务折线图人数，按天统计所有责任点的不合格总人数 -->
+    <select id="checkGramPsCensus" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+            count(*) ps,
+            check_time
+        FROM
+            (
+                SELECT DISTINCT
+                    date_format(ct.check_time, '%Y/%m/%d') AS check_time,
+                    cd.employee_id AS employee_id
+                FROM
+                    (SELECT * FROM checkgram
+                    <where>
+                        <if test="firstDate!=null and firstDate!=''">
+                                <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                        </if>
+                    </where>
+                                
+                    ) ct
+                JOIN check_duty cd ON ct.id = cd.check_id
+                AND ct.eval_type = 1
+                WHERE
+                    ct.check_status = 2
+                    <if test="areaId!=null and areaId!=''">
+                        and cd.area_id=#{areaId}
+                    </if>
+                    <if test="pointId!=null and pointId!=''">
+                        and cd.point_id=#{pointId}
+                    </if>
+            ) t2
+        GROUP BY
+            t2.check_time
+        ORDER BY
+            check_time 
+    </select>
+    
+    <!-- 五克任务折线图次数 ，按天统计所有责任点合格的总次数-->
+    <select id="checkGramPNCensus" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT DISTINCT
+            date_format(t.check_time, '%Y/%m/%d') AS check_time,
+            count(1) passnum
+        FROM
+            (
+                SELECT 
+                    cd.area_id AS area_id,
+                    cd.point_id AS point_id,
+                    ct.check_time
+                FROM
+                    (SELECT * FROM checkgram
+                    <where>
+                        <if test="firstDate!=null and firstDate!=''">
+                            <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                        </if>
+                    </where>
+                    ) ct
+                JOIN check_duty cd ON ct.id = cd.check_id
+                AND ct.eval_type = 1
+                WHERE
+                    ct.check_status = 1
+                    <if test="areaId!=null and areaId!=''">
+                        and cd.area_id=#{areaId}
+                    </if>
+                    <if test="pointId!=null and pointId!=''">
+                        and cd.point_id=#{pointId}
+                    </if>
+            ) t
+        GROUP BY date_format(t.check_time, '%Y/%m/%d') ORDER BY check_time 
+    </select>
+    
+    <!-- 五克任务折线图人数，按天统计所有责任点的合格总人数 -->
+    <select id="checkGramsPPCensus" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+            count(*) passpeople,
+            check_time
+        FROM
+            (
+                SELECT DISTINCT
+                    date_format(ct.check_time, '%Y/%m/%d') AS check_time,
+                    cd.employee_id AS employee_id
+                FROM
+                    (SELECT * FROM checkgram
+                    <where>
+                        <if test="firstDate!=null and firstDate!=''">
+                                <![CDATA[check_time>=#{firstDate} and check_time<#{lastDate}]]>
+                        </if>
+                    </where>
+                                
+                    ) ct
+                JOIN check_duty cd ON ct.id = cd.check_id
+                AND ct.eval_type = 1
+                WHERE
+                    ct.check_status = 1
+                    <if test="areaId!=null and areaId!=''">
+                        and cd.area_id=#{areaId}
+                    </if>
+                    <if test="pointId!=null and pointId!=''">
+                        and cd.point_id=#{pointId}
+                    </if>
+            ) t2
+        GROUP BY
+            t2.check_time
+        ORDER BY
+            check_time 
+    </select>
+    
+    <!-- 获取每个责任区当天和昨天的平均克数 -->
+    <select id="getAverageGrams" resultType="Map" parameterType="int">
+    select b.area_id,c.area_name,ROUND(avg(a.check_value),2) avergeGrames
+    from checkgram a 
+    join check_duty b on a.id = b.check_id
+    join dutyarea c on c.id = b.area_id
+    where a.eval_type = 1 
+    and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;=  DATE_FORMAT(now(),'%Y-%m-%d')
+    and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;=  DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')
+    group by b.AREA_ID order by b.AREA_ID
+    </select>
+    
+    <!-- 获取每个责任区近10天的五克次数 2016-09-02 -->
+    <select id="getCheckGramsNum" resultType="Map" parameterType="int">
+    select b.area_id,c.area_name,count(1) checkGramsNum
+    from checkgram a 
+    join check_duty b on a.id = b.check_id
+    join dutyarea c on c.id = b.area_id
+    where a.eval_type = 1 
+    and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;=  DATE_FORMAT(now(),'%Y-%m-%d')
+    and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;  DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} DAY),'%Y-%m-%d')
+    group by b.AREA_ID order by b.AREA_ID
+    </select>
+    
+    <!-- 城市清洁度分析 近一周道路清洁度趋势图 日平均克数（领导APP端） -->
+    <select id="getAverageGramsForApp" resultType="Map" parameterType="int">
+        select DATE_FORMAT(a.check_time ,'%d') showDay, ROUND(avg(a.check_value),2) avergeGrames
+          from checkgram a 
+         where a.eval_type = 1 
+           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;=  DATE_FORMAT(now(),'%Y-%m-%d')
+           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;=  DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')
+         group by showDay order by showDay         
+    </select>
+
+    <!-- 城市清洁度分析 近一周道路清洁度趋势图 总克数（领导APP端） -->
+    <select id="getTotalGramsForApp" resultType="Map" parameterType="int">
+        select sum(a.check_value) totalGrames
+          from checkgram a 
+         where a.eval_type = 1 
+           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;= DATE_FORMAT(now(),'%Y-%m-%d')
+           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;= DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')  
+    </select>
+    
+    <!-- 城市清洁度分析 近一周道路检测合格率趋势图  合格次数（领导APP端） -->
+    <select id="getEveryPassNumForApp" resultType="Map" parameterType="int">
+        select DATE_FORMAT(a.check_time ,'%d') showDay, COUNT(a.id) passNum
+          from checkgram a 
+         where a.eval_type = 1 
+           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;= DATE_FORMAT(now(),'%Y-%m-%d')
+           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;= DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')
+           and a.check_value &lt; 5
+         group by showDay order by showDay       
+    </select>  
+      
+    <!-- 城市清洁度分析 近一周道路检测合格率趋势图  总次数（领导APP端） -->
+    <select id="getEveryTotalNumForApp" resultType="Map" parameterType="int">
+        select DATE_FORMAT(a.check_time ,'%d') showDay, COUNT(a.id) totalNum
+          from checkgram a 
+         where a.eval_type = 1 
+           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;= DATE_FORMAT(now(),'%Y-%m-%d')
+           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;= DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')
+         group by showDay order by showDay       
+    </select>       
+    
+    <!-- 城市清洁度分析 近一周全市各责任区检测力度清洁度状况表 （领导APP端） -->
+    <select id="getWeekCleContrastsForApp" resultType="Map" parameterType="int">
+        select t.id, t.area_name areaName, if (t1.avergeGrames is null, 0, t1.avergeGrames) avergeGrames,
+               if (floor(ROUND(t2.passNum/t3.totalNum, 2) * 100) is null, 0,  floor(ROUND(t2.passNum/t3.totalNum, 2) * 100) ) passRote
+           from dutyarea t
+           left join (
+                select b.area_id, ROUND(avg(a.check_value),1) avergeGrames
+                  from checkgram a 
+                  join check_duty b on a.id = b.check_id
+                 where a.eval_type = 1 
+                   and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;= DATE_FORMAT(now(),'%Y-%m-%d')
+                   and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;= DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')
+                 group by b.AREA_ID order by b.AREA_ID
+           ) t1 on t1.area_id = t.id
+           left join (
+                select b.area_id, COUNT(a.id) passNum
+                  from checkgram a 
+                  join check_duty b on a.id = b.check_id
+                 where a.eval_type = 1 
+                   and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;= DATE_FORMAT(now(),'%Y-%m-%d')
+                   and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;= DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')
+                   and a.check_value &lt; 5
+                 group by b.AREA_ID order by b.AREA_ID
+            )t2 on t2.area_id = t.id
+            left join (
+                select b.area_id, COUNT(a.id) totalNum
+                  from checkgram a 
+                  join check_duty b on a.id = b.check_id
+                 where a.eval_type = 1 
+                   and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;= DATE_FORMAT(now(),'%Y-%m-%d')
+                   and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;= DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')
+                 group by b.AREA_ID order by b.AREA_ID
+            )t3 on t3.area_id = t.id
+           where t.id = 1 || t.id = 2|| t.id = 3|| t.id = 4|| t.id = 5|| t.id = 6|| t.id = 7            
+    </select>           
+    
+    <!-- 工作效率 近一周人员考核有效力度趋势图  合格次数（领导APP端） -->
+    <select id="getFiveMinPassNumForApp" resultType="Map" parameterType="int">
+        select DATE_FORMAT(ss.check_time ,'%d') showDay, COUNT(ss.id) passNum
+          from (select distinct b.area_id, a.id, a.check_time
+		          from checktime a 
+		         inner join check_duty b on a.id = b.check_id
+		         where a.eval_type = 2 
+		           and a.check_status = 1
+		           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;= DATE_FORMAT(now(),'%Y-%m-%d')
+		           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;= DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')
+		           and b.eval_type = 2
+		           and (b.area_id = 1 || b.area_id = 2|| b.area_id = 3|| b.area_id = 4|| b.area_id= 5|| b.area_id= 6|| b.area_id = 7) ) ss
+          group by showDay order by showDay
+    </select>    
+    
+    <!-- 工作效率 近一周道路检测合格率趋势图  总次数（领导APP端） -->
+    <select id="getFiveMinTotalNumForApp" resultType="Map" parameterType="int">
+        select DATE_FORMAT(a.check_time ,'%d') showDay, COUNT(a.id) totalNum
+          from checktime a 
+         where a.eval_type = 2 
+           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;= DATE_FORMAT(now(),'%Y-%m-%d')
+           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;= DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')
+         group by showDay order by showDay       
+    </select>         
+    
+    <!-- 工作效率 近7日全市各责任区人员响应力度横向对比报表 （领导APP端） -->
+    <select id="getWeekWorkEffForApp" resultType="Map" parameterType="int">
+        select t.id, t.area_name areaName, if (t1.passNum is null, 0, t1.passNum) passNum, 
+        if (floor(ROUND(t1.passNum/t2.totalNum, 2) * 100) is null, 0, floor(ROUND(t1.passNum/t2.totalNum, 2) * 100)) passRote
+           from dutyarea t
+           left join (
+                select ss.area_id, count(ss.id) passNum 
+                  from (select distinct b.area_id, a.id
+                          from checktime a 
+                         inner join check_duty b on a.id = b.check_id
+                         where a.eval_type = 2 
+                           and a.check_status = 1
+                           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;= DATE_FORMAT(now(),'%Y-%m-%d')
+                           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;= DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')
+                           and b.eval_type = 2) ss 
+                 group by ss.area_id 
+                 order by ss.area_id
+           ) t1 on t1.area_id = t.id
+           left join (
+                select ss.area_id, count(ss.id) totalNum 
+                  from (select distinct b.area_id, a.id
+                          from checktime a 
+                         inner join check_duty b on a.id = b.check_id
+                         where a.eval_type = 2 
+                           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;= DATE_FORMAT(now(),'%Y-%m-%d')
+                           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;= DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')
+                           and b.eval_type = 2) ss 
+                 group by ss.area_id 
+                 order by ss.area_id
+            )t2 on t2.area_id = t.id
+          where t.id = 1 || t.id = 2|| t.id = 3|| t.id = 4|| t.id = 5|| t.id = 6|| t.id = 7
+    </select>               
+    
+    <!-- 综合考虑 （领导APP端） -->
+    <select id="getComEvaluationForApp" resultType="Map" parameterType="int">
+        select b.area_id areaId, a.supervisor_type supervisorType, c.area_name areaName, count(b.area_id) number
+          from reports a 
+          join check_duty b on a.id = b.check_id
+          join dutyarea c on c.id = b.area_id
+         where DATE_FORMAT(a.check_time ,'%Y-%m-%d') &lt;=  DATE_FORMAT(now(),'%Y-%m-%d')
+           and DATE_FORMAT(a.check_time ,'%Y-%m-%d') &gt;=  DATE_FORMAT(date_sub(now(),interval #{beforeDayForGramsAVG} day),'%Y-%m-%d')
+         group by b.area_id, a.supervisor_type
+         order by b.area_id, a.supervisor_type
+    </select>                   
+    
+    <!-- 管理人员尽职监督 近一周五克道路测量地点（领导APP端） -->
+    <select id="getCheGraLatLngForLeadApp"  parameterType="com.czz.hwy.bean.mission.CheckGram" resultMap="BaseResultMap">
+       select <include refid="Base_Column_List" />
+         from checkgram
+        where employee_id = #{employeeId}
+          and date_format(check_time,'%Y-%m-%d') &lt;= date_format(now(),'%Y-%m-%d') 
+          and date_format(check_time,'%Y-%m-%d') &gt; date_format(date_sub(now(),interval 7 day),'%Y-%m-%d')
+          and eval_type = 1
+    </select>    
+    
+    <!-- 获取五克考核信息记录条数，2016-11-14 -->
+    <select id="getCheckGramHistoryCount" resultType="int" parameterType="com.czz.hwy.bean.mission.CheckGram">
+        select count(rd.id)
+          from check_duty rd 
+          join checkgram t on rd.check_id = t.id
+          join evaltype t1 on t.eval_type = t1.eval_value and t1.type = 1
+          join users u on t.employee_id = u.employee_id and u.status = 1
+          join users u1 on  rd.employee_id = u1.employee_id and u1.status = 1
+          join dutypoint dp on rd.point_id = dp.id
+          join dutyarea da on rd.area_id = da.id
+          left join (select ck.check_id,count(ck.id) num
+                       from checkimage ck
+                      group by ck.check_id) ci on rd.check_id = ci.check_id
+        <where>
+           <if test="areaId != 0">
+           and rd.area_id = #{areaId}
+          </if>
+           <if test="pointId != 0">
+           and rd.point_id = #{pointId}
+          </if>          
+          <if test="startTimeStr != null and startTimeStr != ''">
+           and DATE_FORMAT(t.check_time, '%Y-%m-%d') &gt;= STR_TO_DATE(#{startTimeStr},"%Y-%m-%d")
+          </if>                    
+          <if test="endTimeStr != null and endTimeStr != ''">
+           and DATE_FORMAT(t.check_time, '%Y-%m-%d') &lt;= STR_TO_DATE(#{endTimeStr},"%Y-%m-%d")
+          </if>                           
+          <if test="employeeId != 0">
+           and rd.employee_id like = #{employeeId}
+          </if>                    
+          <if test="dutyPeopleName != null and dutyPeopleName != ''">
+           and u1.showname like concat('%', #{dutyPeopleName}, '%') 
+          </if>          
+           and t.reader = 0
+       </where>
+    </select>
+
+    <!-- 获取五克考核信息记录，2016-11-14 -->
+    <select id="getCheckGramHistory" resultType="java.util.Map" parameterType="com.czz.hwy.bean.mission.CheckGram">
+         select da.area_name areaName,
+                dp.point_name pointName,
+                u1.showname dutyPeopleName,
+                date_format(t.check_time,'%Y-%m-%d %H:%i') checkTime,
+                t.check_value checkValue,
+                t.check_status checkSataus,
+                u.showname checkUser,
+                t.id id,
+                t.check_lat checkLat,
+                t.check_lng checkLng,                
+                t.eval_type evalType,
+                IFNULL(ci.num,0) imageFlag
+           from check_duty rd 
+           join checkgram t on rd.check_id = t.id
+           join evaltype t1 on t.eval_type = t1.eval_value and t1.type = 1
+           join users u on t.employee_id = u.employee_id and u.status = 1
+           join users u1 on  rd.employee_id = u1.employee_id and u1.status = 1
+           join dutypoint dp on rd.point_id = dp.id
+           join dutyarea da on rd.area_id = da.id
+           left join (select ck.check_id,count(ck.id) num
+                        from checkimage ck
+                       group by ck.check_id) ci on rd.check_id = ci.check_id
+        <where>
+           <if test="areaId != 0">
+           and rd.area_id = #{areaId}
+          </if>
+           <if test="pointId != 0">
+           and rd.point_id = #{pointId}
+          </if>          
+          <if test="startTimeStr != null and startTimeStr != ''">
+           and DATE_FORMAT(t.check_time, '%Y-%m-%d') &gt;= STR_TO_DATE(#{startTimeStr},"%Y-%m-%d")
+          </if>                    
+          <if test="endTimeStr != null and endTimeStr != ''">
+           and DATE_FORMAT(t.check_time, '%Y-%m-%d') &lt;= STR_TO_DATE(#{endTimeStr},"%Y-%m-%d")
+          </if>                           
+          <if test="employeeId != 0">
+           and rd.employee_id like = #{employeeId}
+          </if>                    
+          <if test="dutyPeopleName != null and dutyPeopleName != ''">
+           and u1.showname like concat('%', #{dutyPeopleName}, '%') 
+          </if>          
+           and t.reader = 0
+       </where>
+         ORDER BY t.check_time DESC
+         limit #{row},#{rows}
+    </select>
+    
+</mapper>

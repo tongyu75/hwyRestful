@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.Evaluations" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.Evaluations" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="area_id" property="areaId" jdbcType="INTEGER" />
+    <result column="point_id" property="pointId" jdbcType="INTEGER" />
+    <result column="work_type" property="workType" jdbcType="INTEGER" />
+    <result column="eval_type" property="evalType" jdbcType="INTEGER" />
+    <result column="eval_name" property="evalName" jdbcType="VARCHAR" />
+    <result column="eval_desc" property="evalDesc" jdbcType="VARCHAR" />
+    <result column="standard_value" property="standardValue" jdbcType="DOUBLE" />
+    <result column="standard_unit" property="standardUnit" jdbcType="VARCHAR" />
+    <result column="limit_value" property="limitValue" jdbcType="VARCHAR" />
+    <result column="limit_unit" property="limitUnit" jdbcType="VARCHAR" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="fine" property="fine" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, area_id, point_id, work_type, eval_type, eval_name, eval_desc, standard_value, 
+    standard_unit, limit_value, limit_unit, create_at, update_at, fine
+  </sql>
+  <select id="getEvaluationsById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from evaluations
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+    <select id="getEvaluationInfoByBean" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.Evaluations" >
+    select 
+    <include refid="Base_Column_List" />
+    from evaluations
+	where area_id =  #{areaId,jdbcType=INTEGER}
+		and point_id = #{pointId,jdbcType=INTEGER}
+		and eval_type = #{evalType,jdbcType=INTEGER}
+	
+   </select>
+  <select id="getEvaluationsByBean" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.manager.Evaluations" >
+    select 
+    <include refid="Base_Column_List" />
+    from evaluations
+   <where>
+  	 <if test="id != 0" >
+       and id = #{id,jdbcType=INTEGER}
+      </if>
+   	 <if test="areaId != 0" >
+        and area_id = #{areaId,jdbcType=INTEGER}
+      </if>
+      <if test="pointId != 0" >
+       and point_id = #{pointId,jdbcType=INTEGER}
+      </if>
+      <if test="workType != 0" >
+       and work_type = #{workType,jdbcType=INTEGER}
+      </if>
+      <if test="evalType != 0" >
+        and eval_type = #{evalType,jdbcType=INTEGER}
+      </if>
+      <if test="evalName != null" >
+        and eval_name = #{evalName,jdbcType=VARCHAR}
+      </if>
+      <if test="evalDesc != null" >
+        and eval_desc = #{evalDesc,jdbcType=VARCHAR}
+      </if>
+      <if test="standardValue != 0.0" >
+        and standard_value = #{standardValue,jdbcType=DOUBLE}
+      </if>
+      <if test="standardUnit != null" >
+        and standard_unit = #{standardUnit,jdbcType=VARCHAR}
+      </if>
+      <if test="limitValue != null" >
+        and limit_value = #{limitValue,jdbcType=VARCHAR}
+      </if>
+      <if test="limitUnit != null" >
+        and limit_unit = #{limitUnit,jdbcType=VARCHAR}
+      </if>
+      <if test="createAt != null" >
+        and create_at = #{createAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="updateAt != null" >
+        and update_at = #{updateAt,jdbcType=TIMESTAMP}
+      </if>
+      <if test="fine != null" >
+        and fine = #{fine,jdbcType=VARCHAR}
+      </if>
+   </where>
+  </select>
+  <delete id="deleteEvaluations" parameterType="java.lang.Integer" >
+    delete from evaluations
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteEvaluationsByEvalType" parameterType="java.lang.Integer" >
+    delete from evaluations
+    where eval_type = #{_parameter}
+  </delete>
+  <select id="selectEvaluationsByEvalType" parameterType="java.lang.Integer" resultType="java.util.Map">
+  	select <include refid="Base_Column_List" /> from evaluations
+    where eval_type = #{_parameter}
+  </select>
+  <select id="selectEvaluationsByAreaId" parameterType="java.lang.Integer" resultType="java.util.Map">
+  	select <include refid="Base_Column_List" /> from evaluations
+    where area_id = #{_parameter}
+  </select>
+  <insert id="insertEvaluations" parameterType="com.czz.hwy.bean.manager.Evaluations" >
+    insert into evaluations (id, area_id, point_id, 
+      work_type, eval_type, eval_name, 
+      eval_desc, standard_value, standard_unit, 
+      limit_value, limit_unit, create_at, 
+      update_at, fine)
+    values (#{id,jdbcType=INTEGER}, #{areaId,jdbcType=INTEGER}, #{pointId,jdbcType=INTEGER}, 
+      #{workType,jdbcType=INTEGER}, #{evalType,jdbcType=INTEGER}, #{evalName,jdbcType=VARCHAR}, 
+      #{evalDesc,jdbcType=VARCHAR}, #{standardValue,jdbcType=DOUBLE}, #{standardUnit,jdbcType=VARCHAR}, 
+      #{limitValue,jdbcType=VARCHAR}, #{limitUnit,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, 
+      #{updateAt,jdbcType=TIMESTAMP}, #{fine,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.czz.hwy.bean.manager.Evaluations" >
+    insert into evaluations
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="areaId != null" >
+        area_id,
+      </if>
+      <if test="pointId != null" >
+        point_id,
+      </if>
+      <if test="workType != null" >
+        work_type,
+      </if>
+      <if test="evalType != null" >
+        eval_type,
+      </if>
+      <if test="evalName != null" >
+        eval_name,
+      </if>
+      <if test="evalDesc != null" >
+        eval_desc,
+      </if>
+      <if test="standardValue != null" >
+        standard_value,
+      </if>
+      <if test="standardUnit != null" >
+        standard_unit,
+      </if>
+      <if test="limitValue != null" >
+        limit_value,
+      </if>
+      <if test="limitUnit != null" >
+        limit_unit,
+      </if>
+      <if test="createAt != null" >
+        create_at,
+      </if>
+      <if test="updateAt != null" >
+        update_at,
+      </if>
+      <if test="fine != null" >
+        fine,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="areaId != null" >
+        #{areaId,jdbcType=INTEGER},
+      </if>
+      <if test="pointId != null" >
+        #{pointId,jdbcType=INTEGER},
+      </if>
+      <if test="workType != null" >
+        #{workType,jdbcType=INTEGER},
+      </if>
+      <if test="evalType != null" >
+        #{evalType,jdbcType=INTEGER},
+      </if>
+      <if test="evalName != null" >
+        #{evalName,jdbcType=VARCHAR},
+      </if>
+      <if test="evalDesc != null" >
+        #{evalDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="standardValue != null" >
+        #{standardValue,jdbcType=DOUBLE},
+      </if>
+      <if test="standardUnit != null" >
+        #{standardUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="limitValue != null" >
+        #{limitValue,jdbcType=VARCHAR},
+      </if>
+      <if test="limitUnit != null" >
+        #{limitUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="createAt != null" >
+        #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="fine != null" >
+        #{fine,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateEvaluations" parameterType="com.czz.hwy.bean.manager.Evaluations" >
+    update evaluations
+    <set >
+      <if test="areaId != null" >
+        area_id = #{areaId,jdbcType=INTEGER},
+      </if>
+      <if test="pointId != null" >
+        point_id = #{pointId,jdbcType=INTEGER},
+      </if>
+      <if test="workType != null" >
+        work_type = #{workType,jdbcType=INTEGER},
+      </if>
+      <if test="evalType != null" >
+        eval_type = #{evalType,jdbcType=INTEGER},
+      </if>
+      <if test="evalName != null" >
+        eval_name = #{evalName,jdbcType=VARCHAR},
+      </if>
+      <if test="evalDesc != null" >
+        eval_desc = #{evalDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="standardValue != null" >
+        standard_value = #{standardValue,jdbcType=DOUBLE},
+      </if>
+      <if test="standardUnit != null" >
+        standard_unit = #{standardUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="limitValue != null" >
+        limit_value = #{limitValue,jdbcType=VARCHAR},
+      </if>
+      <if test="limitUnit != null" >
+        limit_unit = #{limitUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="fine != null" >
+        fine = #{fine,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.manager.Evaluations" >
+    update evaluations
+    set area_id = #{areaId,jdbcType=INTEGER},
+      point_id = #{pointId,jdbcType=INTEGER},
+      work_type = #{workType,jdbcType=INTEGER},
+      eval_type = #{evalType,jdbcType=INTEGER},
+      eval_name = #{evalName,jdbcType=VARCHAR},
+      eval_desc = #{evalDesc,jdbcType=VARCHAR},
+      standard_value = #{standardValue,jdbcType=DOUBLE},
+      standard_unit = #{standardUnit,jdbcType=VARCHAR},
+      limit_value = #{limitValue,jdbcType=VARCHAR},
+      limit_unit = #{limitUnit,jdbcType=VARCHAR},
+      create_at = #{createAt,jdbcType=TIMESTAMP},
+      update_at = #{updateAt,jdbcType=TIMESTAMP},
+      fine = #{fine,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="getEvalJoinDutyAreaByEvalType" resultType="java.util.Map" parameterType="java.lang.Integer">
+  select t.area_id,t1.area_name,CASE WHEN t.limit_value is null THEN '' ELSE t.limit_value END limit_value,CASE WHEN t.fine is null THEN '' ELSE t.fine END fine from evaluations t join dutyarea t1 on t.area_id = t1.id where t.eval_type = #{_parameter} group by t.area_id
+  </select>
+</mapper>

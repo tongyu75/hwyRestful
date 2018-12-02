@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.EvalTypeCheckApp" >
+<resultMap type="com.czz.hwy.bean.mission.app.EvalTypeCheckApp" id="evalTypeCheckAppMap">
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="eval_value" property="evalValue" jdbcType="INTEGER" />
+    <result column="eval_name" property="evalName" jdbcType="VARCHAR" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="type" property="type" jdbcType="INTEGER"/>
+</resultMap>
+	 <sql id="Base_Column_List" >
+	   id, eval_value, eval_name, create_at, update_at, type
+	 </sql>
+
+	<!-- 获取某一个考核类型的集合 -->
+	<select id="selectEvalTypeCheckByType" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+	    select eval_value
+	     from evaltype_check where type = #{_parameter}
+	</select>
+
+	<!-- 根据考核类型ID获取考核类型详细信息，2016-12-20 -->
+	<select id="getEvalTypeCheckByBeanApp" resultMap="evalTypeCheckAppMap" parameterType="com.czz.hwy.bean.mission.app.EvalTypeCheckApp">
+	select * from evaltype_check
+	<where>
+		<if test="evalValue != 0">
+		and eval_value = #{evalValue}
+		</if>
+	</where>
+	</select>
+
+</mapper>

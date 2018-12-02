@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="attendanceForPlansWatch">
+    <resultMap id="BaseResultMap" type="com.czz.hwy.bean.user.watch.AttendanceForPlans">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="employeeId" property="employeeId" jdbcType="INTEGER"/>
+        <result column="employeeName" property="employeeName" jdbcType="VARCHAR"/>
+        <result column="duty_area" property="dutyAreaId" jdbcType="INTEGER"/>
+        <result column="dutyAreaName" property="dutyAreaName" jdbcType="VARCHAR"/>
+        <result column="duty_point" property="dutyPointId" jdbcType="INTEGER"/>
+        <result column="dutyPointName" property="dutyPointName" jdbcType="VARCHAR"/>
+        <result column="lastrecordtime" property="lastRecordTime" jdbcType="TIMESTAMP"/>
+        <result column="duty_on_time" property="dutyOnTime" jdbcType="TIMESTAMP"/>
+        <result column="duty_off_time" property="dutyOffTime" jdbcType="TIMESTAMP"/>
+        <result column="get_on_status" property="getOnStatus" jdbcType="VARCHAR"/>
+        <result column="get_off_status" property="getOffStatus" jdbcType="VARCHAR"/>
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+        <result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+        <result column="lat"  property="lat" jdbcType="DOUBLE"/>
+        <result column="lng"  property="lng" jdbcType="DOUBLE"/>
+        <result column="recorddate" property="recordDate" jdbcType="TIMESTAMP"/>      
+        <result column="slow_down_num" property="slowDownNum" jdbcType="INTEGER"/>  
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, employeeId,dutyAreaId,dutyPointId,lastRecordTime,dutyOnTime,dutyOffTime,getOnStatus,getOffStatus,CreateAt,UpdateAt,lat,lng,recorddate,slow_down_num
+    </sql>
+    
+    <!-- 根据员工号和当前日期获取环卫工考勤结果列表 -->
+    <select id="getAttForPlansListWatch" parameterType="attendanceForPlans" resultMap="BaseResultMap">
+        SELECT * 
+          FROM `attendanceforplans`
+         WHERE employeeId = #{employeeId}
+           AND recorddate = DATE_FORMAT(#{recordDate},'%Y-%m-%d') order by duty_on_time 
+    </select>
+
+    <!-- 根据员工号和当前日期和计划上下班时间查询出环卫工（排了多个责任点的）所有的考勤结果 -->
+    <select id="getAttForPlansToHWGListWatch" parameterType="attendanceForPlans" resultMap="BaseResultMap">
+        SELECT * 
+          FROM `attendanceforplans`
+         WHERE employeeId = #{employeeId}
+           AND recorddate = DATE_FORMAT(#{recordDate},'%Y-%m-%d') 
+           and DATE_FORMAT(duty_on_time,'%H:%i') = DATE_FORMAT(#{dutyOnTime},'%H:%i')
+           and DATE_FORMAT(duty_off_time,'%H:%i') = DATE_FORMAT(#{dutyOffTime},'%H:%i') 
+         order by lastrecordtime desc
+    </select>    
+    
+    <select id="getCurrenAttendanceStatusWatch" parameterType="java.lang.Integer" resultType="java.util.Map">
+        select A.employeeId, A.get_on_status getOnStatus, A.get_off_status getOffStatus, A.duty_on_time dutyOnTime, A.duty_off_time dutyOffTime
+          from attendanceforplans A
+         where A.employeeId = #{employeeId}
+           and A.duty_on_time &lt;= DATE_FORMAT(SYSDATE(), '%H:%i:%s')
+           and A.duty_off_time &gt;= DATE_FORMAT(SYSDATE(), '%H:%i:%s')
+           and date_format(A.recorddate,'%Y-%m-%d') = DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+    </select>    
+    
+    <!-- 获取当前员工上下班状态考勤记录 -->
+    <select id="getManualAttendancesWatch" parameterType="Map" resultType="com.czz.hwy.bean.user.watch.AttendanceForPlans">
+        select t.id,
+               t.employeeId,
+               t.duty_on_time dutyOnTime,
+               t.duty_off_time dutyOffTime,
+               t.duty_area dutyAreaId,
+               t.get_on_status dutyOnStatus,
+               t.get_off_status dutyOffStatus,
+               t.update_at updateTime,
+               t.lastrecordtime lastRecordTime,
+               t.recorddate recordDate
+          from attendanceforplans t 
+         where t.recorddate = date_format(now(),'%Y-%m-%d')
+           and date_format(date_sub(CONCAT('1977-01-01 ',DATE_FORMAT(t.duty_on_time,'%H:%i:%s')),interval #{duty_ontime_before} minute),'%H:%i:%s')  &lt;= date_format(#{compareDate},'%H:%i:%s') 
+           <if test='timeFlag == 2 and timePlan == "23:59:00"'>
+               and date_format(date_add(CONCAT('1977-01-01 ',DATE_FORMAT(t.duty_off_time,'%H:%i:%s')),interval #{duty_off_time_after} minute),'%H:%i:%s') &gt;= date_format(#{compareDate},'%H:%i:%s')
+           </if>
+           <if test='timeFlag == 2 and timePlan != "23:59:00"'>
+               <if test="duty_off_time_after == 0">
+                   and date_format(date_add(CONCAT('1977-01-01 ',DATE_FORMAT(t.duty_off_time,'%H:%i:%s')),interval #{duty_off_time_after} minute),'%H:%i:%s') &lt;= date_format(#{compareDate},'%H:%i:%s')
+               </if>
+               <if test="duty_off_time_after != 0">
+                   and date_format(date_add(CONCAT('1977-01-01 ',DATE_FORMAT(t.duty_off_time,'%H:%i:%s')),interval #{duty_off_time_after} minute),'%H:%i:%s') &gt;= date_format(#{compareDate},'%H:%i:%s')
+               </if>
+           </if>
+           and t.employeeId = #{employeeId}    
+         order by t.duty_on_time
+    </select>    
+    
+    <!-- 考勤上班时间设置为【上班时间前60分钟，上班时间】时间段内，第一次在责任点的时间，2016-10-26 -->
+    <select id="selectAtPointAttenadanceListWatch" parameterType="Map" resultMap="BaseResultMap">
+        select *
+          from attendanceforplans t
+         where t.id in (${ids})
+    </select>    
+    
+    <!-- 批量更新考勤记录的上班状态，2016-10-26 -->
+    <update id="batchUpdateOnStatusByListWatch" parameterType="java.util.List" >
+        <foreach collection="list" item="plans" index="index" separator=";">
+        update attendanceforplans
+        <set>
+            lastrecordtime = #{plans.lastRecordTime},
+            update_at = #{plans.updateTime,jdbcType=TIMESTAMP},
+            <if test="plans.dutyOnStatus != null and plans.dutyOnStatus != ''">
+            get_on_status = #{plans.dutyOnStatus},
+            </if>
+            <if test="plans.dutyOffStatus != null and plans.dutyOffStatus != ''">
+            get_off_status = #{plans.dutyOffStatus},
+            </if> 
+        </set>
+        where id = #{plans.id}
+        </foreach>
+    </update>    
+    
+    <!-- 批量更新上下班状态 2016-08-31 -->
+    <update id="updateOnOrOffStatusByMapWatch" parameterType="Map" >
+	    update attendanceforplans
+	    set lastrecordtime = #{nowDate}
+	    <if test="getOnStatus != null and getOnStatus != ''">
+	    ,update_at = #{nowDate}
+	    ,get_on_status = #{getOnStatus}
+	    </if>
+	    <if test="getOffStatus != null and getOffStatus != ''">
+	    ,get_off_status = #{getOffStatus}
+	    </if>
+	    where id in(${ids})
+    </update>    
+    
+    <!-- 获取时间在某一个区间内，且在责任点的考勤记录Id集合 2016-09-02 -->
+    <select id="selectAtPointAttenadanceWatch" parameterType="Map"  resultType="int">
+	    select 
+	    a.id
+	    from attendanceforplans a
+	    join attendances b 
+	    on a.employeeId = b.employee_id
+	    and DATE_FORMAT(b.create_at,'%Y-%m-%d') = DATE_FORMAT(a.recorddate,'%Y-%m-%d')
+	    <!-- 获取时间在【上班前30分钟，当前时间】内，且在责任点的考勤记录Id集合 2016-08-31 -->
+	    <if test="flag == 1">
+	    and DATE_FORMAT(b.record_time,'%H:%i:%s') &lt;= DATE_FORMAT(#{compareDate},'%H:%i:%s') 
+	    and DATE_FORMAT(b.record_time,'%H:%i:%s') &gt;= DATE_FORMAT(DATE_SUB(CONCAT('1977-01-01 ',a.duty_on_time),INTERVAL #{at_point_time_for_sb} MINUTE),'%H:%i:%s')
+	    </if>
+	    <!-- 获取时间在【上班时间，下班时间】内，且在责任点的考勤记录Id集合 2016-09-02 -->
+	    <if test="flag == 2">
+	    and DATE_FORMAT(b.record_time,'%H:%i:%s') &gt;= DATE_FORMAT(a.duty_on_time,'%H:%i:%s') 
+	    and DATE_FORMAT(b.record_time,'%H:%i:%s') &lt;= DATE_FORMAT(a.duty_off_time,'%H:%i:%s')
+	    </if>
+	    and b.at_point = 1
+	    where a.id in (${ids})
+	    group by a.id having count(b.at_point) &gt; 0
+    </select>    
+    
+    <!-- 根据员工ID查询昨天或今天考勤记录，用于手机端的考勤记录 2016-12-12 -->
+    <select id="getYesAndTomAttendanceForWatch" parameterType="java.util.Map" resultType="java.util.Map">
+        select DISTINCT date_format(duty_on_time, '%H:%i:%s') planOnTime, date_format(duty_off_time, '%H:%i:%s') planOffTime, date_format(update_at,'%H:%i:%s') onTime,
+               date_format(lastrecordtime,'%H:%i:%s') offTime, get_on_status onStatus , get_on_status offStatus
+          from attendanceforplans t
+         where employeeId = #{employeeId}
+           and recorddate = #{attendanceDate}
+    </select>    
+    
+    <!-- 根据Ids获取人、上下班时间、日期唯一的考勤记录列表，2017-05-05 -->
+    <select id="getAttendanceForPlansListByIdsForWatch" parameterType="java.util.Map" resultMap="BaseResultMap">
+	select 
+		DISTINCT
+		employeeId,
+		duty_on_time,
+		duty_off_time,
+		recorddate 
+	from attendanceforplans 
+	where id in (${ids})
+	</select>
+	
+	<!-- 批量更新考勤记录中上下班时间内移动的距离，2017-05-05 -->
+	<update id="batchUpdateMobileDistanceByListForWatch" parameterType="java.util.List">
+	<foreach collection="list" item="plans" index="index" separator=";">
+	update attendanceforplans
+	set mobile_distance = #{plans.mobileDistance}
+	<where>
+		<if test="plans.employeeId != 0">
+		and employeeId = #{plans.employeeId}
+		</if>
+		<if test="plans.recordDate != null">
+		and recorddate = date_format(#{plans.recordDate}, '%Y-%m-%d')
+		</if>
+		<if test="plans.dutyOnTime != null">
+		and duty_on_time = date_format(#{plans.dutyOnTime}, '%H:%i:%s')
+		</if>
+		<if test="plans.dutyOffTime != null">
+		and duty_off_time = date_format(#{plans.dutyOffTime}, '%H:%i:%s')
+		</if>
+	</where>
+	</foreach>
+	</update>
+      
+</mapper>

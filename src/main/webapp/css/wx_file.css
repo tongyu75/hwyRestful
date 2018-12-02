@@ -1,0 +1,25 @@
+
+*{
+	padding:0;margin:0;
+	}
+body{
+	width:100%;
+	font-family:"微软雅黑","宋体";
+	font-size:12px;color:#333;
+	line-height:1.5em; 
+	margin:0px auto;
+	}
+
+/*<---------------top部分-------->*/
+.top{
+	width: 100%; 
+	height:69px;
+	}
+.top img{float:block;
+         width: 100%;
+         }
+
+
+
+
+

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.CoverWork">
+    <resultMap type="com.czz.hwy.bean.manager.CoverWork" id="base_result_map">
+        <id column="id" property="id"/>
+        <result column="leaveInfo_id" property="leaveInfoId" jdbcType="INTEGER"/>
+        <result column="leave_id" property="leaveId" jdbcType="INTEGER"/>
+        <result column="leave_name" property="leaveName" jdbcType="VARCHAR"/>
+        <result column="leave_role" property="leaveRole" jdbcType="INTEGER"/>
+        <result column="cover_from_time" property="coverFromTime" jdbcType="TIMESTAMP"/>
+        <result column="cover_to_time" property="coverToTime" jdbcType="TIMESTAMP"/>
+        <result column="duty_area_id" property="dutyAreaId" jdbcType="INTEGER"/>
+        <result column="duty_point_id" property="dutyPointId" jdbcType="INTEGER"/>
+        <result column="cover_id" property="coverId" jdbcType="INTEGER"/>
+        <result column="cover_role" property="coverRole" jdbcType="INTEGER"/>
+        <result column="cover_name" property="coverName" jdbcType="VARCHAR"/>
+        <result column="cover_status" property="coverStatus" jdbcType="INTEGER"/>
+        <result column="toTime" property="toTime" jdbcType="VARCHAR"/>
+        <result column="fromTime" property="fromTime" jdbcType="VARCHAR"/>
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+        <result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+        <result column="areaName" property="areaName" jdbcType="VARCHAR"/>
+        <result column="pointName" property="pointName" jdbcType="VARCHAR"/>
+    </resultMap>
+    
+    <sql id="base_column_list">
+        id,leaveInfo_id,leave_id,leave_name,leave_role,cover_from_time,cover_to_time,duty_area_id,
+        duty_point_id,cover_id,cover_role,cover_status,create_at,update_at
+    </sql> 
+    
+    <!--查看自己某一段时间内的代班记录总条数，2016-10-21-->
+    <select id="getCoverWorkCount" resultType="int" parameterType="coverWork">
+   	select count(1)
+	from coverwork t 
+	<where>
+		<if test="dutyAreaId !=0">
+		and t.duty_area_id = #{dutyAreaId}
+		</if>
+		<if test="dutyPointId != 0">
+		and t.duty_point_id = #{dutyPointId}
+		</if>
+		
+		<!-- 凡是代班开始时间到结束时间段之间被条件中的开始时间到结束时间包括的都应被查到 -->
+		<if test="coverFromTime != null and coverToTime != null">
+		and (	( DATE_FORMAT(t.cover_from_time, '%Y-%m-%d') &gt;= DATE_FORMAT(#{coverFromTime},'%Y-%m-%d')
+				  and  
+				  DATE_FORMAT(t.cover_from_time, '%Y-%m-%d') &lt;= DATE_FORMAT(#{coverToTime},'%Y-%m-%d')
+				 )
+				or 
+				(
+					DATE_FORMAT(t.cover_to_time, '%Y-%m-%d') &gt;= DATE_FORMAT(#{coverFromTime},'%Y-%m-%d')
+					and DATE_FORMAT(t.cover_to_time, '%Y-%m-%d') &lt;= DATE_FORMAT(#{coverToTime},'%Y-%m-%d')	
+				)
+		)
+		</if>
+		
+		<!-- 条件中只有开始时间的，视为从此时间以后所有 -->
+		<if test="coverFromTime != null and coverToTime == null">
+		and DATE_FORMAT(t.cover_from_time, '%Y-%m-%d') &gt;= DATE_FORMAT(#{coverFromTime},'%Y-%m-%d')
+		</if>
+		
+		<!-- 条件中只有结束时间的，视为从此时间之前所有 -->
+		<if test="coverToTime != null and coverFromTime == null">
+		and DATE_FORMAT(t.cover_to_time, '%Y-%m-%d') &lt;= DATE_FORMAT(#{coverToTime},'%Y-%m-%d')
+		</if>
+		
+		<if test="coverName != null and coverName != '' ">
+		and t.cover_name like concat('%', #{coverName}, '%') 
+		</if>
+		
+	</where>
+    </select>
+    
+    <!--查看自己某一段时间内的代班记录集合，2016-10-21，不分页 -->
+    <select id="getCoverWorkList" resultMap="base_result_map" parameterType="coverWork">
+   	select  
+   		t.id,t.leaveInfo_id,
+   		t.leave_id,t.leave_name,t.leave_role,
+   		t.cover_from_time,t.cover_to_time,
+   		t.duty_area_id,t1.area_name areaName,
+        t.duty_point_id,t2.point_name pointName,
+        t.cover_id,t.cover_name,t.cover_role,t.cover_status,
+        t.create_at,t.update_at
+	from coverwork t 
+	left join dutyarea t1 on t.duty_area_id = t1.id and t1.status = 1
+	left join dutypoint t2 on t.duty_point_id = t2.id and t2.status = 1
+	<where>
+		<if test="dutyAreaId !=0">
+		and t.duty_area_id = #{dutyAreaId}
+		</if>
+		<if test="dutyPointId != 0">
+		and t.duty_point_id = #{dutyPointId}
+		</if>
+		
+		<!-- 凡是代班开始时间到结束时间段之间被条件中的开始时间到结束时间包括的都应被查到 -->
+		<if test="coverFromTime != null and coverToTime != null">
+		and (	( DATE_FORMAT(t.cover_from_time, '%Y-%m-%d') &gt;= DATE_FORMAT(#{coverFromTime},'%Y-%m-%d')
+				  and  
+				  DATE_FORMAT(t.cover_from_time, '%Y-%m-%d') &lt;= DATE_FORMAT(#{coverToTime},'%Y-%m-%d')
+				 )
+				or 
+				(
+					DATE_FORMAT(t.cover_to_time, '%Y-%m-%d') &gt;= DATE_FORMAT(#{coverFromTime},'%Y-%m-%d')
+					and DATE_FORMAT(t.cover_to_time, '%Y-%m-%d') &lt;= DATE_FORMAT(#{coverToTime},'%Y-%m-%d')	
+				)
+		)
+		</if>
+		
+		<!-- 条件中只有开始时间的，视为从此时间以后所有 -->
+		<if test="coverFromTime != null and coverToTime == null">
+		and DATE_FORMAT(t.cover_from_time, '%Y-%m-%d') &gt;= DATE_FORMAT(#{coverFromTime},'%Y-%m-%d')
+		</if>
+		
+		<!-- 条件中只有结束时间的，视为从此时间之前所有 -->
+		<if test="coverToTime != null and coverFromTime == null">
+		and DATE_FORMAT(t.cover_to_time, '%Y-%m-%d') &lt;= DATE_FORMAT(#{coverToTime},'%Y-%m-%d')
+		</if>
+		
+		<if test="coverName != null and coverName != '' ">
+		and t.cover_name like concat('%', #{coverName}, '%') 
+		</if>
+	</where>
+	order by t.create_at desc
+	limit #{row},#{rows}
+    </select>
+    
+   
+    
+   
+</mapper>

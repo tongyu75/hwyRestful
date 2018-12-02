@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.app.CheckGramApp">
+    <resultMap id="BaseResultMap" type="com.czz.hwy.bean.mission.app.CheckGramApp">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="eval_Type" property="evalType" jdbcType="INTEGER" />
+		<result column="check_address" property="checkAddress" jdbcType="VARCHAR"/>
+        <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+        <result column="employee_name" property="employeeName" jdbcType="VARCHAR" />
+        <result column="check_time" property="checkTime" jdbcType="TIMESTAMP" />
+        <result column="check_lat" property="checkLat" jdbcType="DOUBLE" />
+        <result column="check_lng" property="checkLng" jdbcType="DOUBLE" />
+        <result column="check_value" property="checkValue" jdbcType="DOUBLE" />
+        <result column="publish_time" property="publishTime" jdbcType="TIMESTAMP" />
+        <result column="check_status" property="checkStatus" jdbcType="INTEGER" />       
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        id, eval_Type, employee_id, employee_name,check_address, check_time,
+        check_lat,
+        check_lng, check_value,
+        publish_time, check_status
+    </sql>
+   
+   <!-- 新增五克考核任务，并将新增数据的主键ID返回,2016-12-20 -->
+    <insert id="insertCheckGramByBeanApp" parameterType="com.czz.hwy.bean.mission.app.CheckGramApp">
+        <selectKey resultType="java.lang.Integer" order="AFTER"
+            keyProperty="id">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+        insert into checkgram (
+        	id, 
+        	eval_Type, 
+        	employee_id,
+        	employee_name,
+       		check_address,
+            check_time, 
+            check_lat,
+        	check_lng,
+        	check_value, 
+        	publish_time,
+        	check_status)
+        values(
+        	#{id,jdbcType=INTEGER},
+        	#{evalType,jdbcType=INTEGER},
+        	#{employeeId,jdbcType=INTEGER},
+        	#{employeeName,jdbcType=INTEGER},
+       		#{checkAddress,jdbcType=VARCHAR}, 
+       		#{checkTime,jdbcType=TIMESTAMP},
+	        #{checkLat,jdbcType=DOUBLE},
+	        #{checkLng,jdbcType=DOUBLE},
+	        #{checkValue,jdbcType=DOUBLE},
+	        #{publishTime,jdbcType=TIMESTAMP},
+	        #{checkStatus,jdbcType=INTEGER}
+	    )
+    </insert>
+
+	<!--  查询某个责任区某个时间段内的五克考核总条数，2016-12-22 -->
+	<select id="getCheckGramCountByMapApp" parameterType="java.util.Map" resultType="int">
+	select count(1)
+		from checkgram a 
+		join check_duty b on a.id = b.check_id
+		join users c on a.employee_id = c.employee_id and c.status = 1
+		join users d on b.employee_id = d.employee_id and d.status = 1
+		join dutyarea e on e.id = b.area_id and e.status = 1
+		join dutypoint f on f.id = b.POINT_ID and f.status = 1
+		where a.eval_type = 1
+		and b.eval_type = 1
+		<if test="areaId != null and areaId !=''">
+		and b.AREA_ID = #{areaId}
+		</if>
+		<if test="beginDate != null and beginDate != ''">
+		and DATE_FORMAT(a.check_time,'%Y-%m-%d') &gt;= #{beginDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+		and DATE_FORMAT(a.check_time,'%Y-%m-%d') &lt;= #{endDate}
+		</if>
+		order by a.check_time desc
+	</select>
+	
+	<!--  查询某个责任区某个时间段内的五克考核总条数，2016-12-22 -->
+	<select id="getCheckGramListByMapApp" parameterType="java.util.Map" resultType="com.czz.hwy.bean.mission.app.CheckGramForSelectApp">
+	select b.AREA_ID areaId,e.area_name areaName,
+				b.POINT_ID pointId,f.point_name pointName,
+				a.employee_id submitEmployeeId,ifnull(a.employee_name,c.showname) submitEmployeeName,
+				b.employee_id dutyEmployeeId,ifnull(b.employee_name,d.showname) dutyEmployeeName,
+				a.check_address checkAddress,a.check_lat checkLat,a.check_lng checkLng,
+				a.check_value checkValue,if(a.check_status=1,'合格','不合格') checkStatus,
+				a.check_time checkTime,
+				b.fines
+		from checkgram a 
+		join check_duty b on a.id = b.check_id
+		join users c on a.employee_id = c.employee_id and c.status = 1
+		join users d on b.employee_id = d.employee_id and d.status = 1
+		join dutyarea e on e.id = b.area_id and e.status = 1
+		join dutypoint f on f.id = b.POINT_ID and f.status = 1
+		where a.eval_type = 1
+		and b.eval_type = 1
+		<if test="areaId != null and areaId !=''">
+		and b.AREA_ID = #{areaId}
+		</if>
+		<if test="beginDate != null and beginDate != ''">
+		and DATE_FORMAT(a.check_time,'%Y-%m-%d') &gt;= #{beginDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+		and DATE_FORMAT(a.check_time,'%Y-%m-%d') &lt;= #{endDate}
+		</if>
+		order by a.check_time desc
+	</select>
+	
+</mapper>

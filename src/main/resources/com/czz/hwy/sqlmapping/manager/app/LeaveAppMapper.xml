@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.LeaveApp" >
+  <resultMap id="BaseResultMap" type="leaveApp" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="apply_id" property="applyId" jdbcType="INTEGER" />
+    <result column="apply_name" property="applyName" jdbcType="VARCHAR" />
+    <result column="leave_content" property="leaveContent" jdbcType="VARCHAR" />
+    <result column="leave_number" property="leaveNumber" jdbcType="INTEGER" />
+    <result column="leave_from_time" property="leaveFromTime" jdbcType="TIMESTAMP" />
+    <result column="leave_to_time" property="leaveToTime" jdbcType="TIMESTAMP" />
+    <result column="leave_appl_time" property="leaveApplTime" jdbcType="TIMESTAMP" />
+    <result column="leave_appr_id" property="leaveApprId" jdbcType="INTEGER" />
+    <result column="leave_appr_name" property="leaveApprName" jdbcType="VARCHAR" />
+    <result column="leave_appr_content" property="leaveApprContent" jdbcType="VARCHAR" />
+    <result column="apply_role" property="applyRole" jdbcType="INTEGER" />
+    <result column="appr_role" property="apprRole" jdbcType="INTEGER" />
+    <result column="appr_content" property="apprContent" jdbcType="VARCHAR" />
+    <result column="appr_time" property="apprTime" jdbcType="TIMESTAMP" />
+    <result column="appr_status" property="apprStatus" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="appl_time" property="applTime" jdbcType="VARCHAR" />
+    <result column="from_Time" property="fromTime" jdbcType="VARCHAR" />
+    <result column="to_Time" property="toTime" jdbcType="VARCHAR" />        
+    <result column="duty_area_id" property="dutyAreaId" jdbcType="INTEGER" />
+    <result column="duty_point_id" property="dutyPointId" jdbcType="INTEGER" />
+    <result column="appr_two_status" property="apprTwoStatus" jdbcType="INTEGER" />    
+    <result column="appr_three_status" property="apprThreeStatus" jdbcType="INTEGER" />    
+    <result column="appr_four_status" property="apprFourStatus" jdbcType="INTEGER" />  
+    <result column="relay_id" property="relayId" jdbcType="INTEGER" />
+    <result column="relayName" property="relayName" jdbcType="VARCHAR" /> 
+    <result column="timeForSelect" property="timeForSelect" jdbcType="TIMESTAMP" /> 
+     
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, apply_id, apply_name, leave_content, leave_number, leave_from_time, leave_to_time, leave_appl_time,
+    leave_appr_id, leave_appr_name, leave_appr_content, apply_role, appr_role, appr_content, appr_time, appr_status,
+    create_at, update_at, duty_area_id, duty_point_id, appr_two_status, appr_three_status, appr_four_status,relay_id
+  </sql>
+  
+  <!-- 获取某个人包含某个时间的请假记录，2016-11-08 -->
+  <select id="getLeaveListByBeanApp" parameterType="leaveApp" resultMap="BaseResultMap">
+	  select * 
+	  from leaveinfo t 
+	  <where> 
+	  t.appr_status = 1
+	  <if test="applyId != 0">
+	  and t.apply_id = #{applyId}
+	  </if>
+	  <if test="timeForSelect != null">
+	  and t.leave_from_time &lt;= #{timeForSelect}
+	  and t.leave_to_time &gt;= #{timeForSelect}
+	  </if>
+	  </where>
+  </select>
+  
+  <!-- 根据当日时间，查询请假人信息用于定时生成考勤状态,2016-11-28 -->
+  <select id="getLeaveForAttendanceApp" resultMap="BaseResultMap">
+   select leave_from_time,
+          leave_to_time,
+          apply_id
+     from leaveinfo
+    where DATE_FORMAT(NOW(), '%Y-%m-%d') &gt;= DATE_FORMAT(leave_from_time, '%Y-%m-%d')
+      and DATE_FORMAT(NOW(), '%Y-%m-%d') &lt;= DATE_FORMAT(leave_to_time, '%Y-%m-%d')
+      and appr_status = 1     
+  </select>          
+  
+  <!-- 依据员工ID以及明日日期，查询出明日请假记录。2016-12-09 -->
+    <select id="getLeaveListByMapApp" parameterType="java.util.Map" resultMap="BaseResultMap">
+	  select * 
+	  from leaveinfo t 
+	  <where> 
+	  t.appr_status = 1
+	  <if test="employeeId != 0">
+	  and t.apply_id = #{employeeId}
+	  </if>
+	  <if test="tomorrowDate != null">
+	  and DATE_FORMAT(t.leave_from_time,'%Y-%m-%d') &lt;= DATE_FORMAT(#{tomorrowDate},'%Y-%m-%d')
+	  and DATE_FORMAT(t.leave_to_time,'%Y-%m-%d') &gt;= DATE_FORMAT(#{tomorrowDate},'%Y-%m-%d')
+	  </if>
+	  </where>
+  </select>
+  
+   <!-- 根据时间和请假人ID获取请假记录中的代班人集合，2016-12-14 -->
+    <select id="getCoverWorkDutyPeopleListByMapApp" parameterType="java.util.Map" resultType="java.util.Map">
+    select DISTINCT t1.cover_id employeeId, t1.cover_name employeeName 
+	from leaveinfo t
+	join coverwork t1 on t.id = t1.leaveinfo_id 
+	<where>
+		<if test="employeeId != 0">
+		and t.apply_id = #{employeeId}
+		</if>
+		<if test="curDate != null">
+		and leave_from_time &lt;= #{curDate}
+		and leave_to_time &gt;= #{curDate}
+		</if>
+	</where>
+    </select>
+  
+</mapper>

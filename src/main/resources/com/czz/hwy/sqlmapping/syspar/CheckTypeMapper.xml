@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.syspar.CheckType">
+	<resultMap id="CheckTypeResultMap" type="com.czz.hwy.bean.syspar.CheckType">
+		<id property="id" column="id" jdbcType="INTEGER" />
+		<result property="evalValue" column="eval_value" jdbcType="INTEGER" />
+		<result property="evalName" column="eval_name" jdbcType="VARCHAR" />
+		<result property="remark" column="remark" jdbcType="VARCHAR" />
+		<result property="createAt" column="create_at" jdbcType="TIMESTAMP" />
+		<result property="updateAt" column="update_at" jdbcType="TIMESTAMP" />
+		<result property="role1" column="role1" jdbcType="INTEGER" />
+		<result property="role2" column="role2" jdbcType="INTEGER" />
+		<result property="role3" column="role3" jdbcType="INTEGER" />
+		<result property="role4" column="role4" jdbcType="INTEGER" />
+		<result property="ishwg" column="ishwg" jdbcType="INTEGER" />
+		<result property="isjcy" column="isjcy" jdbcType="INTEGER" />
+		<result property="iskhy" column="iskhy" jdbcType="INTEGER" />
+	</resultMap>
+
+
+	<select id="getallchecktype" resultMap="CheckTypeResultMap" parameterType="com.czz.hwy.bean.syspar.CheckType">
+
+		select * from evaltype 
+		<where>
+			<if test="evalValue != null and evalValue != ''">
+				and eval_value = #{evalValue}
+			</if>
+			<if test="evalName != null and evalName != ''">
+				and eval_name like concat('%',#{evalName},'%')
+			</if>
+		</where>
+		  ORDER BY id    
+		  limit #{row},#{rows}
+	</select>
+
+
+	<select id="getCheckTypeCount" resultType="java.lang.Integer" parameterType="com.czz.hwy.bean.syspar.CheckType">
+
+		select count(id)  from evaltype
+		<where>
+			<if test="evalValue!=null  and  evalValue!=''">
+				and eval_value = #{evalValue}
+			</if>
+			<if test="evalName != null and evalName != ''">
+				and eval_name like concat('%',#{evalName},'%')
+			</if>
+		</where>
+
+	</select>
+	
+	
+	<select id="getByBean"  resultMap="CheckTypeResultMap"  parameterType="com.czz.hwy.bean.syspar.CheckType">
+	
+	select   *   from  evaltype
+	<where>
+		<if test="evalValue!=null  and  evalValue!=''">
+			and eval_value=#{evalValue}
+		</if>
+		<if test="evalName!=null  and evalName!=''">
+			and eval_name =#{evalName}
+		</if>
+	</where>
+	ORDER BY id    
+	limit #{row},#{rows}
+	</select>
+	
+	<insert id="insertCheckType"  parameterType="com.czz.hwy.bean.syspar.CheckType">
+	
+	insert   into    evaltype  (id,eval_value,eval_name,remark,create_at,update_at,role1,role2,role3,role4,ishwg,isjcy,iskhy) values  
+	
+	(#{id},#{evalValue},#{evalName},#{remark},#{createAt},#{updateAt},#{role1},#{role2},#{role3},#{role4},#{ishwg},#{isjcy},#{iskhy})
+	
+	</insert>
+	
+	
+	<update id="updateCheckType"  parameterType="com.czz.hwy.bean.syspar.CheckType">
+	
+	update  evaltype  set  eval_value=#{evalValue},eval_name=#{evalName},update_at=#{updateAt}  where id=#{id}
+	
+	</update>
+	
+	
+	
+	<delete id="deleteCheckType" parameterType="com.czz.hwy.bean.syspar.CheckType">
+	
+	delete   from  evaltype   where  id=#{id}
+	
+	</delete>
+	
+	
+	<select id="getCheckType4Combox"  resultType="java.util.Map">
+	select eval_value id,eval_name from evaltype
+	</select>
+	
+
+
+</mapper>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.area.DutyPoint">
+    <resultMap id="BaseResultMap" type="com.czz.hwy.bean.area.DutyPoint">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="area_id" property="areaId" jdbcType="INTEGER" />
+        <result column="point_name" property="pointName" jdbcType="VARCHAR" />
+        <result column="from_address" property="fromAddress" jdbcType="VARCHAR" />
+        <result column="to_address" property="toAddress" jdbcType="VARCHAR" />
+        <result column="from_lat" property="fromLat" jdbcType="DOUBLE" />
+        <result column="from_lng" property="fromLng" jdbcType="DOUBLE" />
+        <result column="to_lat" property="toLat" jdbcType="DOUBLE" />
+        <result column="to_lng" property="toLng" jdbcType="DOUBLE" />
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+        <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+        <result column="create_id" property="createId" jdbcType="INTEGER" />
+        <result column="update_id" property="updateId" jdbcType="INTEGER" />
+        <result column="status" property="status" jdbcType="INTEGER" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, area_id, point_name, from_address, to_address, from_lat, from_lng,
+        to_lat, to_lng,
+        create_at, update_at, create_id, update_id, status
+    </sql>
+    <resultMap id="dutyMap" type="com.czz.hwy.bean.area.DutyPoint">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="area_id" property="areaId" jdbcType="INTEGER" />
+        <result column="areaName" property="areaName" jdbcType="VARCHAR" />
+        <result column="point_name" property="pointName" jdbcType="VARCHAR" />
+        <result column="createName" property="createName" jdbcType="VARCHAR" />
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+        <result column="status" property="status" jdbcType="INTEGER" />
+        <result column="pointFilepath" property="pointFilepath" jdbcType="VARCHAR" />        
+    </resultMap>    
+    <select id="getAllDutyPoint" resultMap="dutyMap" parameterType="com.czz.hwy.bean.area.DutyPoint">
+        select B.id as areaId, A.id as id,C.point_filepath as pointFilepath,
+               B.area_name as areaName, A.point_name as pointName
+          from dutypoint A
+         inner join dutyarea B on A.area_id = B.id
+          left join borderpoint_file C on  A.id = C.point_id 
+           and B.id = C.area_id 
+           and C.approve_status = 1
+         where A.status = 1
+           <if test="areaId != 0">
+               and A.area_id = #{areaId,jdbcType=INTEGER}
+           </if>
+           <if test="pointName != '' and pointName != null">
+               and A.point_name like concat('%',#{pointName,jdbcType=VARCHAR},'%')
+           </if>
+           <if test="id !=0">
+               and A.id = #{id,jdbcType=INTEGER}
+           </if>
+           <if test="areaName !='' and areaName !=null">
+               and B.area_name like concat('%',#{areaName,jdbcType=VARCHAR},'%')
+           </if>
+         order by A.id desc
+         limit #{row},#{rows}
+    </select>
+    <select id="getAllDutyPointCount" resultType="java.lang.Integer" parameterType="com.czz.hwy.bean.area.DutyPoint">
+        select count(A.id)
+          from dutypoint A
+         inner join dutyarea B on A.area_id = B.id
+          left join borderpoint_file C on  A.id = C.point_id 
+           and B.id = C.area_id 
+           and C.approve_status = 1
+         where A.status = 1
+           <if test="areaId != 0">
+               and A.area_id = #{areaId,jdbcType=INTEGER}
+           </if>
+           <if test="pointName != '' and pointName != null">
+               and A.point_name like concat('%',#{pointName,jdbcType=VARCHAR},'%')
+           </if>
+           <if test="id !=0">
+               and A.id = #{id,jdbcType=INTEGER}
+           </if>
+           <if test="areaName !='' and areaName !=null">
+               and B.area_name like concat('%',#{areaName,jdbcType=VARCHAR},'%')
+           </if>
+    </select>    
+    <insert id="insertDutyPoint" parameterType="com.czz.hwy.bean.area.DutyPoint">
+        insert into 
+            dutypoint (id, area_id, point_name, from_address, to_address, from_lat,from_lng, to_lat, to_lng, 
+            create_at, update_at, create_id, update_id, status)
+        values 
+            (#{id,jdbcType=INTEGER}, #{areaId,jdbcType=INTEGER}, #{pointName,jdbcType=VARCHAR},#{fromAddress,jdbcType=VARCHAR},
+            #{toAddress,jdbcType=VARCHAR}, #{fromLat,jdbcType=DOUBLE},#{fromLng,jdbcType=DOUBLE}, #{toLat,jdbcType=DOUBLE},#{toLng,jdbcType=DOUBLE},
+            #{createAt,jdbcType=TIMESTAMP}, #{updateAt,jdbcType=TIMESTAMP}, #{createId,jdbcType=INTEGER},
+            #{updateId,jdbcType=INTEGER}, #{status,jdbcType=INTEGER})
+    </insert>
+    <select id="getDutyPointByBean" resultMap="BaseResultMap" parameterType="com.czz.hwy.bean.area.DutyPoint">
+        select <include refid="Base_Column_List" />
+          from dutypoint
+         where status=1
+           <if test="id != 0">
+           and id = #{id,jdbcType=INTEGER}
+           </if>         
+           <if test="areaId != 0">
+           and area_id = #{areaId,jdbcType=INTEGER}
+           </if>
+           <if test="pointName != null">
+           and point_name = #{pointName,jdbcType=VARCHAR}
+           </if>
+           <if test="fromAddress != null">
+           and from_address = #{fromAddress,jdbcType=VARCHAR}
+           </if>
+           <if test="toAddress != null">
+           and to_address = #{toAddress,jdbcType=VARCHAR}
+           </if>
+           <if test="fromLat != 0.0">
+           and from_lat = #{fromLat,jdbcType=DOUBLE}
+           </if>
+           <if test="fromLng != 0.0">
+           and from_lng = #{fromLng,jdbcType=DOUBLE}
+           </if>
+           <if test="toLat != 0.0">
+           and to_lat = #{toLat,jdbcType=DOUBLE}
+           </if>
+           <if test="toLng != 0.0">
+           and to_lng = #{toLng,jdbcType=DOUBLE}
+           </if>
+           <if test="createAt != null">
+           and create_at = #{createAt,jdbcType=TIMESTAMP}
+           </if>
+           <if test="updateAt != null">
+           and update_at = #{updateAt,jdbcType=TIMESTAMP}
+           </if>
+           <if test="createId != 0">
+           and create_id = #{createId,jdbcType=INTEGER}
+           </if>
+           <if test="updateId != 0">
+           and update_id = #{updateId,jdbcType=INTEGER}
+           </if>
+    </select>    
+    <update id="updateDutyPoint" parameterType="com.czz.hwy.bean.area.DutyPoint">
+        update dutypoint
+        <set>
+            <if test="areaId != 0">
+                area_id = #{areaId,jdbcType=INTEGER},
+            </if>
+            <if test="pointName != null">
+                point_name = #{pointName,jdbcType=VARCHAR},
+            </if>
+            <if test="fromAddress != null">
+                from_address = #{fromAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="toAddress != null">
+                to_address = #{toAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="fromLat != 0.0">
+                from_lat = #{fromLat,jdbcType=DOUBLE},
+            </if>
+            <if test="fromLng != 0.0">
+                from_lng = #{fromLng,jdbcType=DOUBLE},
+            </if>
+            <if test="toLat != 0.0">
+                to_lat = #{toLat,jdbcType=DOUBLE},
+            </if>
+            <if test="toLng != 0.0">
+                to_lng = #{toLng,jdbcType=DOUBLE},
+            </if>
+            <if test="createAt != null">
+                create_at = #{createAt,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateAt != null">
+                update_at = #{updateAt,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createId != 0">
+                create_id = #{createId,jdbcType=INTEGER},
+            </if>
+            <if test="updateId != 0">
+                update_id = #{updateId,jdbcType=INTEGER},
+            </if>
+            <if test="status != 0">
+                status = #{status,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <!-- 责任点模糊查询 -->
+    <select id="getDutyPointByLike" parameterType="java.lang.String" resultType="java.util.Map">
+        select id,point_name from dutypoint where status=1
+        <if test="_parameter!=null and _parameter!=''">
+            and point_name like concat(concat('%',#{_parameter}),'%')
+        </if>
+    </select>
+    
+   <select id="getDutyPointByStatus" resultType="java.util.Map" parameterType="java.lang.Integer">
+    select id from  dutypoint where  status = 1 and area_id = #{_parameter}
+  </select>
+</mapper>

@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.DutyForBanci">
+	<resultMap type="com.czz.hwy.bean.mission.DutyForBanci" id="base_result_map">
+		<id column="id" property="id"/>
+		<result column="duty_area_id" property="dutyAreaId"/>
+		<result column="duty_point_id" property="dutyPointId"/>
+		<result column="duty_type" property="dutyType"/>
+		<result column="duty_from_date" property="dutyFromDate"/>
+		<result column="duty_to_date" property="dutyToDate"/>
+		<result column="dutynumber" property="dutyNumber"/>
+		<result column="distributor_id" property="distributorId"/>
+		<result column="employee_id" property="employeeId"/>
+		<result column="create_at" property="createAt"/>
+		<result column="update_at" property="updateAt"/>
+		<result column="plate_num" property="plateNum"/>
+		<result column="roles_value" property="rolesValue"/>
+		<result column="status" property="status"/>
+		<result column="create_id" property="creatId"/>
+		<result column="update_id" property="updateId"/>
+		<result column="seq" property="seq"/>
+	</resultMap>
+	
+	<resultMap type="com.czz.hwy.bean.mission.DutyForBanci" id="get_list_map">
+		<id column="id" property="id"/>
+		<result column="duty_area_id" property="dutyAreaId"/>
+		<result column="duty_point_id" property="dutyPointId"/>
+		<result column="duty_type" property="dutyType"/>
+		<result column="duty_from_date" property="dutyFromDate"/>
+		<result column="duty_to_date" property="dutyToDate"/>
+		<result column="dutynumber" property="dutyNumber"/>
+		<result column="distributor_id" property="distributorId"/>
+		<result column="employee_id" property="employeeId"/>
+		<result column="create_at" property="createAt"/>
+		<result column="update_at" property="updateAt"/>
+		<result column="plate_num" property="plateNum"/>
+		<result column="roles_value" property="rolesValue"/>
+		<result column="status" property="status"/>
+		<result column="create_id" property="creatId"/>
+		<result column="update_id" property="updateId"/>
+		<result column="showname" property="showname"/>
+		<result column="distributorName" property="distributorName"/>
+		<result column="dutyTypename" property="dutyTypename"/>
+		<result column="dutyAreaName" property="dutyAreaName"/>
+		<result column="dutyPointName" property="dutyPointName"/>
+		<result column="seq" property="seq"/>
+	</resultMap>
+	
+	<sql id="base_column_list">
+		id,duty_area_id,duty_point_id,duty_type,duty_from_date,duty_to_date,dutynumber,distributor_id,
+		employee_id,create_at,update_at,plate_num,roles_value,status,create_id,update_id,seq
+	</sql>
+	
+	<insert id="insertDuty" parameterType="dutyForBanci">
+		insert into dutyforbanci
+		(duty_area_id,duty_point_id,duty_type,duty_from_date,duty_to_date,dutynumber,distributor_id,employee_id,create_at,plate_num,roles_value,create_id,seq)
+		values(#{dutyAreaId},#{dutyPointId},#{dutyType},#{dutyFromDate},#{dutyToDate},#{dutyNumber},#{distributorId},#{employeeId},
+			#{createAt},#{plateNum},#{rolesValue},#{creatId},#{seq})
+	</insert>
+	
+	<select id="getDutyByBean" parameterType="dutyForBanci" resultMap="base_result_map">
+		select <include refid="base_column_list" /> from dutyforbanci
+			<where>
+				<if test="dutyAreaId != null and dutyAreaId != 0">
+					and duty_area_id = #{dutyAreaId}
+				</if>
+				<if test="dutyPointId != null and dutyPointId!= 0">
+					and duty_point_id =#{dutyPointId}
+				</if>
+				<if test="dutyNumber != null and dutyNumber !=0 ">
+					and dutynumber = #{dutyNumber}
+				</if>
+				<if test="employeeId != null and employeeId != 0">
+					and employee_id = #{employeeId}
+				</if>
+				and status = 1
+			</where>
+	</select>
+	
+	<select id="getDutyListByBean" parameterType="dutyForBanci" resultMap="get_list_map">
+		select t.*,u.showname as showname,u2.showname as distributorName
+  		,w.work_name as dutyTypename ,da.area_name as dutyAreaName,
+			dp.point_name as dutyPointName from (
+	    select <include refid="base_column_list" />
+	    	from dutyforbanci where status=1
+	     	<if test="dutyAreaId != null and dutyAreaId != 0">
+				and duty_area_id = #{dutyAreaId}
+			</if>
+			<if test="dutyPointId != null and dutyPointId!= 0">
+				and duty_point_id =#{dutyPointId}
+			</if>
+			<if test="dutyType != null and dutyType != 0">
+				and duty_type = #{dutyType}
+			</if>
+			<if test="dutyNumber != null and dutyNumber !=0 ">
+				and dutynumber = #{dutyNumber}
+			</if>
+			<if test="employeeId != null and employeeId != 0">
+				and employee_id = #{employeeId}
+			</if>
+			<if test="rolesValue != null and rolesValue!= 0">
+				and roles_value = #{rolesValue}
+			</if>
+	     <!-- 按照出勤时间倒序 -->
+	    order by duty_from_date desc limit #{row},#{rows}
+	     )t left outer join users u on t.employee_id=u.employee_id and u.status =1
+	     	left outer join worktypes w on t.duty_type=w.work_type
+	     	left outer join users u2 on t.distributor_id=u2.employee_id 
+	     	left outer join dutyarea da on t.duty_area_id=da.id
+	     	left outer join dutypoint dp on t.duty_point_id=dp.id
+	</select>
+	
+	<select id="getDutyCountByBean" parameterType="dutyForBanci" resultType="int">
+		select count(duty_area_id) from dutyforbanci
+			<where>
+				<if test="dutyAreaId != null and dutyAreaId != 0">
+					and duty_area_id = #{dutyAreaId}
+				</if>
+				<if test="dutyPointId != null and dutyPointId!= 0">
+					and duty_point_id =#{dutyPointId}
+				</if>
+				<if test="dutyType != null and dutyType != 0">
+					and duty_type = #{dutyType}
+				</if>
+				<if test="dutyNumber != null and dutyNumber !=0 ">
+					and dutynumber = #{dutyNumber}
+				</if>
+				<if test="employeeId != null and employeeId != 0">
+					and employee_id = #{employeeId}
+				</if>
+				<if test="rolesValue != null and rolesValue!= 0">
+					and roles_value = #{rolesValue}
+				</if>
+					and status = 1
+			</where>
+	</select>
+	
+	<!-- 修改排班计划 -->
+	<update id="updateDutyByBean" parameterType="dutyForBanci" >
+  	update dutyforbanci set distributor_id=#{distributorId}, duty_point_id=#{dutyPointId}, duty_area_id=#{dutyAreaId}, 
+      duty_type=#{dutyType}, duty_from_date=#{dutyFromDate}, duty_to_date=#{dutyToDate}, employee_id=#{employeeId}, 
+      update_at=#{updateAt}, plate_num=#{plateNum},roles_value=#{rolesValue},update_id=#{updateId},dutynumber = #{dutyNumber}
+      where seq=#{seq}
+  </update>
+  <!-- 删除排班计划 -->
+  <update id="deleteDutyByBean" parameterType="dutyForBanci" >
+  	update dutyforbanci set status=2,update_at=#{updateAt},update_id=#{updateId} where seq=#{seq}
+  </update>
+  
+  <!-- 根据条件获取排班计划表的列表信息 -->
+  <select id="getDutyForBanciList" parameterType="dutyForBanci" resultMap="base_result_map">
+  	select <include refid="base_column_list" /> from dutyforbanci 
+  		<where>
+		  	<if test="dutyAreaId != null and dutyAreaId != 0">
+			and duty_area_id = #{dutyAreaId}
+			</if>
+			<if test="dutyPointId != null and dutyPointId!= 0">
+				and duty_point_id =#{dutyPointId}
+			</if>
+			<if test="dutyType != null and dutyType != 0">
+				and duty_type = #{dutyType}
+			</if>
+			<if test="dutyNumber != null and dutyNumber !=0 ">
+				and dutynumber = #{dutyNumber}
+			</if>
+			<if test="employeeId != null and employeeId != 0">
+				and employee_id = #{employeeId}
+			</if>
+			<if test="rolesValue != null and rolesValue!= 0">
+				and roles_value = #{rolesValue}
+			</if>
+			and status = 1
+		</where>
+	</select>
+	
+	<!-- 批量进行更新 -->
+	<update id="beatchUpdateForDuty" parameterType="java.util.List">
+		<foreach collection="list" item="duty" index="index" open="" close="" separator=";">
+			update dutyforbanci
+				<set>
+                  dutynumber = ${duty.dutyNumber}
+                </set>
+                where id = ${duty.id}
+		</foreach>
+	</update>
+	
+	<!-- 根据seq获取排班计划 -->	
+	<select id="getDutyPlansBySeq" parameterType="com.czz.hwy.bean.mission.DutyPlans" resultType="com.czz.hwy.bean.mission.DutyPlans">
+	select  <include refid="dutyplans_list"/>  from dutyplans 	
+	where seq = #{seq} 
+	and status = 1 
+	and date_format(duty_from_date,'%Y-%m-%d') &lt;= date_format(now(),'%Y-%m_%d')
+	and date_format(duty_to_date,'%Y-%m-%d') &gt;= date_format(now(),'%Y-%m-%d')
+	</select>
+	
+	<resultMap type="com.czz.hwy.bean.user.AttendanceForPlans" id="get_attendanceforplans">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="employeeId" property="employeeId" jdbcType="INTEGER"/>
+		<result column="duty_area" property="dutyAreaId" jdbcType="INTEGER"/>
+		<result column="duty_point" property="dutyPointId" jdbcType="INTEGER"/>
+		<result column="lastrecordtime" property="lastRecordTime" jdbcType="TIMESTAMP"/>
+		<result column="duty_on_time" property="dutyOnTime" jdbcType="TIMESTAMP"/>
+		<result column="duty_off_time" property="dutyOffTime" jdbcType="TIMESTAMP"/>
+		<result column="get_on_status" property="getOnStatus" jdbcType="VARCHAR"/>
+		<result column="get_off_status" property="getOffStatus" jdbcType="VARCHAR"/>
+		<result column="create_at" property="updateAt" jdbcType="TIMESTAMP"/>
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+		<result column="recorddate" property="recordDate" jdbcType="TIMESTAMP"/>
+		<result column="lat"  property="lat" jdbcType="DOUBLE"/>
+		<result column="lng"  property="lng" jdbcType="DOUBLE"/>
+	</resultMap>
+	<sql id="attendanceforplans_list">
+		id,employeeId,duty_area dutyAreaId,duty_point dutyPointId,lastrecordtime lastRecordTime,duty_on_time dutyOnTime,duty_off_time dutyOffTime,
+		get_on_status getOnStatus,get_off_status getOffStatus,create_at createAt,update_at updateAt,recorddate recordDate
+	</sql>
+	
+	<!-- 根据员工ID,责任区ID，责任点ID和日期查询出员工的考勤记录 -->
+	<select id="getAttendanceForPlansByBean" parameterType="com.czz.hwy.bean.mission.DutyPlans" resultType="com.czz.hwy.bean.user.AttendanceForPlans">
+	select <include refid="attendanceforplans_list"/> from attendanceforplans 
+	where employeeId = #{employeeId}
+	and duty_area = #{dutyAreaId}
+	and duty_point = #{dutyPointId}
+	and date_format(recorddate,'%Y-%m_%d') = date_format(now(),'%Y-%m_%d')
+	</select>
+	
+	<sql id="dutyplans_list">
+		id id,duty_area_id dutyAreaId,duty_point_id dutyPointId,duty_from_date dutyFromDate,duty_to_date dutyToDate,
+		duty_on_time dutyOnTime,duty_off_time dutyOffTime,employee_id as employeeId,create_at createAt,update_at updateAt,seq,status
+	</sql>
+	<!-- 若考勤记录不为空，根据员工ID,责任区ID,责任点ID和当前日期查询出环卫工的排班计划列表 -->
+	<select id="getDutyPlansListByBean" parameterType="com.czz.hwy.bean.user.AttendanceForPlans" resultType="com.czz.hwy.bean.mission.DutyPlans">
+	select  <include refid="dutyplans_list"/> from dutyplans t
+	where t.status = 1
+	and date_format(duty_from_date,'%Y-%m-%d') &lt;= date_format(now(),'%Y-%m_%d')
+	and date_format(duty_to_date,'%Y-%m-%d') &gt;= date_format(now(),'%Y-%m-%d')
+	and t.employee_id = #{employeeId}
+	and duty_area_id = #{dutyAreaId}
+	and duty_point_id = #{dutyPointId}
+	</select>
+	
+	<!--  根据员工ID，当前日期，责任点ID，责任区ID，删除考勤记录 -->
+	<delete id="deleteAttendanceByBean" parameterType="com.czz.hwy.bean.user.AttendanceForPlans">
+	delete from attendanceforplans
+	where employeeId = #{employeeId}
+	and duty_area = #{dutyAreaId}
+	and duty_point = #{dutyPointId}
+	and date_format(recorddate,'%Y-%m_%d') = date_format(now(),'%Y-%m_%d')
+	</delete>
+	
+	<!--更新那条不一致的考勤记录 -->
+	<update id="updateAttendanceForPlansByBean" parameterType="com.czz.hwy.bean.user.AttendanceForPlans">
+	update attendanceforplans 
+	set duty_on_time = date_format(#{dutyOnTime},'%H:%i:%s'),
+	duty_off_time = date_format(#{dutyOffTime},'%H:%i:%s'),
+	<if test="createAt != null">
+	create_at = #{createAt},
+	</if>
+	<if test="updateAt != null">
+	update_at = #{updateAt},
+	</if>
+	lastrecordtime = #{lastRecordTime},
+	get_on_status = #{getOnStatus},
+	get_off_status = #{getOffStatus}
+	where id = #{id}
+	</update>
+	
+	<!-- 根据bean删除多余的考勤记录 -->
+	<delete id="deleteAttendanceForPlansByBean" parameterType="com.czz.hwy.bean.user.AttendanceForPlans">
+	delete from attendanceforplans
+	where duty_on_time = date_format(#{dutyOnTime},'%H:%i:%s')
+	and duty_off_time = date_format(#{dutyOffTime},'%H:%i:%s')
+	and duty_area = #{dutyAreaId}
+	and duty_point = #{dutyPointId}
+	and employeeId = #{employeeId}
+	and date_format(recorddate,'%Y-%m-%d') = date_format(#{recordDate},'%Y-%m-%d')
+	and id != #{id}
+	</delete>
+	
+	<!-- 根据班次获取排班计划信息，2016-09-28 -->
+	<select id="getDutyForBanciListByNumber" parameterType="String" resultMap="base_result_map">
+	select * from dutyforbanci where dutynumber = #{dutynumber} and status = 1
+	</select>
+	
+	 <!-- 批量进行删除，即批量更新状态 为 2 ,2016-09-28，又改成：即批量物理删除排版计划，2016-10-28-->
+	 <update id="beatchDeleteForDutyForBanci" parameterType="java.util.List">
+		<foreach collection="list" item="duty" index="index" separator=";">
+			delete from dutyforbanci where id = #{duty.id}
+		</foreach>
+	 </update>
+	 <!-- <update id="beatchDeleteForDutyForBanci" parameterType="java.util.List">
+		<foreach collection="list" item="duty" index="index" separator=";">
+			update dutyforbanci set status = #{duty.status},update_at=#{duty.updateAt},update_id=#{duty.updateId}
+	     		where id = #{duty.id}
+		</foreach>
+	 </update> -->
+		
+</mapper>

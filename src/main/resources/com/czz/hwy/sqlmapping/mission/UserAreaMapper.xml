@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.UserArea">
+	<resultMap type="userArea" id="base_result_map">
+		<id column="id" property="id"/>
+		<result column="employee_id" property="employeeId" jdbcType="INTEGER"/>
+		<result column="showname" property="employeeName" jdbcType="VARCHAR"/>
+		<result column="roleId" property="roleId" jdbcType="INTEGER"/>
+		<result column="roleName" property="roleName" jdbcType="VARCHAR"/>
+		<result column="area_id" property="areaId" jdbcType="INTEGER"/>
+		<result column="area_name" property="areaName" jdbcType="VARCHAR"/>
+		<result column="status" property="status" jdbcType="INTEGER"/>
+		<result column="create_id" property="createId" jdbcType="INTEGER"/>
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+		<result column="update_id" property="updateId" jdbcType="INTEGER"/>
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+	</resultMap>
+	
+	<!-- 表字段和视图字段 -->
+	<sql id="select_column_list">
+		id,employee_id,showname,area_id,area_name,status,create_id,create_at,update_id,update_at
+	</sql> 
+	
+	<!-- 只有表字段的 -->
+	<sql id="base_column_list">
+		id,employee_id,area_id,create_id,create_at,update_id,update_at
+	</sql> 
+	
+	<!-- 根据员工Id获取绑定关系记录。2016-09-29 -->
+	<select id="getUserAreaByEmployeeId" parameterType="userArea" resultMap="base_result_map">
+	select * from user_area where employee_id  = #{employeeId}
+	</select>
+	
+	<!--  新增一条员工归属责任区记录,2016-09-29 -->
+	<insert id="insertUserAreaByBean" parameterType="userArea">
+	insert into user_area(employee_id,area_id,create_id,create_at)
+	values(#{employeeId},#{areaId},#{createId},#{createAt})
+	</insert>
+	
+	<!--  根据ID获取员工归属责任区关系信息，2016-09-29 -->
+	<select id="getUserAreaById" parameterType="String" resultMap="base_result_map">
+	select * from user_area where id = #{id}
+	</select>
+	
+	<!-- 对一条关系记录解除绑定，2016-09-29 -->
+	<delete id="deleteUserAreaById" parameterType="String">
+	delete from user_area where id = #{id}
+	</delete>
+	
+	<!-- 查询员工归属责任区记录总条数，2016-09-29 
+		2016-11-10 : 只查询环卫工
+	-->
+	<select id="getUserAreaCount" parameterType="userArea" resultType="int">
+	select count(1) from users t
+	left join user_area t1 on t.employee_id = t1.employee_id  <if test="areaId != 0"> and t1.area_id = #{areaId}</if>
+	left join dutyarea t2 on t1.area_id = t2.id and t2.status = 1
+	left join roles t3 on t3.value = t.role_id and t3.status = 1
+	 <where>
+	 	t.status = 1 and t.role_id = 1
+	 	<if test="areaId != 0">
+	          and not exists(select 1 from user_area a where a.area_id != #{areaId} and t.employee_id = a.employee_id)
+	    </if>
+	    <if test="employeeId != 0">
+	          and t.employee_id = #{employeeId}
+	    </if>
+	    <if test="employeeName != null and employeeName != ''">
+	          and t.showname like concat('%', #{employeeName}, '%')
+	    </if>
+	    <if test="areaName != null and areaName != ''">
+	          and t2.area_name like concat('%', #{areaName}, '%')
+	    </if>
+	 </where>
+	</select>
+	
+	<!-- 查询员工归属责任区记录集合，2016-09-29，分页,
+		2016-11-10 : 只查询环卫工
+	 -->
+	<select id="getUserAreaList" parameterType="userArea" resultMap="base_result_map">
+		select t1.id, if(t1.id is null,2,1) status,
+			t1.area_id, t2.area_name, 
+			t.employee_id, t.showname, 
+			t.role_id roleId,t3.name roleName, 
+			t1.create_at,t1.create_id
+	 	from users t
+		left join user_area t1 on t.employee_id = t1.employee_id <if test="areaId != 0"> and t1.area_id = #{areaId}</if>
+		left join dutyarea t2 on t1.area_id = t2.id and t2.status = 1
+		left join roles t3 on t3.value = t.role_id and t3.status = 1
+		<where>
+			t.status = 1 and t.role_id = 1
+		 	<if test="areaId != 0">
+		          and not exists(select 1 from user_area a where a.area_id != #{areaId} and t.employee_id = a.employee_id)
+		    </if>
+		    <if test="employeeId != 0">
+		          and t.employee_id = #{employeeId}
+		    </if>
+		    <if test="employeeName != null and employeeName != ''">
+		          and t.showname like concat('%', #{employeeName}, '%')
+		    </if>
+		    <if test="areaName != null and areaName != ''">
+		          and t2.area_name like concat('%', #{areaName}, '%')
+		    </if>
+		 </where>
+		limit #{row},#{rows}
+	</select>
+	
+	<!-- 查询员工归属责任区记录集合，2016-09-29，不分页
+		2016-11-10 : 只查询环卫工
+	 -->
+	<select id="getAllUserAreaListByBean"  parameterType="userArea" resultMap="base_result_map">
+	select t1.id, if(t1.id is null,2,1) status,
+			t1.area_id, t2.area_name, 
+			t.employee_id, t.showname, 
+			t.role_id roleId,t3.name roleName, 
+			t1.create_at,t1.create_id
+	 	from users t
+		join user_area t1 on t.employee_id = t1.employee_id 
+		left join dutyarea t2 on t1.area_id = t2.id and t2.status = 1
+		left join roles t3 on t3.value = t.role_id and t3.status = 1
+		<where>
+			t.status = 1 and t.role_id = 1
+		 	<if test="areaId != 0">
+		          and t1.area_id = #{areaId}
+		          and not exists(select 1 from user_area a where a.area_id != #{areaId} and t.employee_id = a.employee_id)
+		    </if>
+		    <if test="employeeId != 0">
+		          and t.employee_id = #{employeeId}
+		    </if>
+		    <if test="employeeName != null and employeeName != ''">
+		          and t.showname like concat('%', #{employeeName}, '%')
+		    </if>
+		    <if test="areaName != null and areaName != ''">
+		          and t2.area_name like concat('%', #{areaName}, '%')
+		    </if>
+		 </where>
+	</select>
+	
+	<!-- 根据责任区ID获取员工归属责任区关系信息，2016-10-17 -->
+    <select id="getUserAreaByAreaId" parameterType="userArea" resultMap="base_result_map">
+        select * from user_area where area_id  = #{areaId}
+    </select>
+</mapper>

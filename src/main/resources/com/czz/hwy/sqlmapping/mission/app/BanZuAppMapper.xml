@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.App.BanZu">
+    <resultMap type="com.czz.hwy.bean.mission.BanZu" id="base_result_map">
+        <id column="banzu_id" property="banzuId"/>
+        <result column="banzu_name" property="banzuName" jdbcType="VARCHAR"/>
+        <result column="create_userid" property="createUserId" jdbcType="INTEGER"/>
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+        <result column="update_userid" property="updateUserId" jdbcType="INTEGER"/>
+        <result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    
+    <sql id="base_column_list">
+        banzu_id,banzu_name,create_userid,create_at,update_userid,update_at
+    </sql> 
+    
+    <!-- 查询所有被班次绑定的班组记录集合，2016-10-17，不分页 -->
+    <select id="selectBanZuForBanciCountByBeanApp" resultType="int">
+     select count(1) from banzu t
+     <where>
+        EXISTS (select 1 from banci a where a.banzu_id = t.banzu_id and a.status = 1)
+     </where>
+    </select>
+    
+    <!-- 查询所有被班次绑定的班组记录集合，2016-10-17，不分页 -->
+    <select id="selectBanZuForBanciListByBeanApp" resultMap="base_result_map">
+    select t.banzu_id,CONCAT(t.banzu_name,' ', t1.banciInfo) banzu_name,t.create_userid,t.create_at,t.update_userid,t.update_at 
+    from banzu t 
+    left join (
+        select b.banzu_id, GROUP_CONCAT(CAST(CONCAT(b.duty_on_time,'-',b.duty_off_time)as CHAR)) banciInfo from banci b 
+        where b.status  = 1
+        GROUP BY b.banzu_id
+        
+    ) t1 on t.banzu_id = t1.banzu_id
+     <where>
+         EXISTS (select 1 from banci a where a.banzu_id = t.banzu_id and a.status = 1)
+     </where>
+    </select>
+    
+</mapper>

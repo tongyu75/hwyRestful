@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.czz.hwy.bean.mission.watch.TaskInformation">
+    
+    <resultMap type="com.czz.hwy.bean.mission.watch.TaskInformation" id="BaseResultMap">
+        <id column="id" property="id"/>
+        <result column="taskname" property="taskName"/>
+        <result column="taskstart" property="taskStartTime"/>
+        <result column="taskend" property="taskEndTime"/>
+        <result column="taskaddress" property="taskAddress"/>
+        <result column="taskdutypeople" property="taskDutyPeople"/>
+        <result column="taskcreatepeople" property="taskCreatePeople"/>
+        <result column="taskcomment" property="taskContent"/>
+        <result column="isarrived" property="isArrive"/>
+        <result column="taskresult" property="taskResult"/>
+        <result column="taskstatus" property="taskStatus"/>
+        <result column="create_at" property="createDate"/>
+        <result column="update_at" property="updateDate"/>
+        <result column="people_number" property="peopleNumber"/>
+        <result column="taskCreatePeopleName" property="taskCreatePeopleName"/>
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        id,taskname,taskstart,taskend,taskaddress,taskdutypeople,taskcreatepeople,
+            taskcomment,isarrived,taskresult,taskstatus,create_at,update_at
+    </sql>
+    
+    <select id="getTaskInformationByPojoWatch" parameterType="taskPojo" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List" /> from taskinformation
+            <where>
+                <if test="id != null and id != 0">
+                    and id = #{id}
+                </if>
+                <if test="taskName != null and taskName != '' ">
+                    and taskname like concat('%',#{taskName},'%')
+                </if>
+                <if test="taskAddress != null and taskAddress != '' ">
+                    and taskaddress like concat('%',#{taskAddress},'%')
+                </if>
+                <if test="taskDutyPeople != null and taskDutyPeople != ''">
+                    and taskdutypeople like concat('%',#{taskDutyPeople},'%') 
+                </if>
+                <if test="taskCreatePeople != null and taskCreatePeople != 0">
+                    and taskcreatepeople = #{taskCreatePeople}
+                </if>
+                <if test="taskContent != null and taskContent != ''">
+                    and taskcomment like concat('%',#{taskContent},'%')
+                </if>
+                    and date_format(taskstart,'%Y-%m-%d') &gt;= date_format(#{curronTime},'%Y-%m-%d')
+                    and date_format(taskend,'%Y-%m-%d') &lt;= date_format(#{curronTime},'%Y-%m-%d')
+            </where>
+    </select>
+</mapper>

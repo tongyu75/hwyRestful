@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+body, html, #allmap {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	margin: 0;
+	font-family: "微软雅黑";
+}
+
+button {
+	height: 26px;
+	line-height: 22px;
+	outline: none;
+	color: #fff;
+	background: #1fbba6;
+	font-family: "微软雅黑";
+	width: 58px;
+	border-right: #7b9ebd 1px solid;
+	border-top: #7b9ebd 1px solid;
+	font-size: 14px;
+	FILTER: progid: DXImageTransform.Microsoft.Gradient(GradientType=0,
+		StartColorStr=#ffffff, EndColorStr=#cecfde);
+	border-left: #7b9ebd 1px solid;
+	cursor: hand;
+	color: black;
+	margin: 2px 0 0 10px;
+	border-bottom: #7b9ebd 1px solid;
+	border-radius: 4px;
+}
+
+.BMapLabel {
+	width: 60px;
+	height: 20px;
+	background: #ff8355 !important;
+	color: #fff;
+	font-size: 14px !important;
+	font-family: "微软雅黑" !important;
+	text-align: center;
+	line-height: 20px !important;
+	border-radius: 4px;
+	border: none !important;
+}
+</style>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=MXDf0gIa6ce8G7anDfMCkyWxb21Tkj4Q"></script>
+<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+<title>地图展示</title>
+</head>
+<body>
+	<div id="allmap"></div>
+</body>
+<script type="text/javascript">
+	$(function() {
+		var content;
+		var map = new BMap.Map("allmap");
+		var point = new BMap.Point(105.187637, 37.522473);
+		map.centerAndZoom(point, 17);
+		map.addControl(new BMap.MapTypeControl());
+		map.enableScrollWheelZoom(true);
+		var opts = {
+			width : 250,
+			height : 140,
+			titile : '信息窗口',
+			enableMessage : true
+		};
+		/*
+		 * 查询所有员工
+		 */
+		 console.log( JSON.stringify({
+				areaId : "",
+				dateStr : "2016-09-18"
+			}));
+		function query() {
+			$.ajax({
+				url : '/hwyRestful/coordinateManger/getNewTwoCoorList',
+				//url:'point.json',
+				async : true,
+				type : 'post',
+				data : JSON.stringify({
+					areaId : "",
+					dateStr : "2016-09-18"
+				}) ,
+				dataType : "json",
+				contentType : "application/json;charset=UTF-8",
+				success : function(data) {
+					if (data.result == 'fail') {
+						alert('查询失败，目前没有数据');
+						return false;
+					}
+					console.log(data)
+					var data_info = data.information;
+					var points = [];
+					for (var i = 0; i < data_info.length; i++) {
+						var nPoint = new BMap.Point(data_info[i].lng,data_info[i].lat);
+						var myIcon = new BMap.Icon("marker.png",new BMap.Size(28, 30));
+						var marker = new BMap.Marker(nPoint, {icon : myIcon});
+						points.push(nPoint);
+					    //var marker = new BMap.Marker(new BMap.Point(data_info[i].lng, data_info[i].lat));
+						var content = '<span style="font-weight:bold;margin-right:48px;">'
+							+ data_info[i].employeeName
+							+ '</span>'
+							+ '员工号：'
+							+ data_info[i].employeeId
+							+ '<br/>责任区：'
+							+ data_info[i].areaName
+							+ '<br/>'
+							+ '责任点：'
+							+ data_info[i].pointName
+							+ '<br/>'
+							+ '记录时间：'
+							+ data_info[i].recordTime
+							+ '<br/>';
+						var myLink = '<a style="text-decoration:underline;color:blue;cursor:pointer;user-select:none;id="todayLocal" >查看当天位置轨迹</a>';
+						map.addOverlay(marker);
+						var label = new BMap.Label(data_info[i].employeeName, {offset : new BMap.Size(-14, -22)});
+						marker.setLabel(label);
+						addClickHandler(content, marker);
+					}
+				}
+			});
+		}
+		/*
+		 * 查询某员工当天轨迹
+		 */
+		function queryLocal() {
+			$.ajax({
+				url : '/hwyRestful/coordinateManger/getEmployeeOfCoorList',
+				type : 'get',
+				data : JSON.stringify({
+					areaId : $("#areaId option:selected").val(),
+					dateStr : $("#dataStr").val(),
+					employeeName : $("#employeeName").val()
+				}),
+				dataType : "json",
+				contentType : "application/json;charset=UTF-8",
+				success : function(data) {
+					if (data.result == 'fail') {
+						alert('查询失败，目前没有数据');
+						return false;
+					}
+					var data_info =data.information;
+					var points = [];
+					for (var i = 0; i < data_info.length; i++) {
+						var nPoint = new BMap.Point(data_info[i].lng,
+								data_info[i].lat);
+						var marker = new BMap.Marker(nPoint);
+						points.push(nPoint);
+						var content =  '<p><span style="font-weight:bold;margin-right:48px;">'+data_info[i].employeeName+'</span>' + '<span style="font-size:13px;">员工号：' + data_info[i].employeeId+'<br/>责任区：' + data_info[i].areaName + '<br/>' + '责任点：' + data_info[i].pointName + '<br/>' + '记录时间：' + data_info[i].recordTime + '<br/><span></p>';
+						map.addOverlay(marker);
+						var label = new BMap.Label(data_info[i].employeeName,{offset:new BMap.Size(-14,-22)});
+						marker.setLabel(label); 
+						addClickHandler(content, marker);
+					}
+					var curve = new BMapLib.CurveLine(points, {
+						strokeColor : "blue",
+						strokeWeight : 3,
+						strokeOpacity : 0.5
+					}); //创建弧线对象
+					map.addOverlay(curve); //添加到地图中
+					curve.enableEditing(); //开启编辑功能
+				}
+			});
+		}
+
+		/*
+		 * 删除所有标注点
+		 */
+		function deletePoint() {
+			var allOverlay = map.getOverlays();
+			for (var i = 0; i < allOverlay.length - 1; i++) {
+				map.removeOverlay(allOverlay[i]);
+			}
+		}
+		
+		/*
+		 * 添加点击标注点事件
+		 */
+		function addClickHandler(content, marker) {
+			marker.addEventListener("click", function(e) {
+				openInfo(content, e);
+			})
+		}
+		
+		/*
+		 * 打开信息窗口事件
+		 */
+		function openInfo(content, e) {
+			var p = e.target;
+			var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+			var infoWindow = new BMap.InfoWindow(content, opts); // 创建信息窗口对象 
+			map.openInfoWindow(infoWindow, point); //开启信息窗口
+			infoWindow.getContent();
+		}
+		/*
+		 * 删除所有标注点
+		 */
+		function deletePoint() {
+			var allOverlay = map.getOverlays();
+			for (var i = 0; i < allOverlay.length - 1; i++) {
+				map.removeOverlay(allOverlay[i]);
+			}
+		}
+		/*
+		 * 打开窗口事件
+		 */
+		function addClickHandler(content, marker) {
+			marker.addEventListener("click", function(e) {
+				openInfo(content, e);
+			})
+		}
+		/*
+		 * 创建信息窗口
+		 */
+		function openInfo(content, e) {
+			var p = e.target;
+			var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+			var infoWindow = new BMap.InfoWindow(content, opts);
+			infoWindow.addEventListener('click', function() {
+				alert(1)
+			})
+			map.openInfoWindow(infoWindow, point);
+		}
+		/*
+		 * 添加带有定位的导航控件
+		 */
+		var navigationControl = new BMap.NavigationControl({
+			// 靠左上角位置
+			anchor : BMAP_ANCHOR_TOP_LEFT,
+			// LARGE类型
+			type : BMAP_NAVIGATION_CONTROL_LARGE,
+			// 启用显示定位
+			enableGeolocation : true
+		});
+		map.addControl(navigationControl);
+		// 添加定位控件
+		var geolocationControl = new BMap.GeolocationControl();
+		geolocationControl.addEventListener("locationSuccess", function(e) {
+			// 定位成功事件
+			var address = '';
+			address += e.addressComponent.province;
+			address += e.addressComponent.city;
+			address += e.addressComponent.district;
+			address += e.addressComponent.street;
+			address += e.addressComponent.streetNumber;
+			alert("当前定位地址为：" + address);
+		});
+		geolocationControl.addEventListener("locationError", function(e) {
+			// 定位失败事件
+			alert(e.message);
+		});
+		/*
+		 * 自定义查询条件控件
+		 */
+		// 定义一个控件类,即function
+		function ZoomControl() {
+			// 默认停靠位置和偏移量
+			this.defaultAnchor = BMAP_ANCHOR_TOP_RIGHT;
+			this.defaultOffset = new BMap.Size(150, 10);
+		}
+
+		// 通过JavaScript的prototype属性继承于BMap.Control
+		ZoomControl.prototype = new BMap.Control();
+
+		// 自定义控件必须实现自己的initialize方法,并且将控件的DOM元素返回
+		// 在本方法中创建个div元素作为控件的容器,并将其添加到地图容器中
+		ZoomControl.prototype.initialize = function(map) {
+			// 创建一个DOM元素
+			var div = document.createElement("div");
+			var button = document.createElement("button");
+			// 添加文字说明
+			content = '<span>责任区：</span> <select id="areaId">';
+			$.ajax({
+				url:"/hwyRestful/dictionaryController/getDutyAreas4Select/",
+				type:"get",
+				success:function(data){
+					for(var i=0,len=data.rows.length;i<len;i++){
+						content += '<option value="'+data.rows[i].id+'">'+data.rows[i].area_name+'</option>';
+					}
+					content += '</select> <span> 员工姓名：</span> <input type="text" id="employeeName"> <span>日期：</span><input type="date" id="dataStr">';
+					div.innerHTML = content;
+					button.innerHTML = "查询";		
+					div.appendChild(button);
+				}
+			})
+			
+			// 设置样式
+			button.style.color = "#fff";
+			div.style.cursor = "pointer";
+			div.style.border = "1px solid #1fbba6";
+			div.style.height = "26px";
+			div.style.padding = "4px 8px";
+			div.style.backgroundColor = "white";
+			// 绑定事件,查询当前日期
+			button.onclick = function() {
+				deletePoint();
+				queryLocal();
+				//window.clearInterval(self);
+			}
+			// 添加DOM元素到地图中
+			map.getContainer().appendChild(div);
+			// 将DOM元素返回
+			return div;
+		}
+		// 创建控件
+		var myZoomCtrl = new ZoomControl();
+		// 添加到地图当中
+		map.addControl(myZoomCtrl);
+		//初始化地图,查询当天所有在职员工
+		query(); 
+		//var self = setInterval(query(),3600000);
+	});
+</script>
+

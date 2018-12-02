@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.area.app.DutyPointApp">
+    <resultMap id="BaseResultMap" type="com.czz.hwy.bean.area.app.DutyPointApp">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="area_id" property="areaId" jdbcType="INTEGER" />
+        <result column="point_name" property="pointName" jdbcType="VARCHAR" />
+        <result column="from_address" property="fromAddress" jdbcType="VARCHAR" />
+        <result column="to_address" property="toAddress" jdbcType="VARCHAR" />
+        <result column="from_lat" property="fromLat" jdbcType="DOUBLE" />
+        <result column="from_lng" property="fromLng" jdbcType="DOUBLE" />
+        <result column="to_lat" property="toLat" jdbcType="DOUBLE" />
+        <result column="to_lng" property="toLng" jdbcType="DOUBLE" />
+        <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+        <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+        <result column="create_id" property="createId" jdbcType="INTEGER" />
+        <result column="update_id" property="updateId" jdbcType="INTEGER" />
+        <result column="status" property="status" jdbcType="INTEGER" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, area_id, point_name, from_address, to_address, from_lat, from_lng,
+        to_lat, to_lng,
+        create_at, update_at, create_id, update_id, status
+    </sql>
+    
+    <!-- 根据责任区ID获取责任点列表，2016-11-02 -->
+    <select id="getPointListByBeanForApp" resultMap="BaseResultMap" parameterType="dutyPointApp">
+    select * from dutypoint 
+    <where>
+    	status = 1
+    	<if test="areaId != 0">
+    	and area_id = #{areaId}
+    	</if> 
+    </where>
+    </select>
+</mapper>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.BanZu">
+	<resultMap type="com.czz.hwy.bean.mission.BanZu" id="base_result_map">
+		<id column="banzu_id" property="banzuId"/>
+		<result column="banzu_name" property="banzuName" jdbcType="VARCHAR"/>
+		<result column="create_userid" property="createUserId" jdbcType="INTEGER"/>
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+		<result column="update_userid" property="updateUserId" jdbcType="INTEGER"/>
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+	</resultMap>
+	
+	<sql id="base_column_list">
+		banzu_id,banzu_name,create_userid,create_at,update_userid,update_at
+	</sql> 
+	
+	<!-- 新增一条记录,2016-09-27 -->
+	<insert id="addBanZuByBean" parameterType="com.czz.hwy.bean.mission.BanZu">
+		insert into banzu(banzu_name,create_userid,create_at)
+		values(#{banzuName,jdbcType=VARCHAR},#{createUserId},#{createAt})
+	</insert>
+	
+	<!-- 根据bean获取班组信息,2016-09-27 -->
+	<select id="getBanZuByBean" parameterType="com.czz.hwy.bean.mission.BanZu" resultMap="base_result_map">
+		select <include refid="base_column_list" /> from banzu
+		<where>
+			<if test="banzuId != 0">
+				and banzu_id = #{banzuId}
+			</if>
+			<if test="banzuName != null and banzuName != ''">
+				and banzu_name = #{banzuName}
+			</if>
+			<if test="createUserId != 0">
+				and create_userid = #{createUserId}
+			</if>
+			<if test="createAt != null">
+				and create_at = #{createAt}
+			</if>
+			<if test="updateUserId != 0">
+				and update_userid = #{updateUserId}
+			</if>
+			<if test="updateAt != null">
+				and update_at = #{updateAt}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 根据bean更新一条班组记录，2016-09-27 -->
+	<update id="updateBanZuByBean" parameterType="com.czz.hwy.bean.mission.BanZu">
+		update banzu 
+		<set> 
+	       <if test="banzuName != null || banzuName != ''">
+	          	banzu_name = #{banzuName},
+	       </if>
+	       <if test="updateUserId != 0">
+			   update_userid = #{updateUserId},
+		   </if>
+		   <if test="updateAt != null">
+			   update_at = #{updateAt}
+		  </if>
+	    </set>
+		<where>
+			<if test="banzuId != 0">
+				and banzu_id = #{banzuId}
+			</if>
+		</where>
+	</update>
+	
+	<!-- 删除一条班组记录，2016-09-27 -->
+	<delete id="deleteBanZuById" parameterType="String" >
+	delete from banzu where banzu_id = #{banzuId}
+	</delete>
+	
+	<!-- 查询班组记录总条数(所有被班次绑定和没有被班次绑定的班组记录)，2016-09-27 -->
+	<select id="selectBanZuCountByBean" parameterType="com.czz.hwy.bean.mission.BanZu" resultType="int">
+	 select count(1) from banzu 
+	 <where>
+	 	<if test="banzuName != null || banzuName != ''">
+	          and banzu_name like concat('%', #{banzuName}, '%')
+	    </if>
+	 </where>
+	</select>
+	
+	<!-- 查询班组记录集合(所有被班次绑定和没有被班次绑定的班组记录)，2016-09-27，分页 -->
+	<select id="selectBanZuListByBean" parameterType="com.czz.hwy.bean.mission.BanZu" resultMap="base_result_map">
+	select <include refid="base_column_list"/> from banzu 
+	 <where>
+	 	<if test="banzuName != null || banzuName != ''">
+	          and banzu_name like concat('%', #{banzuName}, '%')
+	    </if>
+	 </where>
+	 limit #{row},#{rows}
+	</select>
+	
+	<!-- 查询所有班组记录集合(所有被班次绑定和没有被班次绑定的班组记录)，2016-09-28，不分页 -->
+	<select id="selectAllBanZuListByBean" parameterType="com.czz.hwy.bean.mission.BanZu" resultMap="base_result_map">
+	select <include refid="base_column_list"/> from banzu 
+	 <where>
+	 	<if test="banzuName != null || banzuName != ''">
+	          and banzu_name like concat('%', #{banzuName}, '%')
+	    </if>
+	 </where>
+	</select>
+	
+	<!-- 查询所有被班次绑定的班组记录集合，2016-10-17，不分页 -->
+	<select id="selectBanZuForBanciCountByBean" parameterType="com.czz.hwy.bean.mission.BanZu" resultType="int">
+	 select count(1) from banzu t
+	 <where>
+	    EXISTS (select 1 from banci a where a.banzu_id = t.banzu_id and a.status = 1)
+	 	<if test="banzuName != null || banzuName != ''">
+	          and t.banzu_name like concat('%', #{banzuName}, '%')
+	    </if>
+	 </where>
+	</select>
+	
+	<!-- 查询所有被班次绑定的班组记录集合，2016-10-17，不分页 -->
+	<select id="selectBanZuForBanciListByBean" parameterType="com.czz.hwy.bean.mission.BanZu" resultMap="base_result_map">
+	select <include refid="base_column_list"/> from banzu t 
+	 <where>
+	 	EXISTS (select 1 from banci a where a.banzu_id = t.banzu_id and a.status = 1)
+	 	<if test="banzuName != null || banzuName != ''">
+	          and banzu_name like concat('%', #{banzuName}, '%')
+	    </if>
+	 </where>
+	</select>
+	
+</mapper>

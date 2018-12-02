@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.czz.hwy.bean.mission.TaskInformation">
+	
+	<resultMap type="com.czz.hwy.bean.mission.TaskInformation" id="BaseResultMap">
+		<id column="id" property="id"/>
+		<result column="taskname" property="taskName" jdbcType="VARCHAR"/>
+		<result column="taskstart" property="taskStart" jdbcType="TIMESTAMP"/>
+		<result column="taskend" property="taskEnd" jdbcType="TIMESTAMP"/>
+		<result column="taskaddress" property="taskAddress" jdbcType="VARCHAR"/>
+		<result column="taskdutypeople" property="taskDutyPeople" jdbcType="VARCHAR"/>
+		<result column="taskcreatepeople" property="taskCreatePeople" jdbcType="INTEGER"/>
+		<result column="taskcomment" property="taskComment" jdbcType="VARCHAR"/>
+		<result column="isarrived" property="isArrived" jdbcType="INTEGER"/>
+		<result column="taskresult" property="taskResult" jdbcType="INTEGER"/>
+		<result column="taskstatus" property="taskStatus" jdbcType="INTEGER"/>
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP"/>
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP"/>
+		<result column="people_number" property="peopleNumber" jdbcType="INTEGER"/>
+		<result column="taskTime" property="taskTime" jdbcType="INTEGER"/>
+		<result column="taskCreatePeopleName" property="taskCreatePeopleName" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		id,taskname,taskstart,taskend,taskaddress,taskdutypeople,taskcreatepeople,
+			taskcomment,isarrived,taskresult,taskstatus,create_at,update_at,people_number
+	</sql>
+	
+	<!-- 查询任务信息记录总条数，2016-11-14 -->
+	<select id="getTaskInformationCount" parameterType="taskInformation" resultType="int">
+	select count(1)
+	from taskinformation t 
+	join users t1 on t1.employee_id = t.taskcreatepeople and t1.status = 1
+	<if test="taskCreatePeopleName != null and taskCreatePeopleName != '' ">
+		and t1.showname like concat('%', #{taskCreatePeopleName}, '%') 
+	</if>
+	<where>
+		<if test="taskName != null and taskName != ''">
+		and t.taskname like concat('%', #{taskName}, '%')
+		</if>
+		<if test="taskAddress != null and taskAddress != ''">
+		and t.taskaddress like concat('%', #{taskAddress}, '%')
+		</if>
+		
+		<!-- 凡是任务开始时间到结束时间段之间被条件中的开始时间到结束时间包括的都应被查到 -->
+		<if test="taskStart != null and taskEnd != null">
+		and (	( DATE_FORMAT(t.taskstart, '%Y-%m-%d') &gt;= DATE_FORMAT(#{taskStart},'%Y-%m-%d')
+				  and  
+				  DATE_FORMAT(t.taskstart, '%Y-%m-%d') &lt;= DATE_FORMAT(#{taskEnd},'%Y-%m-%d')
+				 )
+				or 
+				(
+					DATE_FORMAT(t.taskend, '%Y-%m-%d') &gt;= DATE_FORMAT(#{taskStart},'%Y-%m-%d')
+					and DATE_FORMAT(t.taskend, '%Y-%m-%d') &lt;= DATE_FORMAT(#{taskEnd},'%Y-%m-%d')	
+				)
+		)
+		</if>
+		
+		<!-- 条件中只有开始时间的，视为从此时间以后所有 -->
+		<if test="taskStart != null and taskEnd == null">
+		and DATE_FORMAT(t.taskstart, '%Y-%m-%d') &gt;= DATE_FORMAT(#{taskStart},'%Y-%m-%d')
+		</if>
+		
+		<!-- 条件中只有结束时间的，视为从此时间之前所有 -->
+		<if test="taskEnd != null and taskStart == null">
+		and DATE_FORMAT(t.taskend, '%Y-%m-%d') &lt;= DATE_FORMAT(#{taskEnd},'%Y-%m-%d')
+		</if>
+		
+		<!-- 如果任务状态为 结束（即当前时间已过结束时间） -->
+ 		<if test="taskStatus == 1">
+	    and t.taskend &lt;= now()
+	    </if>
+		<!-- 如果任务状态为进行中（即当前时间已过开始时间，未到结束时间） -->
+	    <if test="taskStatus == 2">
+	    and t.taskstart &lt;= now() and t.taskend &gt; now()
+	    </if>
+		<!-- 如果任务状态为计划中（即当前时间没到开始时间） -->
+	    <if test="taskStatus == 3">
+	    and t.taskstart &gt; now() 
+	    </if>
+		<if test="taskDutyPeople != null and taskDutyPeople != ''">
+		and t.taskdutypeople like concat('%', #{taskDutyPeople}, '%')
+		</if>
+	</where>
+	</select>
+	
+	<!-- 查询任务信息记录集合，2016-11-14，分页 -->
+	<select id="getTaskInformationList" parameterType="taskInformation" resultMap="BaseResultMap">
+	select t.*,t1.showname taskCreatePeopleName
+	from taskinformation t
+	join users t1 on t1.employee_id = t.taskcreatepeople and t1.status = 1
+	<if test="taskCreatePeopleName != null and taskCreatePeopleName != '' ">
+		and t1.showname like concat('%', #{taskCreatePeopleName}, '%') 
+	</if>
+	<where>
+		<if test="taskName != null and taskName != ''">
+		and t.taskname like concat('%', #{taskName}, '%')
+		</if>
+		<if test="taskAddress != null and taskAddress != ''">
+		and t.taskaddress like concat('%', #{taskAddress}, '%')
+		</if>
+		
+		<!-- 凡是任务开始时间到结束时间段之间被条件中的开始时间到结束时间包括的都应被查到 -->
+		<if test="taskStart != null and taskEnd != null">
+		and (	( DATE_FORMAT(t.taskstart, '%Y-%m-%d') &gt;= DATE_FORMAT(#{taskStart},'%Y-%m-%d')
+				  and  
+				  DATE_FORMAT(t.taskstart, '%Y-%m-%d') &lt;= DATE_FORMAT(#{taskEnd},'%Y-%m-%d')
+				 )
+				or 
+				(
+					DATE_FORMAT(t.taskend, '%Y-%m-%d') &gt;= DATE_FORMAT(#{taskStart},'%Y-%m-%d')
+					and DATE_FORMAT(t.taskend, '%Y-%m-%d') &lt;= DATE_FORMAT(#{taskEnd},'%Y-%m-%d')	
+				)
+			)
+		</if>
+		
+		<!-- 条件中只有开始时间的，视为从此时间以后所有 -->
+		<if test="taskStart != null and taskEnd == null">
+		and DATE_FORMAT(t.taskstart, '%Y-%m-%d') &gt;= DATE_FORMAT(#{taskStart},'%Y-%m-%d')
+		</if>
+		
+		<!-- 条件中只有结束时间的，视为从此时间之前所有 -->
+		<if test="taskEnd != null and taskStart == null">
+		and DATE_FORMAT(t.taskend, '%Y-%m-%d') &lt;= DATE_FORMAT(#{taskEnd},'%Y-%m-%d')
+		</if>
+		
+		<!-- 如果任务状态为 结束（即当前时间已过结束时间） -->
+ 		<if test="taskStatus == 1">
+	    and t.taskend &lt;= now()
+	    </if>
+		<!-- 如果任务状态为进行中（即当前时间已过开始时间，未到结束时间） -->
+	    <if test="taskStatus == 2">
+	    and t.taskstart &lt;= now() and t.taskend &gt; now()
+	    </if>
+		<!-- 如果任务状态为计划中（即当前时间没到开始时间） -->
+	    <if test="taskStatus == 3">
+	    and t.taskstart &gt; now() 
+	    </if>
+		<if test="taskDutyPeople != null and taskDutyPeople != ''">
+		and t.taskdutypeople like concat('%', #{taskDutyPeople}, '%')
+		</if>
+	</where>
+	order by t.create_at desc
+	limit #{row},#{rows}
+	</select>
+	
+</mapper>

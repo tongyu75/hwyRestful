@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.app.FinesDetailApp" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.app.FinesDetailApp" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="dept_id" property="deptId" jdbcType="INTEGER" />
+    <result column="amount" property="amount" jdbcType="DOUBLE" />
+    <result column="stand_id" property="standId" jdbcType="INTEGER" />
+    <result column="eval_id" property="evalId" jdbcType="INTEGER" />
+    <result column="work_id" property="workId" jdbcType="INTEGER" />
+    <result column="check_id" property="checkId" jdbcType="INTEGER" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="check_user" property="checkUser" jdbcType="INTEGER" />
+    <result column="check_time" property="checkTime" jdbcType="TIMESTAMP" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, employee_id, dept_id, amount, stand_id, eval_id, work_id, check_id, create_at, 
+    update_at, check_user, check_time, remark
+  </sql>
+  
+  <!--  新增罚款详情，2016-12-20 -->
+  <select id="inertFinesDetailAppByBeanApp" parameterType="com.czz.hwy.bean.manager.app.FinesDetailApp">
+   insert into finesdetail (
+	   			id,
+	   			employee_id, 
+	   			dept_id, 
+		        amount, 
+		        stand_id,
+		         eval_id, 
+		        work_id, 
+		        check_id, 
+		        create_at, 
+		        update_at, 
+		        check_user, 
+		        check_time, 
+		        remark
+	     )
+    values (
+	    	#{id,jdbcType=INTEGER}, 
+	    	#{employeeId,jdbcType=INTEGER},
+	    	#{deptId,jdbcType=INTEGER}, 
+	     	#{amount,jdbcType=DOUBLE}, 
+	     	#{standId,jdbcType=INTEGER}, 
+	     	#{evalId,jdbcType=INTEGER}, 
+	      	#{workId,jdbcType=INTEGER}, 
+	      	#{checkId,jdbcType=INTEGER}, 
+	      	#{createAt,jdbcType=TIMESTAMP}, 
+	        #{updateAt,jdbcType=TIMESTAMP}, 
+	        #{checkUser,jdbcType=INTEGER}, 
+	        #{checkTime,jdbcType=TIMESTAMP}, 
+	        #{remark,jdbcType=VARCHAR}
+        )
+  </select>
+
+</mapper>

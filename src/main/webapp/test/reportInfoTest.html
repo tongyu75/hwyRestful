@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=MXDf0gIa6ce8G7anDfMCkyWxb21Tkj4Q"></script>
+<script type="text/javascript" src="../jquery-1.7.2.min.js"></script>
+<title>测试接口</title>
+</head>
+<body>
+	<div id="allmap"></div>
+</body>
+<script type="text/javascript">
+	//banzhuId ,banzhuName,createUserId,createAt,updateUserid,updateAt
+	$(function() {
+		
+		//提交举报考核
+/*		$.ajax({
+			url :'http://192.168.1.18:8080/hwyRestful/workCheckAppController/reportInfo',
+			async : true,
+			type : 'post',
+			data : {
+				acceptContent:
+					JSON.stringify(
+						{
+							"supervisorId" : 2001,
+							"supervisorName" : "万志娟",
+				            "supervisorRole" : 2,
+				            "evalValue" : 6,
+							"addressFrom" : "测试地址",
+				            "checkTime" : "2017-04-26 11:49:23",
+							"checkLat" : "37.802602",
+							"checkLng" : "108.121212",
+							"memo" :　"举报说明内容",
+							"status" : 1,//处理状态：1已处理 2未处理;
+							"manageMemo" : "处理说明或上报说明内容"
+						}
+					)
+			} ,
+			dataType : "json",
+			xhrFields: {withCredentials: true},
+            crossDomain: true,
+			success : function(data) {
+				console.log(data);
+			}
+		}); */  
+
+		//查询举报
+		$.ajax({
+           url :'http://192.168.1.18:8080/hwyRestful/reportInfoController/reportInfo',
+			async : true,
+			type : 'get', 
+			dataType : "json",
+			data : {
+				acceptContent : 
+					JSON.stringify(
+						{
+							"evalValue" : '',
+							"supervisorName" : '薛',
+                     		"startDateStr" : "2017-04-21",
+							"endDateStr" : "2017-04-26",
+							"page" : 1,
+							"rows" : 10
+				 }
+
+					)
+			}, 
+			// contentType : "application/x-www-form-urlencoded",
+			contentType : "application/json;charset=UTF-8",
+			xhrFields: {withCredentials: true},
+            crossDomain: true,
+			success : function(data) {
+				console.log(data);
+			}
+		});  
+
+	});  
+</script>
+
+

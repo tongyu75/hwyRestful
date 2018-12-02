@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.manager.AdminLogs" >
+  <resultMap id="BaseResultMap" type="com.czz.hwy.bean.manager.AdminLogs" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="employee_id" property="employeeId" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, content, employee_id, status, create_at, update_at
+  </sql>
+  <select id="getAdminLogsById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from adminlogs
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteAdminLogs" parameterType="java.lang.Integer" >
+    delete from adminlogs
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertAdminLogs" parameterType="com.czz.hwy.bean.manager.AdminLogs" >
+    insert into adminlogs (id, content, employee_id, 
+      status, create_at, update_at
+      )
+    values (#{id,jdbcType=INTEGER}, #{content,jdbcType=VARCHAR}, #{employeeId,jdbcType=INTEGER}, 
+      #{status,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, #{updateAt,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.czz.hwy.bean.manager.AdminLogs" >
+    insert into adminlogs
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="employeeId != null" >
+        employee_id,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createAt != null" >
+        create_at,
+      </if>
+      <if test="updateAt != null" >
+        update_at,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createAt != null" >
+        #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateAdminLogs" parameterType="com.czz.hwy.bean.manager.AdminLogs" >
+    update adminlogs
+    <set >
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.czz.hwy.bean.manager.AdminLogs" >
+    update adminlogs
+    set content = #{content,jdbcType=VARCHAR},
+      employee_id = #{employeeId,jdbcType=INTEGER},
+      status = #{status,jdbcType=VARCHAR},
+      create_at = #{createAt,jdbcType=TIMESTAMP},
+      update_at = #{updateAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <!-- 分页检索数据 -->
+  <select id="getSysLogsByBean" parameterType="com.czz.hwy.bean.manager.AdminLogs" resultType="com.czz.hwy.bean.manager.AdminLogs">
+  	select t.id,t.content,t.employee_id as employeeId,
+  		t.create_at as createAt,t.update_at as updateAt,u.showname as employeeName from(
+	  	select id,content,employee_id,create_at,update_at from adminlogs
+	  	where status=1
+	  	<if test="content!=null and content!=''">
+	  		and content like concat('%',#{content},'%')
+	  	</if>
+	  	<if test="employeeId!=0">
+	  		and employee_id=#{employeeId}
+	  	</if>
+  		<if test="f_createAt != null" >
+          and date_format(create_at, '%Y-%m-%d') between date_format(#{f_createAt,jdbcType=TIMESTAMP}, '%Y-%m-%d')
+        </if>
+        <if test="t_createAt != null" >
+          and date_format(#{t_createAt,jdbcType=TIMESTAMP}, '%Y-%m-%d')
+        </if>
+	  	order by create_at desc
+	  )t left outer join users u on t.employee_id=u.employee_id
+	  order by t.create_at desc
+	  limit #{row},#{rows} 
+  </select>
+  <!-- 根据条件检索日志总量 -->
+  <select id="getSysLogsBeanCount" parameterType="com.czz.hwy.bean.manager.AdminLogs" resultType="java.lang.Integer">
+  	select count(*) as total from adminlogs
+  	where status=1
+  	<if test="content!=null and content!=''">
+  		and content like concat('%',#{content},'%')
+  	</if>
+  	<if test="employeeId!=0">
+  		and employee_id=#{employeeId}
+  	</if>
+    <if test="f_createAt != null" >
+      and date_format(create_at, '%Y-%m-%d') between date_format(#{f_createAt,jdbcType=TIMESTAMP}, '%Y-%m-%d')
+    </if>
+    <if test="t_createAt != null" >
+      and date_format(#{t_createAt,jdbcType=TIMESTAMP}, '%Y-%m-%d')
+    </if>  	
+  </select>
+</mapper>

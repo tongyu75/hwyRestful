@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.czz.hwy.bean.mission.ReportInfo">
+	<resultMap id="BaseResultMap" type="reportInfo">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="supervisor_id" property="supervisorId" jdbcType="INTEGER" />
+		<result column="supervisor_name" property="supervisorName" jdbcType="VARCHAR" />
+		<result column="supervisor_role" property="supervisorRole" jdbcType="INTEGER" />
+		<result column="areaIds" property="areaIds" jdbcType="VARCHAR" />
+		<result column="eval_value" property="evalValue" jdbcType="INTEGER" />
+		<result column="eval_name" property="evalName" jdbcType="VARCHAR" />
+		<result column="address_from" property="addressFrom" jdbcType="VARCHAR" />
+		<result column="check_time" property="checkTime" jdbcType="TIMESTAMP" />
+		<result column="check_lat" property="checkLat" jdbcType="DOUBLE" />
+		<result column="check_lng" property="checkLng" jdbcType="DOUBLE" />
+		<result column="memo" property="memo" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="manage_role" property="manageRole" jdbcType="INTEGER" />
+		<result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+		<result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+		<result column="jcy_manage_id" property="jcyManageId" jdbcType="INTEGER" />
+		<result column="jcy_manage_name" property="jcyManageName" jdbcType="VARCHAR" />
+		<result column="jcy_manage_status" property="jcyManageStatus" jdbcType="INTEGER" />
+		<result column="jcy_manage_date" property="jcyManageDate" jdbcType="TIMESTAMP" />
+		<result column="jcy_manage_memo" property="jcyManageMemo" jdbcType="VARCHAR" />
+		<result column="khy_manage_id" property="khyManageId" jdbcType="INTEGER" />
+		<result column="khy_manage_name" property="khyManageName" jdbcType="VARCHAR" />
+		<result column="khy_manage_status" property="khyManageStatus" jdbcType="INTEGER" />
+		<result column="khy_manage_date" property="khyManageDate" jdbcType="TIMESTAMP" />
+		<result column="khy_manage_memo" property="khyManageMemo" jdbcType="VARCHAR" />
+		<result column="dcy_manage_id" property="dcyManageId" jdbcType="INTEGER" />
+		<result column="dcy_manage_name" property="dcyManageName" jdbcType="VARCHAR" />
+		<result column="dcy_manage_status" property="dcyManageStatus" jdbcType="INTEGER" />
+		<result column="dcy_manage_date" property="dcyManageDate" jdbcType="TIMESTAMP" />
+		<result column="dcy_manage_memo" property="dcyManageMemo" jdbcType="VARCHAR" />
+		<result column="manageMemo" property="manageMemo" jdbcType="VARCHAR" />
+		<result column="dealBeforImageCount" property="dealBeforImageCount" jdbcType="INTEGER" />
+		<result column="dealAfterImageCount" property="dealAfterImageCount" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		id, 
+		supervisor_id, supervisor_name,supervisor_role, 
+		areaIds, eval_value, 
+		address_from,check_time, check_lat,check_lng,
+		memo, status, manage_role,
+		create_at, update_at,
+		jcy_manage_id, jcy_manage_name, jcy_manage_status,jcy_manage_date, jcy_manage_memo,
+		khy_manage_id, khy_manage_name, khy_manage_status,khy_manage_date, khy_manage_memo, 
+		dcy_manage_id, dcy_manage_name, dcy_manage_status,dcy_manage_date, dcy_manage_memo
+	</sql>
+	
+	<!-- 根据条件查询记录的总条数,2017-04-26 -->
+	<select id="getAllReportInfoCountByBean" parameterType="reportInfo" resultType="int">
+	select count(1) from (
+		select 1
+		from reportinfo t
+		join evaltype t2 on t.eval_value = t2.eval_value and t2.type = 3
+		left join reportimage t1 on t.id = t1.check_id and t.eval_value = t1.eval_value
+		<where>
+		   	<if test="startDateStr != null and startDateStr != ''">
+		   		and date_format(t.check_time,'%Y-%m-%d') &gt;= #{startDateStr}
+		   	</if>
+		   	<if test="endDateStr != null and endDateStr != ''">
+		   		and date_format(t.check_time,'%Y-%m-%d') &lt;= #{endDateStr}
+		   	</if>
+		   	<if test="supervisorName != null and supervisorName != ''">
+		   		and t.supervisor_name like concat('%', #{supervisorName},'%')
+		   	</if>
+		   	<if test="evalValue != 0">
+		   		and t.eval_value = #{evalValue}
+		   	</if>
+	   </where>
+		group by t.id
+	)tt
+	</select>
+	
+	<!-- 根据条件查询举报记录列表，分页,2017-04-26 -->
+	<select id="getReportInfoListByBean" parameterType="reportInfo" resultMap="BaseResultMap">
+	select 
+		t.id, 
+		t.supervisor_id, t.supervisor_name, t.supervisor_role, 
+		t.areaIds, t.eval_value, t2.eval_name evalName,
+		t.address_from, t.check_time, t.check_lat, t.check_lng,
+		t.memo, t.status, t.manage_role,
+		t.create_at, t.update_at,
+		t.jcy_manage_id, t.jcy_manage_name, t.jcy_manage_status,t.jcy_manage_date, t.jcy_manage_memo,
+		t.khy_manage_id, t.khy_manage_name, t.khy_manage_status,t.khy_manage_date, t.khy_manage_memo, 
+		t.dcy_manage_id, t.dcy_manage_name, t.dcy_manage_status,t.dcy_manage_date, t.dcy_manage_memo,
+		sum(case t1.status when 1 then 1 else 0 end) dealAfterImageCount,
+		sum(case t1.status when 2 then 1 else 0 end) dealBeforImageCount
+	from reportinfo t
+	join evaltype t2 on t.eval_value = t2.eval_value and t2.type = 3
+	left join reportimage t1 on t.id = t1.check_id and t.eval_value = t1.eval_value
+	<where>
+	   	<if test="startDateStr != null and startDateStr != ''">
+	   		and date_format(t.check_time,'%Y-%m-%d') &gt;= #{startDateStr}
+	   	</if>
+	   	<if test="endDateStr != null and endDateStr != ''">
+	   		and date_format(t.check_time,'%Y-%m-%d') &lt;= #{endDateStr}
+	   	</if>
+	   	<if test="supervisorName != null and supervisorName != ''">
+	   		and t.supervisor_name like concat('%', #{supervisorName},'%')
+	   	</if>
+	   	<if test="evalValue != 0">
+	   		and t.eval_value = #{evalValue}
+	   	</if>
+   </where>
+	group by t.id
+	order by check_time desc
+	<if test="rows != 0">
+	   limit #{row},#{rows}
+    </if>
+	</select>
+	
+	
+</mapper>
