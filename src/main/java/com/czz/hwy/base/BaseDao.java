@@ -67,6 +67,8 @@ public interface BaseDao<T> {
     
     public int deleteInfoByMap(String statement, Map<String,Object> param);
     
+    public int deleteAllInfo(String statement);
+
     public int updateInfo(String statement);
     
     public int updateInfoByBean(String statement, T bean);

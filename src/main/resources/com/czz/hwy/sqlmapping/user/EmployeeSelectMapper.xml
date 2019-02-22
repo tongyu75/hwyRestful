@@ -75,6 +75,10 @@
     </where>
   </select>
   
+  <update id="resetSelectEmployee">
+   update employee_select set status = 0
+  </update>
+  
   <update id="updateEmployeeSelect" parameterType="com.czz.hwy.bean.user.EmployeeSelect" >
     update employee_select
     <set >

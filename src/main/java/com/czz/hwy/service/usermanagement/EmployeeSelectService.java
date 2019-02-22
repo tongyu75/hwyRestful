@@ -38,4 +38,9 @@ public interface EmployeeSelectService {
      * 删除员工信息
      */
     public int deleteEmployeeSelectById(int id);
+    
+    /**
+     * 清楚选中的员工表信息
+     */
+    public int resetSelectEmployee();
 }

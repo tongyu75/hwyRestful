@@ -55,4 +55,12 @@ public class EmployeeSelectServiceImpl implements EmployeeSelectService {
     public int deleteEmployeeSelectById(int id) {
         return employeeSelectDao.deleteInfoByPk("deleteEmployeeSelectById", id);
     }
+    
+    /**
+     * 删除员工信息
+     */
+    public int resetSelectEmployee() {
+        return employeeSelectDao.deleteAllInfo("resetSelectEmployee");
+    }
+    
 }

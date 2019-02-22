@@ -125,14 +125,15 @@ public class EmployeeController{
                 exprtSelect.setName(exprt.getName());
                 exprtSelect.setMajor(exprt.getMajor());
                 exprtSelect.setType(exprt.getType());
+                exprtSelect.setStatus(1);
                 employeeSelectService.insertEmployeeSelect(exprtSelect);
                 	
             }
         } else {
         	// 查询已经设置的人员，再有查询需要拼接这个人数
         	EmployeeSelect expertSelect = new EmployeeSelect();
-            // 0是不可以,1是可用
-        	expertSelect.setStatus(0);
+            // 0是不可以用,1是可用
+        	expertSelect.setStatus(1);
         	expertSelect.setType(1);
         	List<Integer> exprtIds = new ArrayList<Integer>();
         	List<EmployeeSelect> lstExpertSelect = employeeSelectService.getEmployeeSelectListByBean(expertSelect);
@@ -164,6 +165,7 @@ public class EmployeeController{
                     exprtSelect.setName(exprt.getName());
                     exprtSelect.setMajor(exprt.getMajor());
                     exprtSelect.setType(exprt.getType());
+                    exprtSelect.setStatus(1);
                     employeeSelectService.insertEmployeeSelect(exprtSelect);
                 }
             }
@@ -183,13 +185,14 @@ public class EmployeeController{
                 exprtSelect.setName(financeEmp.getName());
                 exprtSelect.setMajor(financeEmp.getMajor());
                 exprtSelect.setType(financeEmp.getType());
+                exprtSelect.setStatus(1);
                 employeeSelectService.insertEmployeeSelect(exprtSelect);
             }
         } else {
         	// 查询已经设置的人员，再有查询需要拼接这个人数
         	EmployeeSelect expertSelect = new EmployeeSelect();
             // 0是不可以,1是可用
-        	expertSelect.setStatus(0);
+        	expertSelect.setStatus(1);
         	expertSelect.setType(2);
         	List<Integer> exprtIds = new ArrayList<Integer>();
         	List<EmployeeSelect> lstExpertSelect = employeeSelectService.getEmployeeSelectListByBean(expertSelect);
@@ -200,7 +203,7 @@ public class EmployeeController{
                 exprtIds.add(a.getSelectId());
         	}
         	
-        	if (expert < exprtIds.size()) {
+        	if (finance < exprtIds.size()) {
         		for (Integer id : exprtIds) {
         			employeeSelectService.deleteEmployeeSelectById(id);
         		}
@@ -221,6 +224,7 @@ public class EmployeeController{
                     exprtSelect.setName(financeEmp.getName());
                     exprtSelect.setMajor(financeEmp.getMajor());
                     exprtSelect.setType(financeEmp.getType());
+                    exprtSelect.setStatus(1);
                     employeeSelectService.insertEmployeeSelect(exprtSelect);
                 }
             }
@@ -240,6 +244,7 @@ public class EmployeeController{
                 exprtSelect.setName(technologyEmp.getName());
                 exprtSelect.setMajor(technologyEmp.getMajor());
                 exprtSelect.setType(technologyEmp.getType());
+                exprtSelect.setStatus(1);
                 employeeSelectService.insertEmployeeSelect(exprtSelect);
             }
         } else {
@@ -247,7 +252,7 @@ public class EmployeeController{
         	// 查询已经设置的人员，再有查询需要拼接这个人数
         	EmployeeSelect expertSelect = new EmployeeSelect();
             // 0是不可以,1是可用
-        	expertSelect.setStatus(0);
+        	expertSelect.setStatus(1);
         	expertSelect.setType(3);
         	List<Integer> exprtIds = new ArrayList<Integer>();
         	List<EmployeeSelect> lstExpertSelect = employeeSelectService.getEmployeeSelectListByBean(expertSelect);
@@ -258,7 +263,7 @@ public class EmployeeController{
                 exprtIds.add(a.getSelectId());
         	}
         	
-        	if (expert < exprtIds.size()) {
+        	if (technology < exprtIds.size()) {
         		for (Integer id : exprtIds) {
         			employeeSelectService.deleteEmployeeSelectById(id);
         		}
@@ -279,6 +284,7 @@ public class EmployeeController{
                     exprtSelect.setName(technologyEmp.getName());
                     exprtSelect.setMajor(technologyEmp.getMajor());
                     exprtSelect.setType(technologyEmp.getType());
+                    exprtSelect.setStatus(1);
                     System.out.println("aaaaa" + technologyEmp.getId() + technologyEmp.getName() + technologyEmp.getMajor() + technologyEmp.getType());
                     employeeSelectService.insertEmployeeSelect(exprtSelect);
                 }
@@ -296,6 +302,29 @@ public class EmployeeController{
         return map;
 	}
 
+    /**
+     * 重置按钮清楚DB中已经选中的数据
+     * 
+     * @param financeArray
+     * 
+     * @return 结果
+     */
+    @RequestMapping(value = "/resetSelectEmployee", method = RequestMethod.GET)
+	@ResponseBody
+    public Map<String, Object> resetSelectEmployee(HttpServletRequest request, HttpServletResponse response) {
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        // 从DB中获取不同类型人员的名称以及不同类型人员的数量
+        int flag = employeeSelectService.resetSelectEmployee();
+        // 设置允许跨域访问的路径以及允许认证（可以获取cookie信息）
+        CommonUtils.setAccessOrigin(request, response, accessOrigin);
+        map.put("result", ConstantUtil.SUCCESS);
+        map.put("information", ConstantUtil.SELECT_SUCCESS_MSG);
+        map.put("data", flag);
+        return map;
+	}
+    
+    
     /**
      * 修改查询配置人数信息
      * 

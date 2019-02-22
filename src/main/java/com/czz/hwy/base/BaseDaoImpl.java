@@ -139,6 +139,11 @@ public class BaseDaoImpl<T> implements BaseDao<T>{
 		return sqlSessionTemplate.delete(statement, param);
 	}
 
+	
+	public int deleteAllInfo(String statement) {
+		return sqlSessionTemplate.delete(statement);
+	}
+
 	public int updateInfoByMap(String statement, Map<String, Object> param) {
 		return sqlSessionTemplate.update(statement, param);
 	}
